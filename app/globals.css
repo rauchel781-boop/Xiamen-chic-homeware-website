@@ -35,7 +35,6 @@ header.bg-brand-cream h1,
   font-weight: 800;
   letter-spacing: -0.02em;
   font-feature-settings: 'ss01' on;
-  font-variation-settings: 'SOFT' 50, 'opsz' 96;
 }
 
 /* Pretty optical sizing for big titles */
@@ -285,12 +284,11 @@ a {
   float: left;
   font-size: 4.2rem;
   line-height: 0.85;
-  font-weight: 900;
+  font-weight: 800;
   color: #2C5E3F;
   margin: 0.35rem 0.7rem 0 0;
   padding: 0;
   font-family: var(--font-display), Georgia, serif;
-  font-variation-settings: 'SOFT' 100, 'opsz' 144;
 }
 /* Make blog-prose H2/H3 use display serif for editorial feel */
 .blog-prose h2 {
