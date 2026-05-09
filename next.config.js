@@ -14,6 +14,14 @@ const nextConfig = {
 
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    // Auto-convert to modern formats — saves 70-80% size vs PNG/JPG.
+    // AVIF first, fallback WebP, then original (browser picks best supported).
+    formats: ['image/avif', 'image/webp'],
+    // Standard responsive breakpoints — keeps mobile downloads small.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Cache optimized variants for 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 
   // ── 301 Redirects — preserve every URL Google has indexed ──────────

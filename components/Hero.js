@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 
 const POINTS = [
@@ -56,13 +57,17 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — factory photo, sized to roughly match left column height */}
+          {/* RIGHT — factory photo (LCP target — preloaded + auto WebP) */}
           <div className="relative">
-            <div className="rounded-[20px] overflow-hidden shadow-xl bg-white aspect-[5/4] lg:aspect-[6/5]">
-              <img
+            <div className="relative rounded-[20px] overflow-hidden shadow-xl bg-white aspect-[5/4] lg:aspect-[6/5]">
+              <Image
                 src={FACTORY_PHOTO}
                 alt="CHIC factory — Xiamen Chic Homeware Co., Ltd."
-                className="w-full h-full object-cover"
+                fill
+                priority
+                fetchPriority="high"
+                sizes="(max-width: 1024px) 100vw, 600px"
+                className="object-cover"
               />
             </div>
             <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur px-3 py-1.5 text-[11px] font-bold tracking-wide text-brand-ink shadow">
