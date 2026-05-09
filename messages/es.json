@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — Expertos en Madera | Fabricante de Productos de Madera a Medida en China",
+    "siteDescription": "CHIC expertos en madera — fabricante líder de cajas de madera personalizadas en China. Cajas con bisagra, corredera, magnéticas y con cerradura en paulownia, pino, bambú, acacia y nogal.",
+    "tagline": "Expertos en Madera"
+  },
+  "nav": {
+    "home": "Inicio",
+    "products": "Productos",
+    "about": "Sobre Nosotros",
+    "materialGuide": "Guía de Materiales",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "byUse": "Por Uso",
+    "byStructure": "Por Estructura",
+    "byMaterial": "Por Material"
+  },
+  "categories": {
+    "gift-packaging": "Cajas de Regalo y Embalaje",
+    "watch-jewelry": "Cajas para Relojes y Joyería",
+    "tea-coffee": "Cajas para Té y Café",
+    "wine-whisky": "Cajas para Vino y Whisky",
+    "kitchen-dining": "Cajas de Cocina y Comedor",
+    "garden-seed": "Cajas de Jardín y Semillas",
+    "storage": "Cajas de Almacenaje",
+    "hinged": "Cajas de Madera con Bisagra",
+    "sliding-lid": "Cajas de Madera con Tapa Corredera",
+    "drawer": "Cajas de Madera con Cajón",
+    "magnetic": "Cajas de Madera Magnéticas",
+    "with-lock": "Cajas de Madera con Cerradura",
+    "paulownia": "Cajas de Madera de Paulownia",
+    "pine": "Cajas de Madera de Pino",
+    "bamboo": "Cajas de Bambú",
+    "acacia": "Cajas de Madera de Acacia",
+    "walnut": "Cajas de Madera de Nogal"
+  },
+  "cta": {
+    "getQuote": "Solicitar Presupuesto",
+    "viewAll": "Ver Todo",
+    "subscribe": "Suscribirse",
+    "sending": "Enviando…",
+    "emailUs": "Envíenos un Correo",
+    "whatsapp": "Chatear por WhatsApp",
+    "viewAllProducts": "Ver Todos los Productos"
+  },
+  "utility": {
+    "export": "Exportamos a más de 60 países",
+    "locations": "Oficina de Xiamen · Fábrica de Cao County"
+  },
+  "footer": {
+    "newsletterEyebrow": "Manténgase en contacto",
+    "newsletterTitle": "Reciba nuestro catálogo y novedades de productos",
+    "newsletterPlaceholder": "Su correo profesional",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. es un fabricante de cajas de madera a medida con una fábrica de 15.000 m² en Cao County, Shandong y nuestra oficina de ventas y diseño en Xiamen, Fujian. Ayudamos a marcas y minoristas globales en más de 60 países a llevar productos de embalaje y almacenamiento de madera de alta calidad al mercado — a escala, con una artesanía de nivel profesional.",
+    "products": "Productos",
+    "company": "Empresa",
+    "getInTouch": "Contáctenos",
+    "email": "Correo",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "Horario",
+    "allRightsReserved": "Todos los derechos reservados.",
+    "madeIn": "Hecho en China · Envío Mundial",
+    "aboutLink": "Sobre CHIC",
+    "materialGuideLink": "Guía de Materiales",
+    "woodFabrication": "Fabricación de Madera",
+    "capabilities": "Capacidades",
+    "blogNews": "Blog y Noticias",
+    "contactLink": "Contacto"
+  },
+  "language": {
+    "label": "Idioma"
+  }
+}

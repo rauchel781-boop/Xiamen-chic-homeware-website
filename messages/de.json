@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — Holzexperte | Hersteller von Holzprodukten nach Maß in China",
+    "siteDescription": "CHIC Holzexperte — führender Hersteller individueller Holzboxen in China. Boxen mit Scharnier, Schiebedeckel, magnetisch und abschließbar aus Paulownia, Kiefer, Bambus, Akazie und Nussbaum.",
+    "tagline": "Holzexperte"
+  },
+  "nav": {
+    "home": "Startseite",
+    "products": "Produkte",
+    "about": "Über uns",
+    "materialGuide": "Materialguide",
+    "blog": "Blog",
+    "contact": "Kontakt",
+    "byUse": "Nach Verwendung",
+    "byStructure": "Nach Struktur",
+    "byMaterial": "Nach Material"
+  },
+  "categories": {
+    "gift-packaging": "Geschenk- und Verpackungsboxen",
+    "watch-jewelry": "Uhren- und Schmuckboxen",
+    "tea-coffee": "Tee- und Kaffeeboxen",
+    "wine-whisky": "Wein- und Whiskyboxen",
+    "kitchen-dining": "Küchen- und Esszimmerboxen",
+    "garden-seed": "Garten- und Saatgutboxen",
+    "storage": "Aufbewahrungsboxen",
+    "hinged": "Holzboxen mit Scharnier",
+    "sliding-lid": "Holzboxen mit Schiebedeckel",
+    "drawer": "Holzboxen mit Schublade",
+    "magnetic": "Magnetische Holzboxen",
+    "with-lock": "Abschließbare Holzboxen",
+    "paulownia": "Holzboxen aus Paulownia",
+    "pine": "Holzboxen aus Kiefer",
+    "bamboo": "Bambusboxen",
+    "acacia": "Holzboxen aus Akazie",
+    "walnut": "Holzboxen aus Nussbaum"
+  },
+  "cta": {
+    "getQuote": "Angebot anfordern",
+    "viewAll": "Alle ansehen",
+    "subscribe": "Abonnieren",
+    "sending": "Wird gesendet…",
+    "emailUs": "Jetzt E-Mail senden",
+    "whatsapp": "WhatsApp-Chat",
+    "viewAllProducts": "Alle Produkte ansehen"
+  },
+  "utility": {
+    "export": "Export in über 60 Länder",
+    "locations": "Büro Xiamen · Werk Cao County"
+  },
+  "footer": {
+    "newsletterEyebrow": "Bleiben Sie in Kontakt",
+    "newsletterTitle": "Erhalten Sie unseren Katalog und Produktneuheiten",
+    "newsletterPlaceholder": "Ihre Geschäfts-E-Mail",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. ist ein Hersteller individueller Holzboxen mit einem 15.000 m² großen Werk in Cao County, Shandong und unserem Vertriebs- und Designbüro in Xiamen, Fujian. Wir unterstützen globale Marken und Einzelhändler in über 60 Ländern dabei, hochwertige Holzverpackungen und Aufbewahrungsprodukte auf den Markt zu bringen — in großem Maßstab und mit erstklassiger Handwerkskunst.",
+    "products": "Produkte",
+    "company": "Unternehmen",
+    "getInTouch": "Kontakt aufnehmen",
+    "email": "E-Mail",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "Öffnungszeiten",
+    "allRightsReserved": "Alle Rechte vorbehalten.",
+    "madeIn": "Hergestellt in China · Weltweiter Versand",
+    "aboutLink": "Über CHIC",
+    "materialGuideLink": "Materialguide",
+    "woodFabrication": "Holzverarbeitung",
+    "capabilities": "Fähigkeiten",
+    "blogNews": "Blog & News",
+    "contactLink": "Kontakt"
+  },
+  "language": {
+    "label": "Sprache"
+  }
+}

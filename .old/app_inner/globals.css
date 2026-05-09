@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fbf8f2;
+  --fg: #3f342c;
+  --accent: #8b6a4a;
+}
+
+html, body { background: var(--bg); color: var(--fg); }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+/* Prose for WP content (posts/products) */
+.wp-content { line-height: 1.75; color: #3f342c; }
+.wp-content h1 { font-size: 2rem; font-weight: 700; margin: 1.5em 0 0.6em; line-height: 1.25; }
+.wp-content h2 { font-size: 1.6rem; font-weight: 700; margin: 1.5em 0 0.6em; line-height: 1.3; }
+.wp-content h3 { font-size: 1.25rem; font-weight: 600; margin: 1.2em 0 0.5em; }
+.wp-content h4 { font-size: 1.05rem; font-weight: 600; margin: 1em 0 0.4em; }
+.wp-content p  { margin: 0.9em 0; }
+.wp-content ul { list-style: disc; margin: 0.9em 0; padding-left: 1.5em; }
+.wp-content ol { list-style: decimal; margin: 0.9em 0; padding-left: 1.5em; }
+.wp-content li { margin: 0.3em 0; }
+.wp-content a  { color: #6e523a; text-decoration: underline; }
+.wp-content a:hover { color: #8b6a4a; }
+.wp-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1em 0; }
+.wp-content figure { margin: 1.5em 0; }
+.wp-content figure img { margin: 0; }
+.wp-content figcaption { font-size: 0.875rem; color: #6e523a; text-align: center; margin-top: 0.5em; }
+.wp-content blockquote { border-left: 4px solid #d6c4a3; padding: 0.5em 1.2em; margin: 1.5em 0; background: #faf6ef; font-style: italic; color: #4b3a2a; }
+.wp-content table { width: 100%; border-collapse: collapse; margin: 1.5em 0; font-size: 0.95em; }
+.wp-content th, .wp-content td { border: 1px solid #e7ddc4; padding: 0.6em 0.9em; text-align: left; }
+.wp-content th { background: #faf6ef; font-weight: 600; }
+.wp-content code { background: #f3ead9; padding: 0.15em 0.35em; border-radius: 0.25em; font-size: 0.9em; }
+.wp-content pre { background: #2f2519; color: #faf6ef; padding: 1em; border-radius: 0.5em; overflow-x: auto; }
+
+/* Cap absurdly large inline-styled product blocks to fit */
+.wp-content > div[style] { max-width: 100% !important; padding: 1.5rem !important; }
+
+/* Smooth */
+* { scroll-behavior: smooth; }

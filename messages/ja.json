@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — 木の専門家 | 中国のカスタム木製品メーカー",
+    "siteDescription": "CHIC 木の専門家 — 中国を代表するカスタム木箱メーカー。桐、松、竹、アカシア、ウォールナット製の蝶番式・スライド式・マグネット式・施錠式木箱。",
+    "tagline": "木の専門家"
+  },
+  "nav": {
+    "home": "ホーム",
+    "products": "製品",
+    "about": "会社概要",
+    "materialGuide": "素材ガイド",
+    "blog": "ブログ",
+    "contact": "お問い合わせ",
+    "byUse": "用途別",
+    "byStructure": "構造別",
+    "byMaterial": "素材別"
+  },
+  "categories": {
+    "gift-packaging": "ギフト・パッケージボックス",
+    "watch-jewelry": "時計・ジュエリーボックス",
+    "tea-coffee": "紅茶・コーヒーボックス",
+    "wine-whisky": "ワイン・ウイスキーボックス",
+    "kitchen-dining": "キッチン・ダイニングボックス",
+    "garden-seed": "ガーデン・シードボックス",
+    "storage": "収納ボックス",
+    "hinged": "蝶番式木箱",
+    "sliding-lid": "スライド式木箱",
+    "drawer": "引き出し式木箱",
+    "magnetic": "マグネット式木箱",
+    "with-lock": "鍵付き木箱",
+    "paulownia": "桐の木箱",
+    "pine": "松の木箱",
+    "bamboo": "竹のボックス",
+    "acacia": "アカシアの木箱",
+    "walnut": "ウォールナットの木箱"
+  },
+  "cta": {
+    "getQuote": "見積もり依頼",
+    "viewAll": "すべて見る",
+    "subscribe": "登録する",
+    "sending": "送信中…",
+    "emailUs": "メールでお問い合わせ",
+    "whatsapp": "WhatsAppでチャット",
+    "viewAllProducts": "全製品を見る"
+  },
+  "utility": {
+    "export": "60カ国以上に輸出",
+    "locations": "厦門オフィス · 曹県工場"
+  },
+  "footer": {
+    "newsletterEyebrow": "お問い合わせ",
+    "newsletterTitle": "カタログと新製品情報をお届けします",
+    "newsletterPlaceholder": "ビジネスメールアドレス",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. はカスタム木箱メーカーです。山東省曹県に15,000m²の工場、福建省厦門に営業・デザインオフィスを構え、世界60カ国以上のブランドおよび小売業者に高品質な木製パッケージ・収納製品を、職人技の品質でスケールよくお届けしています。",
+    "products": "製品",
+    "company": "会社情報",
+    "getInTouch": "お問い合わせ",
+    "email": "メール",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "営業時間",
+    "allRightsReserved": "全著作権所有。",
+    "madeIn": "中国製 · 全世界配送",
+    "aboutLink": "CHICについて",
+    "materialGuideLink": "素材ガイド",
+    "woodFabrication": "木材加工",
+    "capabilities": "対応力",
+    "blogNews": "ブログ・ニュース",
+    "contactLink": "お問い合わせ"
+  },
+  "language": {
+    "label": "言語"
+  }
+}

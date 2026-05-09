@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — Especialistas em Madeira | Fabricante de Produtos de Madeira Personalizados na China",
+    "siteDescription": "CHIC especialistas em madeira — fabricante líder de caixas de madeira personalizadas na China. Caixas com dobradiça, tampa deslizante, magnéticas e com fechadura em paulownia, pinho, bambu, acácia e nogueira.",
+    "tagline": "Especialistas em Madeira"
+  },
+  "nav": {
+    "home": "Início",
+    "products": "Produtos",
+    "about": "Sobre Nós",
+    "materialGuide": "Guia de Materiais",
+    "blog": "Blog",
+    "contact": "Contato",
+    "byUse": "Por Uso",
+    "byStructure": "Por Estrutura",
+    "byMaterial": "Por Material"
+  },
+  "categories": {
+    "gift-packaging": "Caixas para Presente e Embalagem",
+    "watch-jewelry": "Caixas para Relógios e Joias",
+    "tea-coffee": "Caixas para Chá e Café",
+    "wine-whisky": "Caixas para Vinho e Whisky",
+    "kitchen-dining": "Caixas para Cozinha e Sala de Jantar",
+    "garden-seed": "Caixas para Jardim e Sementes",
+    "storage": "Caixas de Armazenamento",
+    "hinged": "Caixas de Madeira com Dobradiça",
+    "sliding-lid": "Caixas de Madeira com Tampa Deslizante",
+    "drawer": "Caixas de Madeira com Gaveta",
+    "magnetic": "Caixas de Madeira Magnéticas",
+    "with-lock": "Caixas de Madeira com Fechadura",
+    "paulownia": "Caixas de Madeira de Paulownia",
+    "pine": "Caixas de Madeira de Pinho",
+    "bamboo": "Caixas de Bambu",
+    "acacia": "Caixas de Madeira de Acácia",
+    "walnut": "Caixas de Madeira de Nogueira"
+  },
+  "cta": {
+    "getQuote": "Solicitar Orçamento",
+    "viewAll": "Ver Tudo",
+    "subscribe": "Inscrever-se",
+    "sending": "Enviando…",
+    "emailUs": "Envie-nos um E-mail",
+    "whatsapp": "Conversar no WhatsApp",
+    "viewAllProducts": "Ver Todos os Produtos"
+  },
+  "utility": {
+    "export": "Exportamos para mais de 60 países",
+    "locations": "Escritório de Xiamen · Fábrica de Cao County"
+  },
+  "footer": {
+    "newsletterEyebrow": "Mantenha-se em contato",
+    "newsletterTitle": "Receba nosso catálogo e novidades de produtos",
+    "newsletterPlaceholder": "Seu e-mail profissional",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. é um fabricante de caixas de madeira personalizadas com nossa fábrica de 15.000 m² em Cao County, Shandong, e nosso escritório de vendas e design em Xiamen, Fujian. Ajudamos marcas e varejistas globais em mais de 60 países a levar produtos premium de embalagem e armazenamento em madeira ao mercado — em grande escala, com artesanato de excelência.",
+    "products": "Produtos",
+    "company": "Empresa",
+    "getInTouch": "Entre em Contato",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "Horário",
+    "allRightsReserved": "Todos os direitos reservados.",
+    "madeIn": "Feito na China · Envio Mundial",
+    "aboutLink": "Sobre CHIC",
+    "materialGuideLink": "Guia de Materiais",
+    "woodFabrication": "Fabricação de Madeira",
+    "capabilities": "Capacidades",
+    "blogNews": "Blog e Notícias",
+    "contactLink": "Contato"
+  },
+  "language": {
+    "label": "Idioma"
+  }
+}

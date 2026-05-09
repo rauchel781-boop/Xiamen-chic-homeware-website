@@ -1,0 +1,32 @@
+[
+  {
+    "source": "/wooden-bathroom-organizer",
+    "destination": "/products/wooden-bathroom-organizer",
+    "permanent": true
+  },
+  {
+    "source": "/wooden-bread-box",
+    "destination": "/products/wooden-bread-box",
+    "permanent": true
+  },
+  {
+    "source": "/wooden-cheese-board",
+    "destination": "/products/wooden-cheese-board",
+    "permanent": true
+  },
+  {
+    "source": "/wooden-cutlery-organizer",
+    "destination": "/products/wooden-cutlery-organizer",
+    "permanent": true
+  },
+  {
+    "source": "/wooden-sofa-tray",
+    "destination": "/products/wooden-sofa-tray",
+    "permanent": true
+  },
+  {
+    "source": "/wooden-wine-box",
+    "destination": "/products/wooden-wine-box",
+    "permanent": true
+  }
+]

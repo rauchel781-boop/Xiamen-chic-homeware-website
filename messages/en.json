@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — Wooden Expert | Custom Wood Products Manufacturer in China",
+    "siteDescription": "CHIC wooden expert — a leading custom wooden box manufacturer in China. Hinged, sliding, magnetic and locked boxes in paulownia, pine, bamboo, acacia and walnut.",
+    "tagline": "Wooden Expert"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About Us",
+    "materialGuide": "Material Guide",
+    "blog": "Blog",
+    "contact": "Contact",
+    "byUse": "By Use",
+    "byStructure": "By Structure",
+    "byMaterial": "By Material"
+  },
+  "categories": {
+    "gift-packaging": "Gift & Packaging Boxes",
+    "watch-jewelry": "Watch & Jewelry Boxes",
+    "tea-coffee": "Tea & Coffee Boxes",
+    "wine-whisky": "Wine & Whisky Boxes",
+    "kitchen-dining": "Kitchen & Dining Boxes",
+    "garden-seed": "Garden & Seed Boxes",
+    "storage": "Storage Boxes",
+    "hinged": "Hinged Wooden Boxes",
+    "sliding-lid": "Sliding Lid Wooden Boxes",
+    "drawer": "Drawer Wooden Boxes",
+    "magnetic": "Magnetic Wooden Boxes",
+    "with-lock": "Wooden Boxes with Lock",
+    "paulownia": "Paulownia Wooden Boxes",
+    "pine": "Pine Wooden Boxes",
+    "bamboo": "Bamboo Boxes",
+    "acacia": "Acacia Wooden Boxes",
+    "walnut": "Walnut Wooden Boxes"
+  },
+  "cta": {
+    "getQuote": "Get a Quote",
+    "viewAll": "View All",
+    "subscribe": "Subscribe",
+    "sending": "Sending…",
+    "emailUs": "Email Us Now",
+    "whatsapp": "Chat on WhatsApp",
+    "viewAllProducts": "View All Products"
+  },
+  "utility": {
+    "export": "Export to 60+ Countries",
+    "locations": "Xiamen Office · Cao County Factory"
+  },
+  "footer": {
+    "newsletterEyebrow": "Stay In Touch",
+    "newsletterTitle": "Get our catalog & new product updates",
+    "newsletterPlaceholder": "Your business email",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. is a custom wooden box manufacturer with our 15,000 m² factory in Cao County, Shandong and our sales & design office in Xiamen, Fujian. We help global brands and retailers in 60+ countries bring premium wooden packaging and storage products to market — at scale, with bench-grade craftsmanship.",
+    "products": "Products",
+    "company": "Company",
+    "getInTouch": "Get In Touch",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "Hours",
+    "allRightsReserved": "All rights reserved.",
+    "madeIn": "Made in China · Worldwide Shipping",
+    "aboutLink": "About CHIC",
+    "materialGuideLink": "Material Guide",
+    "woodFabrication": "Wood Fabrication",
+    "capabilities": "Capabilities",
+    "blogNews": "Blog & News",
+    "contactLink": "Contact"
+  },
+  "language": {
+    "label": "Language"
+  }
+}

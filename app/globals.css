@@ -1,0 +1,406 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-brand-teal:     #234654;
+  --color-brand-tealDark: #1A3540;
+  --color-brand-tealDeep: #112430;
+  --color-brand-wood:     #C9A876;
+  --color-brand-woodSoft: #E8D9BC;
+  --color-brand-cream:    #F5F1E8;
+  --color-brand-ink:      #1A1A1A;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-sans), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #1F2A37;
+  background: #ffffff;
+}
+
+/* ─────────────────────────────────────────────
+   Display (serif) typography for hero / editorial headlines
+   Applied automatically to large H1s in <header> hero sections
+   and to blog-post H1s, plus any element with .font-display.
+   ───────────────────────────────────────────── */
+header.bg-brand-cream h1,
+.blog-prose h1,
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'ss01' on;
+  font-variation-settings: 'SOFT' 50, 'opsz' 96;
+}
+
+/* Pretty optical sizing for big titles */
+header.bg-brand-cream h1 {
+  letter-spacing: -0.025em;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* CLS guard — every <img> must have width+height attributes so the browser
+   reserves layout space; this rule keeps the rendered result responsive.
+   Only kicks in when the image specifies width/height or the parent has size. */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Subtle scroll reveal helpers */
+.section-pad {
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
+}
+
+/* Hero curved bottom mimic of screenshot */
+.hero-curve {
+  position: relative;
+}
+.hero-curve::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 60px;
+  background: #ffffff;
+  border-top-left-radius: 50% 60px;
+  border-top-right-radius: 50% 60px;
+}
+
+/* Wood-tone CTA (kept the .btn-yellow class name for backward compatibility) */
+.btn-yellow {
+  background: var(--color-brand-wood);
+  color: #1A1A1A;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 14px 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+.btn-yellow:hover {
+  background: var(--color-brand-woodSoft);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(35, 70, 84, 0.15);
+}
+
+/* ─────────────────────────────────────────────
+   WP Content prose — clean rendering of WordPress page/post HTML
+   Designed to take Elementor's chaotic output and make it feel calm,
+   editorial, brand-consistent.
+   ───────────────────────────────────────────── */
+.wp-content {
+  color: #1F2A37;
+  line-height: 1.75;
+  font-size: 17px;
+  font-family: var(--font-sans), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Headings ───────────────────────────────────────────────── */
+.wp-content h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: #1A1A1A;
+  margin: 3rem 0 1rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+}
+.wp-content h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 48px;
+  height: 3px;
+  background: #2C5E3F;
+  border-radius: 2px;
+}
+.wp-content h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #1A1A1A;
+  margin: 2rem 0 0.6rem;
+  padding-left: 14px;
+  border-left: 3px solid #2C5E3F;
+}
+.wp-content h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+  color: #1A1A1A;
+}
+.wp-content > *:first-child { margin-top: 0; }
+
+/* ── Paragraphs & inline ────────────────────────────────────── */
+.wp-content p {
+  margin: 0.9rem 0;
+  color: #374151;
+}
+.wp-content strong {
+  font-weight: 700;
+  color: #1A1A1A;
+}
+.wp-content a {
+  color: #2C5E3F;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  font-weight: 500;
+}
+.wp-content a:hover {
+  color: #1F4530;
+  text-decoration-thickness: 2px;
+}
+
+/* ── Lists with green checkmark bullets ─────────────────────── */
+.wp-content ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 1.1rem 0;
+}
+.wp-content ul > li {
+  position: relative;
+  padding-left: 1.9rem;
+  margin: 0.5rem 0;
+  color: #374151;
+}
+.wp-content ul > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: #E8F0EA;
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%232C5E3F' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 8.5l3.5 3.5L13 5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 0.85rem 0.85rem;
+}
+.wp-content ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 1.1rem 0;
+}
+.wp-content ol > li {
+  margin: 0.45rem 0;
+  padding-left: 0.4rem;
+  color: #374151;
+}
+.wp-content ol > li::marker {
+  color: #2C5E3F;
+  font-weight: 700;
+}
+
+/* ── Images: full-width, rounded, gentle shadow ─────────────── */
+.wp-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  width: 100%;
+  margin: 1.6rem auto;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  background: #F5F1E8;
+}
+.wp-content figure { margin: 1.6rem 0; }
+.wp-content figure img { margin: 0; }
+.wp-content figcaption {
+  font-size: 0.875rem;
+  color: #6B7280;
+  text-align: center;
+  margin-top: 0.6rem;
+}
+
+/* ── Blockquote / callout ───────────────────────────────────── */
+.wp-content blockquote {
+  border-left: 4px solid #2C5E3F;
+  padding: 1rem 1.25rem;
+  margin: 1.8rem 0;
+  background: #F5F7F8;
+  color: #1F4530;
+  font-style: italic;
+  border-radius: 0 12px 12px 0;
+}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.wp-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.8rem 0;
+  font-size: 0.95em;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+.wp-content th, .wp-content td {
+  border: 1px solid #E5E7EB;
+  padding: 0.7em 1em;
+  text-align: left;
+}
+.wp-content th {
+  background: #F5F1E8;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+/* ── HR ─────────────────────────────────────────────────────── */
+.wp-content hr {
+  border: none;
+  border-top: 1px solid #E5E7EB;
+  margin: 2.5rem 0;
+}
+
+/* ─────────────────────────────────────────────
+   .blog-prose — extra typography polish for blog posts
+   (applied IN ADDITION to .wp-content)
+   ───────────────────────────────────────────── */
+.blog-prose {
+  font-size: 18px;
+  line-height: 1.8;
+}
+/* Drop cap on the very first paragraph (uses serif display font for elegance) */
+.blog-prose > p:first-of-type::first-letter {
+  float: left;
+  font-size: 4.2rem;
+  line-height: 0.85;
+  font-weight: 900;
+  color: #2C5E3F;
+  margin: 0.35rem 0.7rem 0 0;
+  padding: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-variation-settings: 'SOFT' 100, 'opsz' 144;
+}
+/* Make blog-prose H2/H3 use display serif for editorial feel */
+.blog-prose h2 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+/* Slightly larger lead paragraph */
+.blog-prose > p:first-of-type {
+  font-size: 1.15em;
+  color: #1F2A37;
+  font-weight: 500;
+}
+/* Re-style headings inside blog prose to feel editorial */
+.blog-prose h2 {
+  font-size: 1.9rem;
+  margin-top: 3.5rem;
+}
+.blog-prose h2::after {
+  width: 56px;
+  height: 4px;
+}
+.blog-prose h3 {
+  font-size: 1.3rem;
+  margin-top: 2.5rem;
+  border-left-width: 4px;
+}
+/* Pull-quote style for blockquote */
+.blog-prose blockquote {
+  font-size: 1.25em;
+  font-style: normal;
+  font-weight: 500;
+  color: #1A1A1A;
+  border-left: 4px solid #2C5E3F;
+  background: linear-gradient(90deg, #F5F1E8 0%, transparent 100%);
+  padding: 1.5rem 2rem;
+  margin: 2.5rem 0;
+  border-radius: 0 16px 16px 0;
+  position: relative;
+}
+.blog-prose blockquote::before {
+  content: '"';
+  position: absolute;
+  top: -0.5rem;
+  left: 1rem;
+  font-size: 4rem;
+  color: #2C5E3F;
+  opacity: 0.2;
+  line-height: 1;
+  font-family: Georgia, serif;
+}
+/* Larger images in blog posts */
+.blog-prose img,
+.blog-prose figure img {
+  border-radius: 16px;
+  margin: 2rem auto;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1);
+}
+/* Strong emphasis bolder + brand color */
+.blog-prose strong { color: #1A1A1A; }
+/* Inline code styling */
+.blog-prose code:not(pre code) {
+  background: #F5F1E8;
+  color: #2C5E3F;
+  padding: 0.15em 0.5em;
+  border-radius: 0.4em;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+/* ── Stray widgets / inline-styled WP divs ──────────────────── */
+.wp-content > div[style] { max-width: 100% !important; padding: 1.5rem !important; }
+.wp-content svg { display: inline; vertical-align: middle; }
+
+/* ── CTA buttons (rewritten from <a role="button"> to /contact) ─ */
+.wp-content .wp-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.5rem 0 2rem;
+}
+.wp-content .wp-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.75rem;
+  margin: 0.5rem 0.5rem 0.5rem 0;
+  background: #2C5E3F;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 9999px;
+  transition: background 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+  border: 2px solid #2C5E3F;
+}
+/* Inside a row container, drop the per-button margin (gap handles spacing) */
+.wp-content .wp-cta-row .wp-cta-btn { margin: 0; }
+.wp-content .wp-cta-btn:hover {
+  background: #1F4530;
+  border-color: #1F4530;
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+/* Second button in a row gets outline style — visual hierarchy */
+.wp-content .wp-cta-row .wp-cta-btn:nth-child(2) {
+  background: #ffffff;
+  color: #2C5E3F !important;
+}
+.wp-content .wp-cta-row .wp-cta-btn:nth-child(2):hover {
+  background: #2C5E3F;
+  color: #ffffff !important;
+}

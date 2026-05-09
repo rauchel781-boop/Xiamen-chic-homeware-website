@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — 우드 전문가 | 중국 맞춤형 목제품 제조업체",
+    "siteDescription": "CHIC 우드 전문가 — 중국 대표 맞춤형 목재 박스 제조업체. 오동나무, 소나무, 대나무, 아카시아, 호두나무 소재의 경첩식, 슬라이드식, 자석식, 잠금식 박스.",
+    "tagline": "우드 전문가"
+  },
+  "nav": {
+    "home": "홈",
+    "products": "제품",
+    "about": "회사 소개",
+    "materialGuide": "소재 가이드",
+    "blog": "블로그",
+    "contact": "문의하기",
+    "byUse": "용도별",
+    "byStructure": "구조별",
+    "byMaterial": "소재별"
+  },
+  "categories": {
+    "gift-packaging": "선물·포장 박스",
+    "watch-jewelry": "시계·주얼리 박스",
+    "tea-coffee": "차·커피 박스",
+    "wine-whisky": "와인·위스키 박스",
+    "kitchen-dining": "주방·다이닝 박스",
+    "garden-seed": "정원·씨앗 박스",
+    "storage": "수납 박스",
+    "hinged": "경첩식 목재 박스",
+    "sliding-lid": "슬라이드식 목재 박스",
+    "drawer": "서랍식 목재 박스",
+    "magnetic": "자석식 목재 박스",
+    "with-lock": "잠금식 목재 박스",
+    "paulownia": "오동나무 박스",
+    "pine": "소나무 박스",
+    "bamboo": "대나무 박스",
+    "acacia": "아카시아 박스",
+    "walnut": "호두나무 박스"
+  },
+  "cta": {
+    "getQuote": "견적 요청",
+    "viewAll": "전체 보기",
+    "subscribe": "구독하기",
+    "sending": "전송 중…",
+    "emailUs": "이메일 문의",
+    "whatsapp": "WhatsApp 채팅",
+    "viewAllProducts": "모든 제품 보기"
+  },
+  "utility": {
+    "export": "60개 이상 국가로 수출",
+    "locations": "샤먼 사무소 · 차오현 공장"
+  },
+  "footer": {
+    "newsletterEyebrow": "연락처 정보",
+    "newsletterTitle": "카탈로그와 신제품 소식을 받아보세요",
+    "newsletterPlaceholder": "회사 이메일",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd.는 맞춤형 목재 박스 제조업체로, 산둥성 차오현에 15,000m² 공장과 푸젠성 샤먼에 영업·디자인 사무소를 두고 있습니다. 60개 이상 국가의 글로벌 브랜드 및 유통업체와 함께 프리미엄 목재 포장·수납 제품을 시장에 공급합니다 — 대규모 생산력과 장인 수준의 완성도를 함께.",
+    "products": "제품",
+    "company": "회사",
+    "getInTouch": "문의 방법",
+    "email": "이메일",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "영업 시간",
+    "allRightsReserved": "모든 권리 보유.",
+    "madeIn": "메이드 인 차이나 · 전 세계 배송",
+    "aboutLink": "CHIC 소개",
+    "materialGuideLink": "소재 가이드",
+    "woodFabrication": "목재 가공",
+    "capabilities": "역량",
+    "blogNews": "블로그·뉴스",
+    "contactLink": "문의하기"
+  },
+  "language": {
+    "label": "언어"
+  }
+}

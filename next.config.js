@@ -1,0 +1,62 @@
+const createNextIntlPlugin = require('next-intl/plugin');
+const withNextIntl = createNextIntlPlugin('./i18n/request.js');
+
+// Auto-generated redirect list from the WP data + Search Console traffic data.
+// Kept in a JSON file so it stays in sync if you re-export WP later.
+//   - 71 blog post redirects:  /<post-slug> → /blog/<post-slug>
+//   - 10 empty-page category stubs: /<cat-slug> → /products/<cat-slug>
+//   - 5 long-slug aliases:     /complete-guide-… → /material-guide  etc.
+const dataRedirects = require('./wp-data/extracted/all_redirects.json');
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+
+  images: {
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+  },
+
+  // ── 301 Redirects — preserve every URL Google has indexed ──────────
+  // Validated against Google Search Console export (May 2026).
+  async redirects() {
+    return [
+      // ── Wildcard: WP singular permalink → new plural ───────────────
+      // WP used /product/<slug>/ — our new structure uses /products/<slug>.
+      // This single rule covers all 178 products + any future product whose
+      // old URL Google has indexed.
+      { source: '/product/:slug',          destination: '/products/:slug', permanent: true },
+      { source: '/product/:slug/:rest*',   destination: '/products/:slug', permanent: true },
+
+      // ── Per-slug redirects from the JSON data ──────────────────────
+      // Blog posts (71) + empty-page category stubs (10) + alias pages (5).
+      // Loaded at build time from wp-data/extracted/all_redirects.json.
+      ...dataRedirects.map(({ source, destination, permanent }) => ({
+        source,
+        destination,
+        permanent: permanent !== false,
+      })),
+
+      // ── Legacy long-slug redirects (URL was shortened on WP after publishing) ──
+      {
+        source: '/acacia-vs-bamboo-organizer-why-2026s-top-home-brands-are-pivoting-to-acacia-wood-a-data-driven-analysis',
+        destination: '/blog/acacia-vs-bamboo-organizer',
+        permanent: true,
+      },
+
+      // ── Old /<locale>/ URLs from the brief multilingual experiment ──
+      { source: '/en',         destination: '/',         permanent: true },
+      { source: '/en/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/zh',         destination: '/',         permanent: true },
+      { source: '/zh/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/de/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/es/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/fr/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/it/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/ja/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/ko/:path*',  destination: '/:path*',   permanent: true },
+      { source: '/pt/:path*',  destination: '/:path*',   permanent: true },
+    ];
+  },
+};
+
+module.exports = withNextIntl(nextConfig);

@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — Esperti del Legno | Produttore di Prodotti in Legno su Misura in Cina",
+    "siteDescription": "CHIC esperti del legno — produttore leader di scatole in legno personalizzate in Cina. Scatole con cerniera, coperchio scorrevole, magnetiche e con serratura in paulownia, pino, bambù, acacia e noce.",
+    "tagline": "Esperti del Legno"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Prodotti",
+    "about": "Chi siamo",
+    "materialGuide": "Guida ai Materiali",
+    "blog": "Blog",
+    "contact": "Contatti",
+    "byUse": "Per Uso",
+    "byStructure": "Per Struttura",
+    "byMaterial": "Per Materiale"
+  },
+  "categories": {
+    "gift-packaging": "Scatole Regalo e Imballaggio",
+    "watch-jewelry": "Scatole per Orologi e Gioielli",
+    "tea-coffee": "Scatole per Tè e Caffè",
+    "wine-whisky": "Scatole per Vino e Whisky",
+    "kitchen-dining": "Scatole per Cucina e Sala da Pranzo",
+    "garden-seed": "Scatole per Giardino e Sementi",
+    "storage": "Scatole Portaoggetti",
+    "hinged": "Scatole in Legno con Cerniera",
+    "sliding-lid": "Scatole in Legno con Coperchio Scorrevole",
+    "drawer": "Scatole in Legno con Cassetto",
+    "magnetic": "Scatole in Legno Magnetiche",
+    "with-lock": "Scatole in Legno con Serratura",
+    "paulownia": "Scatole in Legno di Paulownia",
+    "pine": "Scatole in Legno di Pino",
+    "bamboo": "Scatole in Bambù",
+    "acacia": "Scatole in Legno di Acacia",
+    "walnut": "Scatole in Legno di Noce"
+  },
+  "cta": {
+    "getQuote": "Richiedi un Preventivo",
+    "viewAll": "Vedi Tutto",
+    "subscribe": "Iscriviti",
+    "sending": "Invio in corso…",
+    "emailUs": "Inviaci un'Email",
+    "whatsapp": "Chatta su WhatsApp",
+    "viewAllProducts": "Vedi Tutti i Prodotti"
+  },
+  "utility": {
+    "export": "Esportiamo in oltre 60 paesi",
+    "locations": "Ufficio di Xiamen · Stabilimento di Cao County"
+  },
+  "footer": {
+    "newsletterEyebrow": "Resta in contatto",
+    "newsletterTitle": "Ricevi il nostro catalogo e gli aggiornamenti sui nuovi prodotti",
+    "newsletterPlaceholder": "La tua email aziendale",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. è un produttore di scatole in legno su misura con un stabilimento di 15.000 m² a Cao County, Shandong e il nostro ufficio vendite e design a Xiamen, Fujian. Aiutiamo brand e rivenditori globali in oltre 60 paesi a portare sul mercato prodotti di imballaggio e stoccaggio in legno di alta qualità — su larga scala, con artigianalità di prim'ordine.",
+    "products": "Prodotti",
+    "company": "Azienda",
+    "getInTouch": "Contattaci",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "Orari",
+    "allRightsReserved": "Tutti i diritti riservati.",
+    "madeIn": "Made in China · Spedizione Mondiale",
+    "aboutLink": "Su CHIC",
+    "materialGuideLink": "Guida ai Materiali",
+    "woodFabrication": "Lavorazione del Legno",
+    "capabilities": "Capacità",
+    "blogNews": "Blog e Notizie",
+    "contactLink": "Contatti"
+  },
+  "language": {
+    "label": "Lingua"
+  }
+}

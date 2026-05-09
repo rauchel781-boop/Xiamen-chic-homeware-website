@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "siteTitle": "CHIC — Experts du Bois | Fabricant de Produits en Bois sur Mesure en Chine",
+    "siteDescription": "CHIC experts du bois — fabricant leader de boîtes en bois personnalisées en Chine. Boîtes à charnières, à couvercle coulissant, magnétiques et verrouillables en paulownia, pin, bambou, acacia et noyer.",
+    "tagline": "Experts du Bois"
+  },
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "about": "À propos",
+    "materialGuide": "Guide des Matériaux",
+    "blog": "Blog",
+    "contact": "Contact",
+    "byUse": "Par Usage",
+    "byStructure": "Par Structure",
+    "byMaterial": "Par Matériau"
+  },
+  "categories": {
+    "gift-packaging": "Boîtes Cadeau et Emballage",
+    "watch-jewelry": "Boîtes à Montres et Bijoux",
+    "tea-coffee": "Boîtes à Thé et Café",
+    "wine-whisky": "Boîtes à Vin et Whisky",
+    "kitchen-dining": "Boîtes Cuisine et Salle à Manger",
+    "garden-seed": "Boîtes Jardin et Semences",
+    "storage": "Boîtes de Rangement",
+    "hinged": "Boîtes en Bois à Charnières",
+    "sliding-lid": "Boîtes en Bois à Couvercle Coulissant",
+    "drawer": "Boîtes en Bois à Tiroir",
+    "magnetic": "Boîtes en Bois Magnétiques",
+    "with-lock": "Boîtes en Bois Verrouillables",
+    "paulownia": "Boîtes en Bois de Paulownia",
+    "pine": "Boîtes en Bois de Pin",
+    "bamboo": "Boîtes en Bambou",
+    "acacia": "Boîtes en Bois d'Acacia",
+    "walnut": "Boîtes en Bois de Noyer"
+  },
+  "cta": {
+    "getQuote": "Demander un Devis",
+    "viewAll": "Voir Tout",
+    "subscribe": "S'abonner",
+    "sending": "Envoi en cours…",
+    "emailUs": "Nous Contacter par E-mail",
+    "whatsapp": "Discuter sur WhatsApp",
+    "viewAllProducts": "Voir Tous les Produits"
+  },
+  "utility": {
+    "export": "Exportation vers plus de 60 pays",
+    "locations": "Bureau de Xiamen · Usine de Cao County"
+  },
+  "footer": {
+    "newsletterEyebrow": "Restez en contact",
+    "newsletterTitle": "Recevez notre catalogue et les nouveautés produits",
+    "newsletterPlaceholder": "Votre e-mail professionnel",
+    "brandBlurb": "Xiamen Chic Homeware Co.,Ltd. est un fabricant de boîtes en bois sur mesure avec son usine de 15 000 m² à Cao County, Shandong et son bureau de vente et de design à Xiamen, Fujian. Nous aidons les marques et détaillants mondiaux dans plus de 60 pays à mettre sur le marché des produits d'emballage et de rangement en bois haut de gamme — à grande échelle, avec un savoir-faire artisanal de qualité supérieure.",
+    "products": "Produits",
+    "company": "Entreprise",
+    "getInTouch": "Contactez-nous",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "wechat": "WeChat",
+    "hours": "Horaires",
+    "allRightsReserved": "Tous droits réservés.",
+    "madeIn": "Fabriqué en Chine · Livraison Mondiale",
+    "aboutLink": "À propos de CHIC",
+    "materialGuideLink": "Guide des Matériaux",
+    "woodFabrication": "Fabrication du Bois",
+    "capabilities": "Capacités",
+    "blogNews": "Blog et Actualités",
+    "contactLink": "Contact"
+  },
+  "language": {
+    "label": "Langue"
+  }
+}
