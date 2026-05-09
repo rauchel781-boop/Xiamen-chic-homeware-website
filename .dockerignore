@@ -1,0 +1,16 @@
+# Don't ship build artifacts and dev cruft into the Docker context.
+# Saves ~1GB of context transfer and avoids stale .next from local builds.
+.next
+node_modules
+.git
+.env*.local
+*.log
+.DS_Store
+.vscode
+.idea
+test-classify.cjs
+test-classify.mjs
+count.mjs
+.old
+1.rtf
+README.md
