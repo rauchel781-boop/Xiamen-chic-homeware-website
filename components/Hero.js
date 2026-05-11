@@ -37,8 +37,9 @@ export default function Hero() {
             </ul>
 
             <p className="mt-6 text-[15px] text-brand-ink/80 leading-relaxed max-w-[520px]">
-              Factory-direct OEM &amp; ODM manufacturer of wooden kitchenware,
-              desk organizers and home storage products — built for global brands.
+              CHIC is a factory-direct <strong>wooden products manufacturer in China</strong> —
+              OEM &amp; ODM supplier of wooden kitchenware, desk organizers, gift packaging and
+              home storage products, built for global retailers and brands.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
