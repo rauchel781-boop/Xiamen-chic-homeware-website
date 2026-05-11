@@ -51,16 +51,15 @@ const nextConfig = {
         permanent: true,
       },
 
-      // ── Old /<locale>/ URLs from the brief multilingual experiment ──
+      // ── Locale clean-up redirects ──────────────────────────────────
+      // /en → / (English is the no-prefix canonical, localePrefix: 'as-needed')
+      // /zh, /it, /ko, /pt → / (legacy/unsupported locales from old WP experiment)
+      // NOTE: /de, /es, /fr, /ja are LIVE locales — do NOT redirect them.
       { source: '/en',         destination: '/',         permanent: true },
       { source: '/en/:path*',  destination: '/:path*',   permanent: true },
       { source: '/zh',         destination: '/',         permanent: true },
       { source: '/zh/:path*',  destination: '/:path*',   permanent: true },
-      { source: '/de/:path*',  destination: '/:path*',   permanent: true },
-      { source: '/es/:path*',  destination: '/:path*',   permanent: true },
-      { source: '/fr/:path*',  destination: '/:path*',   permanent: true },
       { source: '/it/:path*',  destination: '/:path*',   permanent: true },
-      { source: '/ja/:path*',  destination: '/:path*',   permanent: true },
       { source: '/ko/:path*',  destination: '/:path*',   permanent: true },
       { source: '/pt/:path*',  destination: '/:path*',   permanent: true },
     ];

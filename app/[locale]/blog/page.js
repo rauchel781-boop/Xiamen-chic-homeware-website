@@ -7,12 +7,14 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts, wpPostCategories, stripHtml } from '@/lib/wp-data';
+import { localizePost } from '@/lib/translated-content';
+import { hreflangFor } from '@/i18n/routing';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   return {
     title: 'Blog — Wooden Homeware Sourcing & Manufacturing Guides',
     description: 'Sourcing tips, material selection, OEM workflow guides and packaging know-how — written by our factory team for B2B buyers of wooden homeware.',
-    alternates: { canonical: `/blog` },
+    alternates: { canonical: `/blog`, languages: hreflangFor(SITE.siteUrl, '/blog') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/blog`,
@@ -36,7 +38,8 @@ const CAT_META = {
 export default function BlogIndex({ params: { locale } }) {
   unstable_setRequestLocale(locale);
 
-  const allPosts = wpPosts(); // already sorted desc by date in the export
+  // Localize titles + excerpts for the active locale (English passes through).
+  const allPosts = wpPosts().map((p) => localizePost(p, locale));
   const cats = wpPostCategories();
 
   // Counts per category slug

@@ -8,22 +8,36 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts, wpPostBySlug, stripHtml } from '@/lib/wp-data';
+import { localizePost } from '@/lib/translated-content';
+import { routing } from '@/i18n/routing';
+
+// Build hreflang map for a given path — used in metadata.alternates.languages.
+function buildBlogAlternates(path) {
+  const langs = {};
+  for (const loc of routing.locales) {
+    const prefix = loc === routing.defaultLocale ? '' : `/${loc}`;
+    langs[loc] = `${SITE.siteUrl}${prefix}${path}`;
+  }
+  langs['x-default'] = `${SITE.siteUrl}${path}`;
+  return langs;
+}
 
 export function generateStaticParams() {
   return wpPosts().map(p => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }) {
-  const p = wpPostBySlug(params.slug);
-  if (!p) return {};
-  const title = p.meta_title || stripHtml(p.title);
-  const desc  = p.meta_desc  || stripHtml(p.excerpt || p.content).slice(0, 160);
+  const rawP = wpPostBySlug(params.slug);
+  if (!rawP) return {};
+  const p = localizePost(rawP, params.locale);
+  const title = stripHtml(p.title);
+  const desc  = stripHtml(p.excerpt || p.content).slice(0, 160);
   const path  = `/blog/${p.slug}`;
   const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
   return {
     title,
     description: desc,
-    alternates: { canonical: path },
+    alternates: { canonical: path, languages: buildBlogAlternates(path) },
     openGraph: {
       type: 'article',
       url: `${SITE.siteUrl}${path}`,
@@ -45,8 +59,9 @@ function readingTime(html) {
 
 export default function BlogPost({ params }) {
   unstable_setRequestLocale(params.locale);
-  const p = wpPostBySlug(params.slug);
-  if (!p) notFound();
+  const rawP = wpPostBySlug(params.slug);
+  if (!rawP) notFound();
+  const p = localizePost(rawP, params.locale);
 
   // Related — prefer same category, fall back to most recent
   const sameCategory = wpPosts().filter(x =>
@@ -56,7 +71,8 @@ export default function BlogPost({ params }) {
   const fallback = wpPosts().filter(x => x.id !== p.id);
   const related = [...sameCategory, ...fallback]
     .filter((x, i, arr) => arr.findIndex(y => y.id === x.id) === i)
-    .slice(0, 3);
+    .slice(0, 3)
+    .map((x) => localizePost(x, params.locale));
 
   const minutes = readingTime(p.content);
   const date = new Date(p.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

@@ -6,6 +6,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 import ContactClient from './ContactClient';
 
 export async function generateMetadata({ params: { locale } = {} }) {
@@ -13,10 +14,10 @@ export async function generateMetadata({ params: { locale } = {} }) {
   const description = 'Send your specs, sketches or reference samples — we typically reply within 24 hours with a quote and sample timeline. Email, WhatsApp, WeChat or contact form.';
   return {
     title, description,
-    alternates: { canonical: `/${locale || 'en'}/contact` },
+    alternates: { canonical: `/contact`, languages: hreflangFor(SITE.siteUrl, '/contact') },
     openGraph: {
       type: 'website',
-      url: `${SITE.siteUrl}/${locale || 'en'}/contact`,
+      url: `${SITE.siteUrl}/contact`,
       title, description, siteName: SITE.company.brand,
     },
   };

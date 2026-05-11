@@ -3,6 +3,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'custom-wooden-spice-rack';
 const TITLE = 'Custom Wooden Spice Rack Manufacturer with Glass Jar Matching Options';
@@ -12,7 +13,7 @@ const META_DESC =
 export const metadata = {
   title: 'Custom Wooden Spice Rack Manufacturer | Wooden Rack & Glass Jar Set Solutions',
   description: META_DESC,
-  alternates: { canonical: `/${SLUG}` },
+  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
   openGraph: {
     type: 'website', url: `${SITE.siteUrl}/${SLUG}`, title: TITLE, description: META_DESC,
     images: [{ url: '/wp-images/2026/04/ScreenShot_2026-04-09_180610_619.png', width: 1200, height: 800, alt: TITLE }],

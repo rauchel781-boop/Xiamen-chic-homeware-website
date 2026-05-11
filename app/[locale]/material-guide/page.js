@@ -8,13 +8,14 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts } from '@/lib/wp-data';
+import { hreflangFor } from '@/i18n/routing';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const title = 'Wood Materials Guide — Choose the Right Wood for Your Product';
   const description = 'A complete guide to wood materials for kitchenware, storage boxes and home organizers. Compare acacia, walnut, bamboo, pine, oak, paulownia, teak and more.';
   return {
     title, description,
-    alternates: { canonical: `/material-guide` },
+    alternates: { canonical: `/material-guide`, languages: hreflangFor(SITE.siteUrl, '/material-guide') },
     openGraph: {
       type: 'article',
       url: `${SITE.siteUrl}/material-guide`,

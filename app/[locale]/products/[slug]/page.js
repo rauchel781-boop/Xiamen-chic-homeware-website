@@ -18,12 +18,17 @@ import {
   stripHtml,
 } from '@/lib/wp-data';
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
+import { localizeProduct } from '@/lib/translated-content';
 
-// Build hreflang map for a path — used in metadata.alternates.languages
+// Build hreflang map for a path — used in metadata.alternates.languages.
+// With localePrefix:'as-needed', the default locale (en) has NO prefix.
 function buildAlternates(path) {
   const langs = {};
-  for (const loc of routing.locales) langs[loc] = `/${loc}${path}`;
-  langs['x-default'] = `/${routing.defaultLocale}${path}`;
+  for (const loc of routing.locales) {
+    const prefix = loc === routing.defaultLocale ? '' : `/${loc}`;
+    langs[loc] = `${SITE.siteUrl}${prefix}${path}`;
+  }
+  langs['x-default'] = `${SITE.siteUrl}${path}`;
   return langs;
 }
 
@@ -44,7 +49,7 @@ export async function generateMetadata({ params }) {
     return {
       title: `${cat.name} — Wholesale Manufacturer`,
       description: desc,
-      alternates: { canonical: path},
+      alternates: { canonical: path, languages: buildAlternates(path) },
       openGraph: {
         type: 'website',
         url: `${SITE.siteUrl}${path}`,
@@ -55,15 +60,16 @@ export async function generateMetadata({ params }) {
       twitter: { card: 'summary_large_image', title: `${cat.name} — Wholesale Manufacturer`, description: desc },
     };
   }
-  const p = wpProductBySlug(params.slug);
-  if (p) {
+  const rawP = wpProductBySlug(params.slug);
+  if (rawP) {
+    const p = localizeProduct(rawP, params.locale);
     const title = stripHtml(p.title);
-    const desc  = p.meta_desc || stripHtml(p.excerpt || p.content).slice(0, 160);
+    const desc  = p._localizedOverview?.slice(0, 160) || p.meta_desc || stripHtml(p.excerpt || p.content).slice(0, 160);
     const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
     return {
       title,
       description: desc,
-      alternates: { canonical: path},
+      alternates: { canonical: path, languages: buildAlternates(path) },
       openGraph: {
         type: 'website',
         url: `${SITE.siteUrl}${path}`,
@@ -82,8 +88,11 @@ export default function ProductOrCategoryPage({ params }) {
   unstable_setRequestLocale(params.locale);
   const cat  = wpCategoryBySlug(params.slug);
   if (cat)  return <CategoryView cat={cat} locale={params.locale} />;
-  const p = wpProductBySlug(params.slug);
-  if (p)    return <ProductView p={p} locale={params.locale} />;
+  const rawP = wpProductBySlug(params.slug);
+  if (rawP) {
+    const p = localizeProduct(rawP, params.locale);
+    return <ProductView p={p} locale={params.locale} />;
+  }
   notFound();
 }
 
@@ -102,7 +111,7 @@ function breadcrumbLd(crumbs) {
 }
 
 function CategoryView({ cat, locale }) {
-  const items = wpProductsByCategory(cat.slug);
+  const items = wpProductsByCategory(cat.slug).map((p) => localizeProduct(p, locale));
   const subCats = wpProductCategories().filter(c => String(c.parent) === String(cat.id));
 
   // Breadcrumb + ItemList JSON-LD for category landing
@@ -205,7 +214,11 @@ function ProductView({ p, locale }) {
 
   // Use generated overview as fallback description — much richer + more
   // keyword-dense than the often-empty excerpt or raw spec dump.
+  // If a translated overview exists for this locale, use that instead.
   const generated = generateProductContent(p);
+  if (p._localizedOverview) {
+    generated.overview = p._localizedOverview;
+  }
   const productLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',

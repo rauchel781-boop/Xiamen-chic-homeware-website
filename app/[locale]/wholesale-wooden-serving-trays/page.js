@@ -3,6 +3,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'wholesale-wooden-serving-trays';
 const TITLE = 'Wholesale Wooden Serving Trays & Platters: Premium Manufacturer';
@@ -12,7 +13,7 @@ const META_DESC =
 export const metadata = {
   title: '7 Remarkable Wholesale Wooden Serving Trays & Platters',
   description: META_DESC,
-  alternates: { canonical: `/${SLUG}` },
+  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
   openGraph: { type: 'website', url: `${SITE.siteUrl}/${SLUG}`, title: TITLE, description: META_DESC,
     images: [{ url: '/wp-images/2026/02/1-1.jpg', width: 1200, height: 800, alt: TITLE }],
     siteName: SITE.company.brand },

@@ -2,12 +2,13 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 export const metadata = {
   title: 'Wood Fabrication Capabilities — CHIC',
   description:
     'From rough timber to finished, packaged wooden box components — CHIC handles cutting, shaping, mortising, pre-assembly, polishing and packing under one roof.',
-  alternates: { canonical: '/wood-fabrication' },
+  alternates: { canonical: '/wood-fabrication', languages: hreflangFor(SITE.siteUrl, '/wood-fabrication') },
 };
 
 const CAPABILITIES = [

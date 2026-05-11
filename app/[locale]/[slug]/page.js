@@ -13,6 +13,8 @@ import { notFound, redirect } from 'next/navigation';
 import WpRichLanding from '@/components/WpRichLanding';
 import { wpPageBySlug, wpPages, stripHtml } from '@/lib/wp-data';
 import { classifyWpPage } from '@/lib/wp-classify-page';
+import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 // Slugs that have their own dedicated routes in app/[locale]/<slug>/
 // Don't generate them here, and redirect requests to the canonical short URL.
@@ -70,7 +72,7 @@ export async function generateMetadata({ params }) {
   return {
     title: p.meta_title || stripHtml(p.title),
     description: p.meta_desc || stripHtml(p.excerpt || p.content).slice(0, 160),
-    alternates: { canonical: `/${params.slug}` },
+    alternates: { canonical: `/${params.slug}`, languages: hreflangFor(SITE.siteUrl, `/${params.slug}`) },
   };
 }
 

@@ -7,6 +7,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'wooden-sofa-tray-manufacturer';
 const TITLE = 'Wooden Sofa Tray Manufacturer & OEM Supplier';
@@ -16,7 +17,7 @@ const META_DESC =
 export const metadata = {
   title: '7 Ways to Elevate Your Space with a Wooden Sofa Tray',
   description: META_DESC,
-  alternates: { canonical: `/${SLUG}` },
+  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
   openGraph: {
     type: 'website',
     url: `${SITE.siteUrl}/${SLUG}`,

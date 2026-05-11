@@ -3,6 +3,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'wholesale-wooden-spice-racks';
 const TITLE = 'Wholesale Wooden Spice Racks — Bamboo & Acacia Organizers';
@@ -12,7 +13,7 @@ const META_DESC =
 export const metadata = {
   title: '10 Daring Designs for Wholesale Wooden Spice Racks',
   description: META_DESC,
-  alternates: { canonical: `/${SLUG}` },
+  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
   openGraph: { type: 'website', url: `${SITE.siteUrl}/${SLUG}`, title: TITLE, description: META_DESC,
     images: [{ url: '/wp-images/2026/04/ScreenShot_2026-04-09_180610_619.png', width: 1200, height: 800, alt: TITLE }],
     siteName: SITE.company.brand },

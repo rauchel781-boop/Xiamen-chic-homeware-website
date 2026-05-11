@@ -1,9 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Sitemap — English-only B2B export site.
-// Includes products, posts, categories, static pages and image entries
-// per Google's image sitemap spec.
+// Sitemap — multilingual (5 locales: en/es/de/fr/ja) B2B export site.
+// Each URL is emitted ONCE (as the default-locale English version) with
+// alternates pointing to all other locale variants. This is the format
+// Google recommends for hreflang sitemaps.
 //
 // Refs:
+//   - https://developers.google.com/search/docs/specialty/international/localized-versions#sitemap
 //   - https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
 //   - https://developers.google.com/search/docs/crawling-indexing/sitemaps/image-sitemaps
 // ─────────────────────────────────────────────────────────────────────────
@@ -15,6 +17,7 @@ import {
   wpProductCategories,
   wpPages,
 } from '@/lib/wp-data';
+import { routing } from '@/i18n/routing';
 
 const TODAY = new Date();
 
@@ -24,14 +27,32 @@ function abs(imgPath) {
   return `${SITE.siteUrl}${imgPath}`;
 }
 
+// Build the per-locale URL for a path. EN has no prefix; others get /<locale>/.
+function urlFor(locale, path) {
+  const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
+  return `${SITE.siteUrl}${prefix}${path}`;
+}
+
+// Build hreflang alternates for a path — all locales + x-default.
+function alternatesFor(path) {
+  const languages = {};
+  for (const loc of routing.locales) {
+    languages[loc] = urlFor(loc, path);
+  }
+  languages['x-default'] = urlFor(routing.defaultLocale, path);
+  return { languages };
+}
+
 export default function sitemap() {
   const entries = [];
   const push = (path, opts = {}) => {
     const entry = {
-      url: `${SITE.siteUrl}${path}`,
+      // Canonical URL is the English (default-locale) one
+      url: urlFor(routing.defaultLocale, path === '/' ? '' : path),
       lastModified: opts.lastModified || TODAY,
       changeFrequency: opts.changeFrequency || 'monthly',
       priority: opts.priority ?? 0.7,
+      alternates: alternatesFor(path === '/' ? '' : path),
     };
     if (opts.images && opts.images.length > 0) entry.images = opts.images;
     entries.push(entry);

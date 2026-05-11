@@ -1,12 +1,14 @@
 // /capabilities — high-level overview of factory capabilities.
 import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 export const metadata = {
   title: 'Capabilities — CHIC Wooden Products Factory',
   description:
     'CNC routing, laser engraving, hot foil, screen print, kiln drying, finishing and packing — modern equipment and a strict QC system for wholesale and OEM wooden box programs.',
-  alternates: { canonical: '/capabilities' },
+  alternates: { canonical: '/capabilities', languages: hreflangFor(SITE.siteUrl, '/capabilities') },
 };
 
 const ITEMS = [

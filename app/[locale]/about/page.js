@@ -6,13 +6,14 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const title = 'About CHIC — Custom Wooden Products Factory in Xiamen, China';
   const description = 'Xiamen Chic Homeware Co.,Ltd. — wooden products factory in China, OEM & ODM manufacturer for global brands. Learn about our factory, process, capabilities and quality system.';
   return {
     title, description,
-    alternates: { canonical: `/about` },
+    alternates: { canonical: `/about`, languages: hreflangFor(SITE.siteUrl, '/about') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/about`,

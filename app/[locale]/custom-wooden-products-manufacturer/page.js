@@ -3,6 +3,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'custom-wooden-products-manufacturer';
 const TITLE = 'Custom Wooden Products Manufacturer in China';
@@ -12,7 +13,7 @@ const META_DESC =
 export const metadata = {
   title: 'Custom Wooden Products Manufacturer in China | OEM & Private Label Supplier',
   description: META_DESC,
-  alternates: { canonical: `/${SLUG}` },
+  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
   openGraph: { type: 'website', url: `${SITE.siteUrl}/${SLUG}`, title: TITLE, description: META_DESC,
     images: [{ url: '/wp-images/2025/12/production.jpg', width: 1200, height: 800, alt: TITLE }],
     siteName: SITE.company.brand },

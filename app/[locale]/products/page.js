@@ -6,12 +6,14 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpProducts, wpProductCategories, wpProductCategoryTree } from '@/lib/wp-data';
+import { localizeProduct } from '@/lib/translated-content';
+import { hreflangFor } from '@/i18n/routing';
 
 export async function generateMetadata() {
   return {
     title: 'All Products — Custom Wooden & Bamboo Manufacturer',
     description: 'Browse 178+ wooden and bamboo home storage products — kitchen, organizers, gift packaging, hospitality. OEM & ODM ready. 45 categories.',
-    alternates: { canonical: '/products' },
+    alternates: { canonical: '/products', languages: hreflangFor(SITE.siteUrl, '/products') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/products`,
@@ -45,7 +47,8 @@ const MATERIAL_CHIPS = [
 export default function ProductsIndex({ params: { locale } }) {
   unstable_setRequestLocale(locale);
 
-  const products = wpProducts();
+  // Localize product titles for the active locale (English passes through).
+  const products = wpProducts().map((p) => localizeProduct(p, locale));
   const categoryTree = wpProductCategoryTree();
   const allCats = wpProductCategories();
 

@@ -1,24 +1,50 @@
 import { defineRouting } from 'next-intl/routing';
 
-// English-only export site. Decision: serving B2B export buyers globally,
-// 95% of whom communicate in English — auto-translated content gets
-// penalized by Google, so we keep a single high-quality English version.
+// Multilingual B2B export site. Decision: English is the canonical language
+// (no /en/ prefix), and we add 4 high-priority B2B export markets:
+//   - Spanish (LATAM + Spain)
+//   - German (DACH region, large EU buyer base)
+//   - French (FR + BE + CA + parts of Africa)
+//   - Japanese (premium gift/packaging market)
 //
-// To add a real (human-translated) language later:
-//   1. Add the code to `locales` below
-//   2. Add a matching `messages/<code>.json`
-//   3. Switch localePrefix to 'as-needed' so /en/ stays clean and /de/ etc.
-//      get a prefix.
+// localePrefix 'as-needed' keeps /products/foo (English) clean, while
+// /es/products/foo, /de/products/foo, etc. get a prefix.
 export const routing = defineRouting({
-  locales: ['en'],
+  locales: ['en', 'es', 'de', 'fr', 'ja'],
   defaultLocale: 'en',
-  // 'never' → URLs have no /en/ prefix at all. /products/foo, not /en/products/foo.
-  localePrefix: 'never',
+  localePrefix: 'as-needed',
 });
 
 export const locales = routing.locales;
 export const defaultLocale = routing.defaultLocale;
 
+// Display names shown in the language switcher dropdown.
 export const localeNames = {
   en: 'English',
+  es: 'Español',
+  de: 'Deutsch',
+  fr: 'Français',
+  ja: '日本語',
 };
+
+// hreflang values for SEO (slightly different from locale codes).
+// 'x-default' points to English (the canonical version for non-targeted users).
+export const localeHreflang = {
+  en: 'en',
+  es: 'es',
+  de: 'de',
+  fr: 'fr',
+  ja: 'ja',
+};
+
+// Build absolute hreflang URLs for any path. Pass an absolute siteUrl.
+// With localePrefix:'as-needed', English gets NO prefix; others get /<locale>.
+export function hreflangFor(siteUrl, path = '') {
+  const langs = {};
+  for (const loc of routing.locales) {
+    const prefix = loc === routing.defaultLocale ? '' : `/${loc}`;
+    langs[loc] = `${siteUrl}${prefix}${path}`;
+  }
+  langs['x-default'] = `${siteUrl}${path}`;
+  return langs;
+}

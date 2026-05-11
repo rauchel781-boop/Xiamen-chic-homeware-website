@@ -3,6 +3,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
+import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'custom-wooden-boxes';
 const TITLE = 'Custom Wooden Boxes Manufacturer for Wholesale & Private Label';
@@ -12,7 +13,7 @@ const META_DESC =
 export const metadata = {
   title: 'Custom Wooden Boxes Manufacturer | OEM & Wholesale Supplier China',
   description: META_DESC,
-  alternates: { canonical: `/${SLUG}` },
+  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
   openGraph: {
     type: 'website',
     url: `${SITE.siteUrl}/${SLUG}`,

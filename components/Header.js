@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
+import LanguageSwitcher from './LanguageSwitcher';
 
 // Simple header matching xmchichomeware.com layout:
 // [logo]              Home  Product▼  Materials Guide  About Us  Blog  Contact   [Get A Free Quote]
@@ -113,8 +114,9 @@ export default function Header() {
             )}
           </nav>
 
-          {/* CTA */}
-          <div className="hidden lg:block">
+          {/* Language switcher + CTA */}
+          <div className="hidden lg:flex items-center gap-3">
+            <LanguageSwitcher />
             <Link
               href="/contact"
               className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white shadow-md hover:bg-brand-greenDark transition"
@@ -152,10 +154,13 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            <div className="mt-4 mb-2">
+              <LanguageSwitcher />
+            </div>
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}
-              className="mt-4 inline-flex items-center justify-center w-full rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white"
+              className="mt-2 inline-flex items-center justify-center w-full rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white"
             >
               Get a Free Quote
             </Link>
