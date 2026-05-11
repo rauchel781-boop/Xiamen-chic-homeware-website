@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -65,16 +66,19 @@ const PRODUCT_GROUPS = [
   },
 ];
 
+// NAV labels are resolved at render time via useTranslations — the keys here
+// match the namespace 'nav' in messages/<locale>.json (home, products, etc.).
 const NAV = [
-  { label: 'Home',           href: '/' },
-  { label: 'Product',        href: '/products', dropdown: true },
-  { label: 'Materials Guide',href: '/material-guide' },
-  { label: 'About Us',       href: '/about' },
-  { label: 'Blog',           href: '/blog' },
-  { label: 'Contact',        href: '/contact' },
+  { key: 'home',          href: '/' },
+  { key: 'products',      href: '/products', dropdown: true },
+  { key: 'materialGuide', href: '/material-guide' },
+  { key: 'about',         href: '/about' },
+  { key: 'blog',          href: '/blog' },
+  { key: 'contact',       href: '/contact' },
 ];
 
 export default function Header() {
+  const t = useTranslations();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -101,14 +105,14 @@ export default function Header() {
           <nav className="hidden lg:flex items-center gap-8">
             {NAV.map((item) =>
               item.dropdown ? (
-                <ProductDropdown key={item.label} label={item.label} href={item.href} />
+                <ProductDropdown key={item.key} label={t(`nav.${item.key}`)} href={item.href} />
               ) : (
                 <Link
-                  key={item.label}
+                  key={item.key}
                   href={item.href}
                   className="text-[15px] font-semibold text-brand-ink hover:text-brand-green transition"
                 >
-                  {item.label}
+                  {t(`nav.${item.key}`)}
                 </Link>
               )
             )}
@@ -121,7 +125,7 @@ export default function Header() {
               href="/contact"
               className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white shadow-md hover:bg-brand-greenDark transition"
             >
-              Get A Free Quote
+              {t('cta.getFreeQuoteCaps')}
             </Link>
           </div>
 
@@ -146,12 +150,12 @@ export default function Header() {
           <div className="lg:hidden border-t border-brand-line py-4">
             {NAV.map((item) => (
               <Link
-                key={item.label}
+                key={item.key}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className="block py-3 text-[15px] font-semibold text-brand-ink hover:text-brand-green border-b border-brand-line/60"
               >
-                {item.label}
+                {t(`nav.${item.key}`)}
               </Link>
             ))}
             <div className="mt-4 mb-2">
@@ -162,7 +166,7 @@ export default function Header() {
               onClick={() => setMobileOpen(false)}
               className="mt-2 inline-flex items-center justify-center w-full rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white"
             >
-              Get a Free Quote
+              {t('cta.getFreeQuote')}
             </Link>
           </div>
         )}
