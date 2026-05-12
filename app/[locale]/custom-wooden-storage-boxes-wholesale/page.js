@@ -1,5 +1,6 @@
 // /custom-wooden-storage-boxes-wholesale — hand-coded SEO landing page.
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { buildServiceLd } from '@/lib/service-schema';
@@ -8,77 +9,96 @@ import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
 
 const SLUG = 'custom-wooden-storage-boxes-wholesale';
-const TITLE = 'Custom Wooden Storage Boxes Wholesale for Brands, Importers and Retailers';
-const META_DESC =
-  'Source custom wooden storage boxes wholesale from a factory-direct manufacturer in China. OEM sizes, materials, lids, inserts, logo branding, and export packaging for B2B buyers.';
+const HERO_IMAGE = '/wp-images/2026/03/natural-wood-box-4.png';
 
-export const metadata = {
-  title: 'Custom Wooden Storage Boxes Wholesale | OEM Manufacturer China',
-  description: META_DESC,
-  alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
-  openGraph: { type: 'website', url: `${SITE.siteUrl}/${SLUG}`, title: TITLE, description: META_DESC,
-    images: [{ url: '/wp-images/2026/03/natural-wood-box-4.png', width: 1200, height: 800, alt: TITLE }],
-    siteName: SITE.company.brand },
-  twitter: { card: 'summary_large_image', title: TITLE, description: META_DESC },
-};
-
-const HERO = {
-  kicker: 'Wholesale Storage Boxes',
-  badges: ['Custom sizes & lids', 'Logo branding & packaging', 'Solid wood & engineered options'],
-  lead: 'Custom wooden storage boxes for home organization, gift packaging, retail presentation, and private label projects — full OEM service for B2B buyers.',
-  image: '/wp-images/2026/03/natural-wood-box-4.png',
-};
-
-const STYLES = [
-  { title: 'Hinged Lid Boxes', body: 'Classic structure for keepsake storage, gift packaging, home organization, and private label collections.', image: '/wp-images/2026/03/natural-wood-box-5.png' },
-  { title: 'Sliding Lid Boxes', body: 'Clean and practical style — for tea, coffee, desktop accessories, and compact retail packaging.', image: '/wp-images/2026/02/wooden-gift-box-.jpg' },
-  { title: 'Boxes with Compartments', body: 'For jewelry, essential oils, tea bags, accessories — multi-item storage and presentation sets.', image: '/wp-images/2026/02/holder-10.jpg' },
-  { title: 'Magnetic Closure', body: 'Stronger presentation option — premium packaging, corporate gifts, refined branded collections.', image: '/wp-images/2026/01/Slim-Wooden-Double-Ring-Box-5.png' },
-  { title: 'Lock or Clasp', body: 'Decorative and practical — added security, stronger display value, vintage look.', image: '/wp-images/2026/03/ScreenShot_2026-03-17_200616_970.png' },
-  { title: 'Open-Top Organizers', body: 'For desk storage, vanity organization, entryway catchall use, and countertop display programs.', image: '/wp-images/2026/03/Bamboo-Toilet-Paper-Storage-box-6.png' },
+const STYLE_IMAGES = [
+  '/wp-images/2026/03/natural-wood-box-5.png',
+  '/wp-images/2026/02/wooden-gift-box-.jpg',
+  '/wp-images/2026/02/holder-10.jpg',
+  '/wp-images/2026/01/Slim-Wooden-Double-Ring-Box-5.png',
+  '/wp-images/2026/03/ScreenShot_2026-03-17_200616_970.png',
+  '/wp-images/2026/03/Bamboo-Toilet-Paper-Storage-box-6.png',
+];
+const MATERIAL_IMAGES = [
+  '/wp-images/2026/03/ScreenShot_2026-03-17_150727_334.png',
+  '/wp-images/2026/03/ScreenShot_2026-03-17_151314_710.png',
+  '/wp-images/2026/03/wooden-shower-crate-2.jpg',
 ];
 
-const MATERIALS = [
-  { name: 'Premium Wood Options', body: 'Acacia, walnut. For higher-end retail packaging, gift presentation, and projects needing a refined appearance and solid feel.', image: '/wp-images/2026/03/ScreenShot_2026-03-17_150727_334.png' },
-  { name: 'Cost-Effective Solid Wood', body: 'Pine, paulownia. Practical for larger-volume box programs, painted finishes, and projects needing better cost control.', image: '/wp-images/2026/03/ScreenShot_2026-03-17_151314_710.png' },
-  { name: 'Stable Engineered Options', body: 'Plywood, MDF veneer. Good for painted, veneered, or structure-sensitive projects where consistency and budget balance matter.', image: '/wp-images/2026/03/wooden-shower-crate-2.jpg' },
-];
-
-const CUSTOMIZATION = [
-  'Custom dimensions and internal depth',
-  'Hinged, sliding, magnetic lid or clasp',
-  'Dividers, removable inserts, EVA or velvet lining',
-  'Natural finish, stained finish, or painted colors',
-  'Laser logo, printing, foil logo, or branding details',
-  'Retail box, export carton, or e-commerce packaging',
-];
-
-const APPLICATIONS = [
-  { title: 'Home Organization', body: 'Closet, kitchen, bathroom, entryway organization for retail and DIY home brands.' },
-  { title: 'Gift & Retail Packaging', body: 'Premium gift packaging programs — corporate, holiday, and seasonal collections.' },
-  { title: 'Subscription & E-Commerce', body: 'Branded boxes for subscription companies, DTC brands, and online retailers.' },
-  { title: 'Hospitality Amenity', body: 'Hotel, Airbnb, and serviced apartment amenity boxes — drawer organizers, in-room caddies.' },
-];
-
-const FAQS = [
-  { q: 'What is your typical MOQ for wooden storage boxes?', a: 'Typically 300–500 pcs per design depending on size, material, and customization. Trial orders below MOQ may be possible.' },
-  { q: 'Can you make custom sizes and lids?', a: 'Yes — custom dimensions, internal depth, and lid styles (hinged, sliding, magnetic, clasp) are all supported.' },
-  { q: 'Do you provide samples before mass production?', a: 'Yes. Pre-production samples for size, material, finish, and logo confirmation. Sample lead time 7–10 days.' },
-  { q: 'What wood materials do you usually use?', a: 'Acacia, walnut, pine, paulownia for solid wood — and plywood, MDF veneer for engineered budget projects.' },
-  { q: 'Can you ship directly to Amazon FBA?', a: 'Yes. We provide FBA-ready packaging, barcode labels, drop-test packaging, and worldwide shipping coordination.' },
-];
-
-const BREADCRUMB = [{ name: 'Home', url: '/' }, { name: 'Custom Wooden Storage Boxes Wholesale' }];
+export async function generateMetadata({ params: { locale } }) {
+  const t = await getTranslations({ locale, namespace: 'landing.customStorageBoxes' });
+  const description = t('metaDesc');
+  const ogTitle = t('ogTitle');
+  return {
+    title: t('metaTitle'),
+    description,
+    alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
+    openGraph: {
+      type: 'website',
+      url: `${SITE.siteUrl}/${SLUG}`,
+      title: ogTitle,
+      description,
+      images: [{ url: HERO_IMAGE, width: 1200, height: 800, alt: ogTitle }],
+      siteName: SITE.company.brand,
+    },
+    twitter: { card: 'summary_large_image', title: ogTitle, description },
+  };
+}
 
 export default function Page({ params }) {
   unstable_setRequestLocale(params.locale);
-  const breadcrumbLd = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: BREADCRUMB.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}` })) };
-  const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+  const t = useTranslations('landing.customStorageBoxes');
+  const tCta = useTranslations('cta');
+
+  const STYLES = STYLE_IMAGES.map((image, i) => ({
+    title: t(`style${i + 1}Title`),
+    body: t(`style${i + 1}Body`),
+    image,
+  }));
+  const MATERIALS = MATERIAL_IMAGES.map((image, i) => ({
+    name: t(`mat${i + 1}Name`),
+    body: t(`mat${i + 1}Body`),
+    image,
+  }));
+  const CUSTOMIZATION = [
+    t('custom1'), t('custom2'), t('custom3'),
+    t('custom4'), t('custom5'), t('custom6'),
+  ];
+  const APPLICATIONS = [
+    { title: t('app1Title'), body: t('app1Body') },
+    { title: t('app2Title'), body: t('app2Body') },
+    { title: t('app3Title'), body: t('app3Body') },
+    { title: t('app4Title'), body: t('app4Body') },
+  ];
+  const FAQS = [
+    { q: t('faq1Q'), a: t('faq1A') },
+    { q: t('faq2Q'), a: t('faq2A') },
+    { q: t('faq3Q'), a: t('faq3A') },
+    { q: t('faq4Q'), a: t('faq4A') },
+    { q: t('faq5Q'), a: t('faq5A') },
+  ];
+  const BREADCRUMB = [{ name: 'Home', url: '/' }, { name: t('breadcrumb') }];
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: BREADCRUMB.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}`,
+    })),
+  };
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  };
   const serviceLd = buildServiceLd({
     slug: SLUG,
     serviceType: 'Custom Wooden Storage Box Manufacturing',
-    name: 'Custom Wooden Storage Boxes — Wholesale & Private Label Manufacturing',
-    description: META_DESC,
+    name: t('ogTitle'),
+    description: t('metaDesc'),
     locale: params.locale,
     offerItems: STYLES.map(s => ({ name: s.title, description: s.body })),
   });
@@ -93,27 +113,31 @@ export default function Page({ params }) {
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
           <nav className="text-xs text-brand-mute mb-4">
             <Link href="/" className="hover:text-brand-green">Home</Link>{' / '}
-            <span className="text-brand-ink">Custom Wooden Storage Boxes Wholesale</span>
+            <span className="text-brand-ink">{t('breadcrumb')}</span>
           </nav>
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">{HERO.kicker}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">{t('heroKicker')}</p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-                Custom Wooden <span className="text-brand-green">Storage Boxes</span> Wholesale
+                {t('heroH1Pre')} <span className="text-brand-green">{t('heroH1Highlight')}</span> {t('heroH1Post')}
               </h1>
-              <p className="mt-5 text-brand-mute leading-relaxed text-[17px] max-w-xl">{HERO.lead}</p>
+              <p className="mt-5 text-brand-mute leading-relaxed text-[17px] max-w-xl">{t('heroLead')}</p>
               <ul className="mt-6 grid sm:grid-cols-3 gap-3">
-                {HERO.badges.map(b => <li key={b} className="flex items-center gap-2 bg-white border border-brand-line rounded-full px-4 py-2 text-sm font-semibold text-brand-ink"><span className="w-2 h-2 rounded-full bg-brand-green" />{b}</li>)}
+                {[t('heroBadge1'), t('heroBadge2'), t('heroBadge3')].map(b => (
+                  <li key={b} className="flex items-center gap-2 bg-white border border-brand-line rounded-full px-4 py-2 text-sm font-semibold text-brand-ink">
+                    <span className="w-2 h-2 rounded-full bg-brand-green" />{b}
+                  </li>
+                ))}
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition">Get a Quote</Link>
-                <Link href="/products/wooden-storage-box-with-lid" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">Browse Boxes</Link>
+                <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition">{t('ctaQuote')}</Link>
+                <Link href="/products/wooden-storage-box-with-lid" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">{t('ctaBrowse')}</Link>
               </div>
             </div>
             <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
               <Image
-                src={HERO.image}
-                alt={TITLE}
+                src={HERO_IMAGE}
+                alt={t('ogTitle')}
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
                 priority
@@ -128,9 +152,9 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Box Styles</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">Popular Custom Wooden Storage Box Styles</h2>
-            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">Different projects require different box structures — practical organizers, premium gift boxes, or branded retail collections.</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('stylesEyebrow')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('stylesTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('stylesIntro')}</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {STYLES.map(s => (
@@ -158,9 +182,9 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Materials</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">Wood Materials for Different Price Levels</h2>
-            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">Material affects cost, appearance, weight, and structure — different solutions for different market positions.</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('matsEyebrow')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('matsTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('matsIntro')}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {MATERIALS.map(m => (
@@ -191,19 +215,19 @@ export default function Page({ params }) {
             <div className="relative aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
               <Image
                 src="/wp-images/2026/02/image-14.png"
-                alt="Custom wooden storage box customization options"
+                alt={t('customImageAlt')}
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
                 className="object-cover"
               />
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Customization</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('customEyebrow')}</p>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-tight mb-5">
-                Full Customization for Wholesale Buyers
+                {t('customTitle')}
               </h2>
               <p className="text-brand-mute leading-relaxed text-[16px] mb-6">
-                Buyers care about more than just outer box shape — internal layout, lid style, finish, logo placement, and shipping packaging all affect the final result.
+                {t('customIntro')}
               </p>
               <ul className="space-y-3">
                 {CUSTOMIZATION.map(item => (
@@ -225,8 +249,8 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Applications</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">For Storage, Gifting, and Retail Packaging</h2>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('appsEyebrow')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('appsTitle')}</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {APPLICATIONS.map((a, i) => (
@@ -244,8 +268,8 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[820px] mx-auto px-6 lg:px-8">
           <div className="text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">FAQ</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">FAQ About Custom Wooden Storage Boxes Wholesale</h2>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('faqEyebrow')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('faqTitle')}</h2>
           </div>
           <div className="space-y-3">
             {FAQS.map((f, i) => (
@@ -265,13 +289,13 @@ export default function Page({ params }) {
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-16 lg:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">Need a quote</p>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">Need a Quote for Custom Wooden Storage Boxes?</h2>
-              <p className="mt-4 text-white/85 leading-relaxed text-[16px] max-w-xl">Send us your size, material preference, lid style, logo and packaging requirements — full quote with samples and lead-time within one business day.</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">{t('bottomCtaEyebrow')}</p>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">{t('bottomCtaTitle')}</h2>
+              <p className="mt-4 text-white/85 leading-relaxed text-[16px] max-w-xl">{t('bottomCtaBody')}</p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">Get a Free Quote</Link>
-              <Link href="/wooden-box-factory-in-china" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">About Our Factory</Link>
+              <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">{tCta('getFreeQuote')}</Link>
+              <Link href="/wooden-box-factory-in-china" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">{t('bottomCtaAbout')}</Link>
             </div>
           </div>
         </div>
