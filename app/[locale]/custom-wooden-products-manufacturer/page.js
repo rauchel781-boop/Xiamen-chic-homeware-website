@@ -73,6 +73,7 @@ export default function Page({ params }) {
     serviceType: 'Custom Wooden Products Manufacturing',
     name: 'Custom Wooden Products — OEM & ODM Manufacturing in China',
     description: META_DESC,
+    locale: params.locale,
     offerItems: CATEGORIES.map(c => ({ name: c.title, description: c.body, url: c.href })),
   });
 

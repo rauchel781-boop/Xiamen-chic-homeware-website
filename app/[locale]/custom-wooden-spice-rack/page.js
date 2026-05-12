@@ -97,6 +97,7 @@ export default function Page({ params }) {
     serviceType: 'Custom Wooden Spice Rack Manufacturing',
     name: 'Custom Wooden Spice Rack — OEM & Private Label Manufacturing',
     description: META_DESC,
+    locale: params.locale,
     offerItems: STYLES.map(s => ({ name: s.name || s.title, description: s.body })),
   });
 

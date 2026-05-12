@@ -286,7 +286,6 @@ function loadDB() {
     DB.productCategories = DB.productCategories || [];
     DB.quotations = DB.quotations || [];
     DB.shipments = DB.shipments || [];
-    migrateProducts();
     migrateSamples();
     DB.templates = DB.templates || [];
     DB.meta = DB.meta || {};
@@ -1940,16 +1939,12 @@ function editProduct(id) {
       <div class="form-grid">
         <div class="field"><label>规格</label>
           <input name="specs" value="${escapeHtml(p.specs || '')}" placeholder="如 33x4cm, 重量 1.3kg"></div>
-        <div class="field"><label>工厂名</label>
-          <input name="factoryName" value="${escapeHtml(p.factoryName || '')}" placeholder="供应工厂"></div>
-        <div class="field"><label>采购价 (不含税)</label>
-          <input name="purchasePriceNoTax" type="number" step="0.01" min="0" value="${escapeHtml(p.purchasePriceNoTax || '')}"></div>
-        <div class="field"><label>采购价 (含税)</label>
-          <input name="purchasePriceWithTax" type="number" step="0.01" min="0" value="${escapeHtml(p.purchasePriceWithTax || '')}"></div>
-        <div class="field"><label>中文包装</label>
-          <input name="packingZh" value="${escapeHtml(p.packingZh || p.packing || '')}"></div>
-        <div class="field"><label>英文包装 (Packing)</label>
-          <input name="packingEn" value="${escapeHtml(p.packingEn || '')}"></div>
+        <div class="field"><label>HS 编码</label>
+          <input name="hsCode" value="${escapeHtml(p.hsCode || '')}"></div>
+        <div class="field"><label>MOQ</label>
+          <input name="moq" value="${escapeHtml(p.moq || '')}"></div>
+        <div class="field"><label>包装</label>
+          <input name="packing" value="${escapeHtml(p.packing || '')}"></div>
         <div class="field full">
           <label>装箱信息 <span class="muted" style="font-weight:normal;font-size:10px;">（影响出货箱规计算）</span></label>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;background:#fafbfc;border:1px solid #e5e7eb;border-radius:4px;">
@@ -1982,10 +1977,8 @@ function editProduct(id) {
             </div>
           </div>
         </div>
-        <div class="field"><label>中文描述</label>
-          <textarea name="descriptionZh" rows="3">${escapeHtml(p.descriptionZh || p.description || '')}</textarea></div>
-        <div class="field"><label>英文描述 (Description)</label>
-          <textarea name="descriptionEn" rows="3">${escapeHtml(p.descriptionEn || '')}</textarea></div>
+        <div class="field full"><label>产品描述</label>
+          <textarea name="description">${escapeHtml(p.description || '')}</textarea></div>
       </div>
     </form>
   `, `<button class="btn" onclick="closeModal()">取消</button>
@@ -2074,14 +2067,11 @@ function viewProduct(id) {
           <dt>分类</dt><dd>${p.category ? '<span class="tag tag-cyan">' + escapeHtml(p.category) + '</span>' : '-'}</dd>
           <dt>价格</dt><dd><strong>${escapeHtml(p.currency || '')} ${escapeHtml(p.price || '-')}</strong></dd>
           <dt>规格</dt><dd>${escapeHtml(p.specs || '-')}</dd>
-          <dt>工厂名</dt><dd>${escapeHtml(p.factoryName || '-')}</dd>
-          <dt>采购价(不含税)</dt><dd>${p.purchasePriceNoTax ? '¥' + Number(p.purchasePriceNoTax).toFixed(2) : '-'}</dd>
-          <dt>采购价(含税)</dt><dd>${p.purchasePriceWithTax ? '¥' + Number(p.purchasePriceWithTax).toFixed(2) : '-'}</dd>
-          <dt>中文包装</dt><dd>${escapeHtml(p.packingZh || p.packing || '-')}</dd>
-          <dt>英文包装</dt><dd>${escapeHtml(p.packingEn || '-')}</dd>
+          <dt>HS编码</dt><dd>${escapeHtml(p.hsCode || '-')}</dd>
+          <dt>MOQ</dt><dd>${escapeHtml(p.moq || '-')}</dd>
+          <dt>包装</dt><dd>${escapeHtml(p.packing || '-')}</dd>
           <dt>装箱</dt><dd>${hasPackingInfo(p) ? (p.qtyPerCarton + ' 个/箱，外箱 ' + p.cartonLength + '×' + p.cartonWidth + '×' + p.cartonHeight + ' cm，体积 ' + calcCartonCBM(p).toFixed(4) + ' CBM，毛重 ' + p.cartonGrossWeight + ' kg' + (p.cartonNetWeight ? '，净重 ' + p.cartonNetWeight + ' kg' : '')) : '<span class="muted">未录入</span>'}</dd>
-          <dt>中文描述</dt><dd>${nl2br(p.descriptionZh || p.description || '-')}</dd>
-          <dt>英文描述</dt><dd>${nl2br(p.descriptionEn || '-')}</dd>
+          <dt>描述</dt><dd>${nl2br(p.description || '-')}</dd>
         </dl>
       </div>
     </div>
@@ -2406,31 +2396,6 @@ let _editingSample = null;
 let _samplePickerItemId = null;
 
 // 数据迁移：把旧的单条 sample 转成新的 items 结构
-function migrateProducts() {
-  let changed = 0;
-  (DB.products || []).forEach(p => {
-    if (p.packing !== undefined && p.packingZh === undefined) {
-      p.packingZh = p.packing;
-      delete p.packing;
-      changed++;
-    }
-    if (p.description !== undefined && p.descriptionZh === undefined) {
-      p.descriptionZh = p.description;
-      delete p.description;
-      changed++;
-    }
-    if (p.hsCode !== undefined) {
-      delete p.hsCode;
-      changed++;
-    }
-    if (p.moq !== undefined) {
-      delete p.moq;
-      changed++;
-    }
-  });
-  if (changed > 0) { saveDB(); console.log('Migrated', changed, 'product fields'); }
-}
-
 function migrateSamples() {
   let changed = 0;
   (DB.samples || []).forEach(s => {
@@ -2890,12 +2855,10 @@ async function exportSampleListZh(sampleId) {
     }
     ws.getCell(r, 2).value = '';
     ws.getCell(r, 3).value = (p && p.code) || '-';
-    // 中文导出：只用中文名（如果有），否则 fallback 英文名 / 手填名
-    const nameZh = (p && p.nameZh) ? p.nameZh : (it.productName || (p && p.nameEn) || '-');
-    ws.getCell(r, 4).value = nameZh;
+    const name = it.productName || (p ? (p.nameZh ? (p.nameZh + '\n' + (p.nameEn || '')) : (p.nameEn || '')) : '');
+    ws.getCell(r, 4).value = name;
     ws.getCell(r, 5).value = it.specs || (p ? p.specs : '') || '';
-    // 工艺要求：item 自填 > 产品的中文描述
-    ws.getCell(r, 6).value = it.productCraft || (p && (p.descriptionZh || p.description)) || '';
+    ws.getCell(r, 6).value = it.productCraft || '';
     ws.getCell(r, 7).value = Number(it.qty) || 1;
     const fp = (Number(it.factoryPrice) || 0) * (Number(it.qty) || 1);
     ws.getCell(r, 8).value = fp;
@@ -4294,10 +4257,8 @@ function exportExcel() {
     })),
     '产品': DB.products.map(p => ({
       编号: p.code, 英文名: p.nameEn, 中文名: p.nameZh, 分类: p.category,
-      销售价: p.price, 币种: p.currency, 规格: p.specs,
-      工厂名: p.factoryName || '', 采购价不含税: p.purchasePriceNoTax || '', 采购价含税: p.purchasePriceWithTax || '',
-      中文包装: p.packingZh || p.packing || '', 英文包装: p.packingEn || '',
-      中文描述: p.descriptionZh || p.description || '', 英文描述: p.descriptionEn || ''
+      价格: p.price, 币种: p.currency, 规格: p.specs, HS编码: p.hsCode,
+      MOQ: p.moq, 包装: p.packing, 描述: p.description
     })),
     '样品': DB.samples.map(s => ({
       编号: s.sampleNo, 客户: customerLookup(s.customerId), 产品: s.productName,

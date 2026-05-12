@@ -286,8 +286,6 @@ function loadDB() {
     DB.productCategories = DB.productCategories || [];
     DB.quotations = DB.quotations || [];
     DB.shipments = DB.shipments || [];
-    migrateProducts();
-    migrateSamples();
     DB.templates = DB.templates || [];
     DB.meta = DB.meta || {};
     DB.meta.counters = DB.meta.counters || {};
@@ -1940,16 +1938,12 @@ function editProduct(id) {
       <div class="form-grid">
         <div class="field"><label>规格</label>
           <input name="specs" value="${escapeHtml(p.specs || '')}" placeholder="如 33x4cm, 重量 1.3kg"></div>
-        <div class="field"><label>工厂名</label>
-          <input name="factoryName" value="${escapeHtml(p.factoryName || '')}" placeholder="供应工厂"></div>
-        <div class="field"><label>采购价 (不含税)</label>
-          <input name="purchasePriceNoTax" type="number" step="0.01" min="0" value="${escapeHtml(p.purchasePriceNoTax || '')}"></div>
-        <div class="field"><label>采购价 (含税)</label>
-          <input name="purchasePriceWithTax" type="number" step="0.01" min="0" value="${escapeHtml(p.purchasePriceWithTax || '')}"></div>
-        <div class="field"><label>中文包装</label>
-          <input name="packingZh" value="${escapeHtml(p.packingZh || p.packing || '')}"></div>
-        <div class="field"><label>英文包装 (Packing)</label>
-          <input name="packingEn" value="${escapeHtml(p.packingEn || '')}"></div>
+        <div class="field"><label>HS 编码</label>
+          <input name="hsCode" value="${escapeHtml(p.hsCode || '')}"></div>
+        <div class="field"><label>MOQ</label>
+          <input name="moq" value="${escapeHtml(p.moq || '')}"></div>
+        <div class="field"><label>包装</label>
+          <input name="packing" value="${escapeHtml(p.packing || '')}"></div>
         <div class="field full">
           <label>装箱信息 <span class="muted" style="font-weight:normal;font-size:10px;">（影响出货箱规计算）</span></label>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;background:#fafbfc;border:1px solid #e5e7eb;border-radius:4px;">
@@ -1982,10 +1976,8 @@ function editProduct(id) {
             </div>
           </div>
         </div>
-        <div class="field"><label>中文描述</label>
-          <textarea name="descriptionZh" rows="3">${escapeHtml(p.descriptionZh || p.description || '')}</textarea></div>
-        <div class="field"><label>英文描述 (Description)</label>
-          <textarea name="descriptionEn" rows="3">${escapeHtml(p.descriptionEn || '')}</textarea></div>
+        <div class="field full"><label>产品描述</label>
+          <textarea name="description">${escapeHtml(p.description || '')}</textarea></div>
       </div>
     </form>
   `, `<button class="btn" onclick="closeModal()">取消</button>
@@ -2074,14 +2066,11 @@ function viewProduct(id) {
           <dt>分类</dt><dd>${p.category ? '<span class="tag tag-cyan">' + escapeHtml(p.category) + '</span>' : '-'}</dd>
           <dt>价格</dt><dd><strong>${escapeHtml(p.currency || '')} ${escapeHtml(p.price || '-')}</strong></dd>
           <dt>规格</dt><dd>${escapeHtml(p.specs || '-')}</dd>
-          <dt>工厂名</dt><dd>${escapeHtml(p.factoryName || '-')}</dd>
-          <dt>采购价(不含税)</dt><dd>${p.purchasePriceNoTax ? '¥' + Number(p.purchasePriceNoTax).toFixed(2) : '-'}</dd>
-          <dt>采购价(含税)</dt><dd>${p.purchasePriceWithTax ? '¥' + Number(p.purchasePriceWithTax).toFixed(2) : '-'}</dd>
-          <dt>中文包装</dt><dd>${escapeHtml(p.packingZh || p.packing || '-')}</dd>
-          <dt>英文包装</dt><dd>${escapeHtml(p.packingEn || '-')}</dd>
+          <dt>HS编码</dt><dd>${escapeHtml(p.hsCode || '-')}</dd>
+          <dt>MOQ</dt><dd>${escapeHtml(p.moq || '-')}</dd>
+          <dt>包装</dt><dd>${escapeHtml(p.packing || '-')}</dd>
           <dt>装箱</dt><dd>${hasPackingInfo(p) ? (p.qtyPerCarton + ' 个/箱，外箱 ' + p.cartonLength + '×' + p.cartonWidth + '×' + p.cartonHeight + ' cm，体积 ' + calcCartonCBM(p).toFixed(4) + ' CBM，毛重 ' + p.cartonGrossWeight + ' kg' + (p.cartonNetWeight ? '，净重 ' + p.cartonNetWeight + ' kg' : '')) : '<span class="muted">未录入</span>'}</dd>
-          <dt>中文描述</dt><dd>${nl2br(p.descriptionZh || p.description || '-')}</dd>
-          <dt>英文描述</dt><dd>${nl2br(p.descriptionEn || '-')}</dd>
+          <dt>描述</dt><dd>${nl2br(p.description || '-')}</dd>
         </dl>
       </div>
     </div>
@@ -2397,88 +2386,22 @@ function convertQtToOrder(id) {
 
 let sampleFilter = '', sampleStatusFilter = '', sampleCustomerFilter = '';
 
-// === 样品单导出（中英文双版本，ExcelJS） ===
-
-// ============ 产品选择弹窗 - 样品模式 ============
-// === 样品模块（重构版：单子 + 多产品行）===
-
-let _editingSample = null;
-let _samplePickerItemId = null;
-
-// 数据迁移：把旧的单条 sample 转成新的 items 结构
-function migrateProducts() {
-  let changed = 0;
-  (DB.products || []).forEach(p => {
-    if (p.packing !== undefined && p.packingZh === undefined) {
-      p.packingZh = p.packing;
-      delete p.packing;
-      changed++;
-    }
-    if (p.description !== undefined && p.descriptionZh === undefined) {
-      p.descriptionZh = p.description;
-      delete p.description;
-      changed++;
-    }
-    if (p.hsCode !== undefined) {
-      delete p.hsCode;
-      changed++;
-    }
-    if (p.moq !== undefined) {
-      delete p.moq;
-      changed++;
-    }
-  });
-  if (changed > 0) { saveDB(); console.log('Migrated', changed, 'product fields'); }
-}
-
-function migrateSamples() {
-  let changed = 0;
-  (DB.samples || []).forEach(s => {
-    if (!s.items || !Array.isArray(s.items)) {
-      const it = {
-        id: uid(),
-        productId: s.productId || '',
-        productName: s.productName || '',
-        specs: s.specs || '',
-        productCraft: s.productCraft || '',
-        qty: 1,
-        factoryPrice: s.factoryPrice || '',
-        clientPrice: s.clientPrice || '',
-      };
-      s.items = [it];
-      delete s.productId;
-      delete s.productName;
-      delete s.specs;
-      delete s.productCraft;
-      delete s.factoryPrice;
-      delete s.clientPrice;
-      if (!s.currency) s.currency = 'USD';
-      if (!s.code && s.sampleNo) { s.code = s.sampleNo; delete s.sampleNo; }
-      else if (!s.code) s.code = nextCode('SP');
-      changed++;
-    }
-  });
-  if (changed > 0) { saveDB(); console.log('Migrated', changed, 'sample records'); }
-}
-
 function renderSamples() {
   document.getElementById('pageTitle').textContent = '样品管理';
-  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editSample()">+ 新建样品单</button>`;
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editSample()">+ 新建样品</button>`;
   setTabs('');
   const kw = sampleFilter.toLowerCase();
-  const list = (DB.samples || []).filter(s => {
+  const list = DB.samples.filter(s => {
     const c = customerById(s.customerId);
-    const items = s.items || [];
-    const productMatch = items.some(it => (it.productName||'').toLowerCase().includes(kw) || (it.specs||'').toLowerCase().includes(kw));
-    return (!kw || (s.code||'').toLowerCase().includes(kw) || productMatch || (c && c.company.toLowerCase().includes(kw)))
+    return (!kw || (s.sampleNo||'').toLowerCase().includes(kw) || (s.productName||'').toLowerCase().includes(kw) || (c && c.company.toLowerCase().includes(kw)))
         && (!sampleStatusFilter || s.status === sampleStatusFilter)
         && (!sampleCustomerFilter || s.customerId === sampleCustomerFilter);
-  }).sort((a,b) => (b.orderDate||b.createdAt||'').localeCompare(a.orderDate||a.createdAt||''));
+  }).sort((a,b) => (b.sentDate||'').localeCompare(a.sentDate||''));
 
   document.getElementById('content').innerHTML = `
     <div class="table-wrap">
       <div class="table-toolbar">
-        <input class="search-box" placeholder="搜索 单号 / 客户 / 产品..." value="${escapeHtml(sampleFilter)}" oninput="sampleFilter=this.value;renderSamples()">
+        <input class="search-box" placeholder="搜索 编号 / 产品 / 客户..." value="${escapeHtml(sampleFilter)}" oninput="sampleFilter=this.value;renderSamples()">
         <select class="btn" onchange="sampleCustomerFilter=this.value;renderSamples()">
           <option value="">全部客户</option>
           ${DB.customers.map(c => `<option value="${c.id}" ${sampleCustomerFilter===c.id?'selected':''}>${escapeHtml(c.company)}</option>`).join('')}
@@ -2487,38 +2410,27 @@ function renderSamples() {
           <option value="">全部状态</option>
           ${SAMPLE_STATUSES.map(s => `<option ${sampleStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
         </select>
-        <span class="muted">共 ${list.length} 单</span>
+        <button class="btn" onclick="exportSampleListZh()" title="先在客户筛选选择一个客户">↓ 趣可样品单 (中)</button>
+        <button class="btn" onclick="exportSampleListEn()" title="先在客户筛选选择一个客户">↓ Sample Invoice (EN)</button>
+        <span class="muted">共 ${list.length} 条</span>
       </div>
-      ${list.length === 0 ? '<div class="empty">暂无样品单</div>' : `
+      ${list.length === 0 ? '<div class="empty">暂无样品记录</div>' : `
       <table>
-        <thead><tr>
-          <th style="width:50px;">图片</th><th>单号</th><th>客户</th>
-          <th>产品</th><th class="text-right">产品数</th>
-          <th class="text-right">工厂费(RMB)</th><th class="text-right">客户报价</th>
-          <th>下单时间</th><th>状态</th>
-          <th class="text-right">操作</th>
-        </tr></thead>
+        <thead><tr><th style="width:50px;">图片</th><th>编号</th><th>客户</th><th>产品</th><th>规格</th><th>寄出日期</th><th>快递</th><th>状态</th><th class="text-right">操作</th></tr></thead>
         <tbody>
         ${list.map(s => {
-          const items = s.items || [];
-          const firstP = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
-          const totalFactory = items.reduce((sum, it) => sum + (Number(it.factoryPrice) || 0) * (Number(it.qty) || 1), 0);
-          const totalClient = items.reduce((sum, it) => sum + (Number(it.clientPrice) || 0) * (Number(it.qty) || 1), 0);
-          const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameEn || '-').join('; ');
+          const p = s.productId ? productById(s.productId) : null;
           return `<tr>
-            <td>${firstP && firstP.image ? '<img src="' + firstP.image + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
-            <td class="code no-wrap">${escapeHtml(s.code || '-')}</td>
+            <td>${p && p.image ? '<img src="' + p.image + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+            <td class="code no-wrap">${escapeHtml(s.sampleNo || '')}</td>
             <td>${customerNameWithFlag(s.customerId)}</td>
-            <td>${escapeHtml(truncate(productNames, 40))}</td>
-            <td class="text-right">${items.length}</td>
-            <td class="text-right">${totalFactory ? '¥' + totalFactory.toFixed(2) : '-'}</td>
-            <td class="text-right">${totalClient ? (s.currency || 'USD') + ' ' + totalClient.toFixed(2) : '-'}</td>
-            <td class="no-wrap">${fmtDate(s.orderDate)}</td>
+            <td>${escapeHtml(s.productName || '')}</td>
+            <td class="muted">${escapeHtml(s.specs || '')}</td>
+            <td class="no-wrap">${fmtDate(s.sentDate)}</td>
+            <td class="muted">${escapeHtml(s.trackingNo || '')}</td>
             <td><span class="tag ${getStatus(SAMPLE_STATUSES, s.status).tag}">${escapeHtml(s.status || '-')}</span></td>
             <td class="text-right no-wrap">
               <button class="btn-link" onclick="editSample('${s.id}')">编辑</button>
-              <button class="btn-link" onclick="exportSampleListZh('${s.id}')" title="导出中文工厂样品单">↓中</button>
-              <button class="btn-link" onclick="exportSampleListEn('${s.id}')" title="导出英文 Sample Invoice">↓EN</button>
               <button class="btn-link danger" onclick="deleteSample('${s.id}')">删除</button>
             </td>
           </tr>`;
@@ -2531,259 +2443,69 @@ function renderSamples() {
 
 function editSample(id, customerId) {
   if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
-  if (id) {
-    const s = (DB.samples || []).find(x => x.id === id);
-    if (!s) { toast('样品单不存在', 'error'); return; }
-    _editingSample = JSON.parse(JSON.stringify(s));
-    if (!_editingSample.items) _editingSample.items = [];
-  } else {
-    _editingSample = {
-      id: uid(),
-      code: nextCode('SP'),
-      customerId: customerId || '',
-      orderDate: todayStr(),
-      productionTime: '',
-      sentDate: '',
-      status: '筹备中',
-      currency: 'USD',
-      trackingNo: '',
-      feedback: '',
-      notes: '',
-      items: [],
-      createdAt: new Date().toISOString(),
-    };
-  }
-  openModal((id ? '编辑样品单 ' : '新建样品单 ') + _editingSample.code,
-    renderSampleForm(),
-    `<button class="btn" onclick="closeModal()">取消</button>
-     <button class="btn btn-primary" onclick="saveSampleForm('${id || ''}')">保存</button>`,
-    'xl');
-}
-
-function renderSampleForm() {
-  const s = _editingSample;
-  return `
-    <div class="form-grid cols-3" style="margin-bottom:14px;">
-      <div class="field"><label>样品单号</label>
-        <input value="${escapeHtml(s.code || '')}" oninput="_editingSample.code=this.value"></div>
-      <div class="field"><label>客户 <span class="req">*</span></label>
-        <select onchange="_editingSample.customerId=this.value">${customerOptions(s.customerId)}</select></div>
-      <div class="field"><label>币种</label>
-        <select onchange="_editingSample.currency=this.value">${CURRENCIES.map(c => `<option ${s.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div class="field"><label>下单时间</label>
-        <input type="date" value="${fmtDate(s.orderDate)}" onchange="_editingSample.orderDate=this.value"></div>
-      <div class="field"><label>交货时间</label>
-        <input value="${escapeHtml(s.productionTime||'')}" oninput="_editingSample.productionTime=this.value" placeholder="如 10-14 天 或具体日期"></div>
-      <div class="field"><label>状态</label>
-        <select onchange="_editingSample.status=this.value">${SAMPLE_STATUSES.map(st => `<option ${s.status===st.name?'selected':''}>${st.name}</option>`).join('')}</select></div>
-      <div class="field"><label>寄出日期</label>
-        <input type="date" value="${fmtDate(s.sentDate)}" onchange="_editingSample.sentDate=this.value"></div>
-      <div class="field"><label>快递公司/单号</label>
-        <input value="${escapeHtml(s.trackingNo||'')}" oninput="_editingSample.trackingNo=this.value"></div>
-      <div class="field"><label>备注</label>
-        <input value="${escapeHtml(s.notes||'')}" oninput="_editingSample.notes=this.value"></div>
-    </div>
-
-    <div style="margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center;">
-      <strong style="font-size:14px;">产品清单</strong>
-      <button type="button" class="btn btn-sm btn-primary" onclick="addSampleItem()">+ 添加产品</button>
-    </div>
-    <div id="sampleItems">${s.items.length === 0 ? '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>' : s.items.map(it => sampleItemHtml(it)).join('')}</div>
-    <div id="sampleTotal" style="margin-top:14px;">${sampleTotalHtml()}</div>
-
-    <div style="margin-top:14px;">
-      <label style="font-size:11px;color:#6b7280;">客户反馈</label>
-      <textarea style="width:100%;margin-top:4px;" oninput="_editingSample.feedback=this.value">${escapeHtml(s.feedback||'')}</textarea>
-    </div>
-  `;
-}
-
-function sampleItemHtml(item) {
-  return `
-    <div class="ship-item" data-sample-item="${item.id}" style="border:1px solid #e5e7eb;border-radius:6px;padding:10px;margin-bottom:8px;background:#fff;">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:flex-end;">
-        <div class="field">
-          <label>产品</label>
-          <div style="display:flex;gap:6px;align-items:stretch;">
-            ${sampleItemProductCardHtml(item)}
-            <button type="button" class="btn btn-sm" onclick="openSampleItemPicker('${item.id}')" style="white-space:nowrap;">${item.productId ? '更换' : '选择'}</button>
-          </div>
+  const s = id ? DB.samples.find(x => x.id === id) : { customerId: customerId || '', sentDate: todayStr(), status: '筹备中', orderDate: todayStr() };
+  const p = s.productId ? productById(s.productId) : null;
+  openModal(id ? '编辑样品' : '新建样品', `
+    <form id="sampleForm" onsubmit="return saveSample(event, '${id || ''}')">
+      <input type="hidden" name="productId" value="${s.productId || ''}">
+      <div class="form-grid">
+        <div class="field"><label>样品编号</label>
+          <input name="sampleNo" value="${escapeHtml(s.sampleNo || '')}" placeholder="留空自动生成"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(s.customerId)}</select></div>
+        <div class="field full"><label>选择产品（从产品库）</label>
+          ${sampleProductCardHtml(p)}
         </div>
-        <div class="field">
-          <label>数量</label>
-          <input type="number" min="0" step="1" value="${escapeHtml(item.qty || 1)}" oninput="changeSampleItem('${item.id}','qty',this.value)">
-        </div>
-        <div class="field">
-          <label>工厂费(RMB/个)</label>
-          <input type="number" min="0" step="0.01" value="${escapeHtml(item.factoryPrice||'')}" oninput="changeSampleItem('${item.id}','factoryPrice',this.value)">
-        </div>
-        <div class="field">
-          <label>客户报价/个</label>
-          <input type="number" min="0" step="0.01" value="${escapeHtml(item.clientPrice||'')}" oninput="changeSampleItem('${item.id}','clientPrice',this.value)">
-        </div>
-        <div>
-          <button type="button" class="btn btn-sm" onclick="removeSampleItem('${item.id}')" style="color:#ef4444;">删除</button>
-        </div>
+        <div class="field full"><label>产品名称 <span class="req">*</span></label>
+          <input name="productName" required value="${escapeHtml(s.productName || '')}" placeholder="选了产品后自动填，可手改"></div>
+        <div class="field"><label>规格</label>
+          <input name="specs" value="${escapeHtml(s.specs || '')}"></div>
+        <div class="field"><label>样品成本（旧字段）</label>
+          <input name="cost" value="${escapeHtml(s.cost || '')}"></div>
+        <div class="field full"><label>产品工艺要求</label>
+          <textarea name="productCraft" rows="2" placeholder="材质、表面处理、印刷、特殊要求等">${escapeHtml(s.productCraft || '')}</textarea></div>
+        <div class="field"><label>工厂样品费 (RMB)</label>
+          <input name="factoryPrice" type="number" step="0.01" min="0" value="${escapeHtml(s.factoryPrice || '')}"></div>
+        <div class="field"><label>客户样品报价 (USD)</label>
+          <input name="clientPrice" type="number" step="0.01" min="0" value="${escapeHtml(s.clientPrice || '')}"></div>
+        <div class="field"><label>下单时间</label>
+          <input name="orderDate" type="date" value="${fmtDate(s.orderDate)}"></div>
+        <div class="field"><label>交货时间</label>
+          <input name="productionTime" value="${escapeHtml(s.productionTime || '')}" placeholder="如 10-14 天 或具体日期"></div>
+        <div class="field"><label>寄出日期</label>
+          <input name="sentDate" type="date" value="${fmtDate(s.sentDate)}"></div>
+        <div class="field"><label>状态</label>
+          <select name="status">${SAMPLE_STATUSES.map(st => `<option ${s.status===st.name?'selected':''}>${st.name}</option>`).join('')}</select></div>
+        <div class="field full"><label>快递公司 / 单号</label>
+          <input name="trackingNo" value="${escapeHtml(s.trackingNo || '')}"></div>
+        <div class="field full"><label>客户反馈 / 备注</label>
+          <textarea name="feedback">${escapeHtml(s.feedback || '')}</textarea></div>
       </div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="field">
-          <label>产品名（可改）</label>
-          <input value="${escapeHtml(item.productName||'')}" oninput="changeSampleItem('${item.id}','productName',this.value)">
-        </div>
-        <div class="field">
-          <label>规格</label>
-          <input value="${escapeHtml(item.specs||'')}" oninput="changeSampleItem('${item.id}','specs',this.value)">
-        </div>
-      </div>
-      <div class="field" style="margin-top:8px;">
-        <label>工艺要求</label>
-        <textarea rows="2" oninput="changeSampleItem('${item.id}','productCraft',this.value)" placeholder="材质、表面处理、印刷、特殊要求等">${escapeHtml(item.productCraft||'')}</textarea>
-      </div>
-    </div>
-  `;
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('sampleForm').requestSubmit()">保存</button>`, 'lg');
+  if (s.customerId) { const sel = document.querySelector('#sampleForm [name=customerId]'); if (sel) sel.value = s.customerId; }
 }
 
-function sampleItemProductCardHtml(item) {
-  const p = productById(item.productId);
-  if (!p) {
-    return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
+function saveSample(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.samples.find(x => x.id === id), data);
+  else {
+    if (!data.sampleNo) data.sampleNo = nextCode('SP');
+    DB.samples.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
   }
-  return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
-    '<div class="info">' +
-      '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
-      '<div class="name-line">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-function sampleTotalHtml() {
-  const items = (_editingSample && _editingSample.items) || [];
-  const totalFactory = items.reduce((sum, it) => sum + (Number(it.factoryPrice) || 0) * (Number(it.qty) || 1), 0);
-  const totalClient = items.reduce((sum, it) => sum + (Number(it.clientPrice) || 0) * (Number(it.qty) || 1), 0);
-  const cur = (_editingSample && _editingSample.currency) || 'USD';
-  return `
-    <div style="border:2px solid #4a90e2;border-radius:6px;padding:12px 14px;background:#eff6ff;">
-      <div style="font-weight:600;margin-bottom:8px;color:#1e40af;font-size:13px;">合计</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;font-size:13px;">
-        <div>工厂样品费合计：<strong style="color:#1e40af;">¥${totalFactory.toFixed(2)}</strong></div>
-        <div>客户样品报价合计：<strong style="color:#1e40af;">${cur} ${totalClient.toFixed(2)}</strong></div>
-      </div>
-    </div>
-  `;
-}
-
-function addSampleItem() {
-  if (!_editingSample) return;
-  if (DB.products.length === 0) { toast('请先添加产品', 'error'); return; }
-  const it = { id: uid(), productId: '', productName: '', specs: '', productCraft: '', qty: 1, factoryPrice: '', clientPrice: '' };
-  _editingSample.items.push(it);
-  const wrap = document.getElementById('sampleItems');
-  if (_editingSample.items.length === 1) wrap.innerHTML = '';
-  wrap.insertAdjacentHTML('beforeend', sampleItemHtml(it));
-  refreshSampleTotal();
-}
-
-function removeSampleItem(itemId) {
-  if (!confirm('确定删除该行？')) return;
-  _editingSample.items = _editingSample.items.filter(x => x.id !== itemId);
-  const el = document.querySelector('[data-sample-item="' + itemId + '"]');
-  if (el) el.remove();
-  if (_editingSample.items.length === 0) {
-    document.getElementById('sampleItems').innerHTML = '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>';
-  }
-  refreshSampleTotal();
-}
-
-function changeSampleItem(itemId, field, value) {
-  const it = _editingSample.items.find(x => x.id === itemId);
-  if (!it) return;
-  it[field] = value;
-  if (field === 'qty' || field === 'factoryPrice' || field === 'clientPrice') {
-    refreshSampleTotal();
-  }
-}
-
-function refreshSampleTotal() {
-  const el = document.getElementById('sampleTotal');
-  if (el) el.innerHTML = sampleTotalHtml();
-}
-
-function openSampleItemPicker(itemId) {
-  if (DB.products.length === 0) { toast('请先添加产品', 'error'); return; }
-  _samplePickerItemId = itemId;
-  _productPickerItemId = null;
-  document.getElementById('productPickerSearch').value = '';
-  renderProductPickerBodyForSampleItem();
-  document.getElementById('productPickerMask').classList.add('show');
-  setTimeout(() => { try { document.getElementById('productPickerSearch').focus(); } catch(e){} }, 80);
-}
-
-function renderProductPickerBodyForSampleItem() {
-  const kw = (document.getElementById('productPickerSearch').value || '').toLowerCase();
-  const list = DB.products.filter(p =>
-    !kw || (p.code||'').toLowerCase().includes(kw)
-        || (p.nameEn||'').toLowerCase().includes(kw)
-        || (p.nameZh||'').toLowerCase().includes(kw)
-  );
-  const body = document.getElementById('productPickerBody');
-  if (list.length === 0) { body.innerHTML = '<div class="product-picker-empty">无匹配产品</div>'; return; }
-  body.innerHTML = list.map(p =>
-    '<div class="product-picker-card" onclick="selectSampleItemProduct(\'' + p.id + '\')">' +
-      (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
-      '<div class="code">' + escapeHtml(p.code || '-') + '</div>' +
-      '<div class="name">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
-    '</div>'
-  ).join('');
-}
-
-function selectSampleItemProduct(pid) {
-  if (!_samplePickerItemId) return;
-  const p = productById(pid);
-  if (!p) return;
-  const it = _editingSample.items.find(x => x.id === _samplePickerItemId);
-  if (!it) return;
-  it.productId = pid;
-  if (!it.productName) it.productName = p.nameEn || p.nameZh || '';
-  if (!it.specs) it.specs = p.specs || '';
-  const el = document.querySelector('[data-sample-item="' + _samplePickerItemId + '"]');
-  if (el) el.outerHTML = sampleItemHtml(it);
-  refreshSampleTotal();
-  document.getElementById('productPickerMask').classList.remove('show');
-  _samplePickerItemId = null;
-}
-
-function saveSampleForm(id) {
-  const s = _editingSample;
-  if (!s) return;
-  if (!s.customerId) { toast('请选择客户', 'error'); return; }
-  if (s.items.length === 0) { toast('请添加至少一个产品', 'error'); return; }
-  if (!s.code) s.code = nextCode('SP');
-  for (const it of s.items) {
-    if (!it.productId && !it.productName) { toast('每个产品行必须选产品或填产品名', 'error'); return; }
-  }
-  if (!DB.samples) DB.samples = [];
-  if (id) {
-    const idx = DB.samples.findIndex(x => x.id === id);
-    if (idx >= 0) DB.samples[idx] = s;
-    else DB.samples.push(s);
-  } else {
-    DB.samples.push(s);
-  }
-  try { saveDB(); } catch(err) { toast('保存失败：' + err.message, 'error'); return; }
-  _editingSample = null;
-  closeModal();
-  renderSamples();
-  toast('已保存', 'success');
+  saveDB(); closeModal(); renderSamples(); toast('已保存', 'success'); return false;
 }
 
 function deleteSample(id) {
-  if (!confirm('确定删除该样品单？')) return;
-  DB.samples = (DB.samples || []).filter(x => x.id !== id);
+  if (!confirm('确定删除？')) return;
+  DB.samples = DB.samples.filter(x => x.id !== id);
   saveDB(); renderSamples(); toast('已删除');
 }
 
-// === Excel 导出（单个样品单）===
+// === 样品单导出（中英文双版本，ExcelJS） ===
+
 function thinBorderS() {
   return {
     left: { style: 'thin', color: { argb: 'FFB0B7BD' } },
@@ -2793,10 +2515,29 @@ function thinBorderS() {
   };
 }
 
+function getSelectedSamplesForExport() {
+  if (!sampleCustomerFilter) {
+    toast('请先在筛选下拉里选择一个客户', 'error');
+    return null;
+  }
+  const c = customerById(sampleCustomerFilter);
+  if (!c) { toast('客户不存在', 'error'); return null; }
+  const kw = (sampleFilter || '').toLowerCase();
+  const samples = DB.samples.filter(s => {
+    if (s.customerId !== sampleCustomerFilter) return false;
+    if (sampleStatusFilter && s.status !== sampleStatusFilter) return false;
+    if (kw && !((s.sampleNo||'').toLowerCase().includes(kw) || (s.productName||'').toLowerCase().includes(kw))) return false;
+    return true;
+  }).sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+  if (samples.length === 0) { toast('该客户没有匹配的样品', 'error'); return null; }
+  return { customer: c, samples };
+}
+
 async function addProductImage(wb, ws, cellRef, productImage, w, h) {
   if (!productImage) return;
   try {
     const imgId = wb.addImage({ base64: productImage, extension: 'png' });
+    // cellRef is like 'B3' - convert to col/row 0-indexed
     const m = cellRef.match(/^([A-Z]+)(\d+)$/);
     if (!m) return;
     const col = m[1].charCodeAt(0) - 'A'.charCodeAt(0);
@@ -2805,14 +2546,10 @@ async function addProductImage(wb, ws, cellRef, productImage, w, h) {
   } catch (err) { console.warn('Image embed failed', err); }
 }
 
-async function exportSampleListZh(sampleId) {
+async function exportSampleListZh() {
   if (typeof ExcelJS === 'undefined') { toast('Excel 库未加载', 'error'); return; }
-  const s = (DB.samples || []).find(x => x.id === sampleId);
-  if (!s) { toast('样品单不存在', 'error'); return; }
-  const c = customerById(s.customerId);
-  if (!c) { toast('客户不存在', 'error'); return; }
-  const items = s.items || [];
-  if (items.length === 0) { toast('样品单没有产品', 'error'); return; }
+  const sel = getSelectedSamplesForExport(); if (!sel) return;
+  const { customer, samples } = sel;
 
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('趣可样品单', {
@@ -2820,20 +2557,31 @@ async function exportSampleListZh(sampleId) {
     pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
   });
 
-  // 8 列：序号|产品图|产品编号|产品名|规格|工艺要求|数量|工厂样品费(RMB)
-  [6, 14, 14, 28, 14, 32, 8, 14].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+  // 列宽 7 列: 序号|产品图|产品编号|产品名|规格|工艺要求|工厂样品费(RMB)
+  [10, 14, 16, 30, 14, 36, 16].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
 
-  ws.mergeCells('A1:H1');
+  // 大标题
+  ws.mergeCells('A1:G1');
   const t = ws.getCell('A1');
   t.value = '趣 可 样 品 单';
   t.font = { name: 'Microsoft YaHei', bold: true, size: 24, color: { argb: 'FF1F2937' } };
   t.alignment = { horizontal: 'center', vertical: 'middle' };
   ws.getRow(1).height = 42;
 
+  // 抬头信息
+  // 取最早的下单时间作 Date，最晚的交货时间
+  const orderDates = samples.map(s => s.orderDate).filter(x => x);
+  const productionTimes = samples.map(s => s.productionTime).filter(x => x);
+  const earliestOrder = orderDates.length > 0 ? orderDates.sort()[0] : todayStr();
+  const latestProd = productionTimes.length > 0 ? productionTimes[productionTimes.length - 1] : '';
+  const sampleNos = samples.map(s => s.sampleNo).filter(x => x);
+  const sampleNoStr = sampleNos.length === 1 ? sampleNos[0] : (sampleNos.length > 1 ? sampleNos[0] + '...+' + (sampleNos.length - 1) : '-');
+  const today = todayStr();
+
   const info = [
-    ['客      户', c.company, '日       期', todayStr()],
-    ['样品单号', s.code || '-', '下单时间', s.orderDate || '-'],
-    ['', '', '交货时间', s.productionTime || '-'],
+    ['客      户', customer.company, '日       期', today],
+    ['样品单号', sampleNoStr, '下单时间', earliestOrder],
+    ['', '', '交货时间', latestProd || '-'],
   ];
   const infoStart = 3;
   info.forEach((row, i) => {
@@ -2852,22 +2600,24 @@ async function exportSampleListZh(sampleId) {
     ws.getCell(r, 5).value = l2;
     ws.getCell(r, 5).font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF4B5563' } };
     ws.getCell(r, 5).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
-    ws.mergeCells(r, 6, r, 8);
+    ws.mergeCells(r, 6, r, 7);
     ws.getCell(r, 6).value = v2;
     ws.getCell(r, 6).font = { name: 'Microsoft YaHei', size: 11 };
     ws.getCell(r, 6).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
   });
 
+  // 备注
   const noteR = infoStart + info.length + 1;
   ws.getRow(noteR).height = 22;
-  ws.mergeCells(noteR, 1, noteR, 8);
+  ws.mergeCells(noteR, 1, noteR, 7);
   const nc = ws.getCell(noteR, 1);
   nc.value = '说明：请按下方清单制作样品，材质和工艺要求严格按规格执行，交付时附产品检测合格证明。';
   nc.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FFEF4444' } };
   nc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
 
+  // 表头
   const tableStart = noteR + 2;
-  const headers = ['序号', '产品图', '产品编号', '产品名', '规格', '产品工艺要求', '数量', '工厂样品费(RMB)'];
+  const headers = ['序号', '产品图', '产品编号', '产品名', '规格', '产品工艺要求', '工厂样品费(RMB)'];
   ws.getRow(tableStart).height = 36;
   headers.forEach((h, i) => {
     const cell = ws.getCell(tableStart, i + 1);
@@ -2878,10 +2628,11 @@ async function exportSampleListZh(sampleId) {
     cell.border = thinBorderS();
   });
 
+  // 数据行
   let totalFactory = 0;
-  for (let i = 0; i < items.length; i++) {
-    const it = items[i];
-    const p = it.productId ? productById(it.productId) : null;
+  for (let i = 0; i < samples.length; i++) {
+    const s = samples[i];
+    const p = s.productId ? productById(s.productId) : null;
     const r = tableStart + i + 1;
     ws.getRow(r).height = 80;
     ws.getCell(r, 1).value = i + 1;
@@ -2890,24 +2641,21 @@ async function exportSampleListZh(sampleId) {
     }
     ws.getCell(r, 2).value = '';
     ws.getCell(r, 3).value = (p && p.code) || '-';
-    // 中文导出：只用中文名（如果有），否则 fallback 英文名 / 手填名
-    const nameZh = (p && p.nameZh) ? p.nameZh : (it.productName || (p && p.nameEn) || '-');
-    ws.getCell(r, 4).value = nameZh;
-    ws.getCell(r, 5).value = it.specs || (p ? p.specs : '') || '';
-    // 工艺要求：item 自填 > 产品的中文描述
-    ws.getCell(r, 6).value = it.productCraft || (p && (p.descriptionZh || p.description)) || '';
-    ws.getCell(r, 7).value = Number(it.qty) || 1;
-    const fp = (Number(it.factoryPrice) || 0) * (Number(it.qty) || 1);
-    ws.getCell(r, 8).value = fp;
+    const name = (p && p.nameZh) ? (p.nameZh + (p.nameEn ? '\n' + p.nameEn : '')) : (s.productName || (p ? (p.nameEn || '') : ''));
+    ws.getCell(r, 4).value = name;
+    ws.getCell(r, 5).value = s.specs || (p ? p.specs : '') || '';
+    ws.getCell(r, 6).value = s.productCraft || '';
+    const fp = Number(s.factoryPrice) || 0;
+    ws.getCell(r, 7).value = fp;
     totalFactory += fp;
 
-    for (let col = 1; col <= 8; col++) {
+    for (let col = 1; col <= 7; col++) {
       const cell = ws.getCell(r, col);
       cell.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FF1F2937' } };
       cell.border = thinBorderS();
-      if ([1, 2, 3, 7].includes(col)) {
+      if ([1, 2, 3].includes(col)) {
         cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      } else if (col === 8) {
+      } else if (col === 7) {
         cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
         cell.numFmt = '0.00';
       } else {
@@ -2916,16 +2664,17 @@ async function exportSampleListZh(sampleId) {
     }
   }
 
-  const totalRow = tableStart + items.length + 1;
+  // 合计
+  const totalRow = tableStart + samples.length + 1;
   ws.getRow(totalRow).height = 30;
-  ws.mergeCells(totalRow, 1, totalRow, 7);
+  ws.mergeCells(totalRow, 1, totalRow, 6);
   const tc = ws.getCell(totalRow, 1);
   tc.value = '合  计  TOTAL (RMB)';
   tc.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
   tc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
   tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
   tc.border = thinBorderS();
-  const tv = ws.getCell(totalRow, 8);
+  const tv = ws.getCell(totalRow, 7);
   tv.value = totalFactory;
   tv.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
   tv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
@@ -2935,8 +2684,8 @@ async function exportSampleListZh(sampleId) {
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const safeName = c.company.replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
-  const filename = '趣可样品单_' + safeName + '_' + (s.code || todayStr()) + '.xlsx';
+  const safeName = customer.company.replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
+  const filename = '趣可样品单_' + safeName + '_' + today.replace(/-/g, '') + '.xlsx';
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = filename;
@@ -2945,14 +2694,10 @@ async function exportSampleListZh(sampleId) {
   toast('已导出 ' + filename, 'success');
 }
 
-async function exportSampleListEn(sampleId) {
+async function exportSampleListEn() {
   if (typeof ExcelJS === 'undefined') { toast('Excel 库未加载', 'error'); return; }
-  const s = (DB.samples || []).find(x => x.id === sampleId);
-  if (!s) { toast('样品单不存在', 'error'); return; }
-  const c = customerById(s.customerId);
-  if (!c) { toast('客户不存在', 'error'); return; }
-  const items = s.items || [];
-  if (items.length === 0) { toast('样品单没有产品', 'error'); return; }
+  const sel = getSelectedSamplesForExport(); if (!sel) return;
+  const { customer, samples } = sel;
 
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Sample Invoice', {
@@ -2960,10 +2705,11 @@ async function exportSampleListEn(sampleId) {
     pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
   });
 
-  // 7 列: No. | Picture | Item Code | Description | Spec. | Qty | Sample Price (USD)
-  [6, 14, 16, 30, 14, 8, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
-  ws.getColumn(2).width = 18;
+  // 6 列: No. | Picture | Item Code | Description | Spec. | Sample Price (USD)
+  [6, 14, 16, 36, 18, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+  ws.getColumn(2).width = 18; // 加大第 2 列让 LOGO 不重叠
 
+  // 抬头 LOGO + 公司信息
   for (let r = 1; r <= 5; r++) ws.getRow(r).height = 20;
   if (typeof COMPANY_LOGO_BASE64 !== 'undefined' && COMPANY_LOGO_BASE64) {
     try {
@@ -2972,44 +2718,54 @@ async function exportSampleListEn(sampleId) {
     } catch (err) { console.warn('Logo embed failed', err); }
   }
 
-  ws.mergeCells('D1:G1');
+  ws.mergeCells('D1:F1');
   const c1 = ws.getCell('D1');
   c1.value = COMPANY_INFO.name;
   c1.font = { name: 'Cambria', bold: true, size: 18, color: { argb: 'FF1F2937' } };
   c1.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
 
-  ws.mergeCells('D2:G2');
+  ws.mergeCells('D2:F2');
   const c2 = ws.getCell('D2');
   c2.value = COMPANY_INFO.salesEn;
   c2.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF6B7280' } };
   c2.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
 
-  ws.mergeCells('D3:G3');
+  ws.mergeCells('D3:F3');
   const c3 = ws.getCell('D3');
   c3.value = COMPANY_INFO.factoryEn;
   c3.font = { name: 'Calibri', size: 9.5, color: { argb: 'FF6B7280' } };
   c3.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
 
-  ws.mergeCells('D4:G4');
+  ws.mergeCells('D4:F4');
   const c4 = ws.getCell('D4');
   c4.value = 'Website: ' + COMPANY_INFO.website;
   c4.font = { name: 'Calibri', size: 9.5, italic: true, color: { argb: 'FF6B7280' } };
   c4.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
 
-  for (let col = 1; col <= 7; col++) {
+  // 分隔线
+  for (let col = 1; col <= 6; col++) {
     ws.getCell(5, col).border = { bottom: { style: 'thin', color: { argb: 'FF2D5C3F' } } };
   }
 
-  ws.mergeCells('A7:G7');
+  // 大标题
+  ws.mergeCells('A7:F7');
   const t = ws.getCell('A7');
   t.value = 'SAMPLE INVOICE';
   t.font = { name: 'Cambria', bold: true, size: 22, color: { argb: 'FF1F2937' } };
   t.alignment = { horizontal: 'center', vertical: 'middle' };
   ws.getRow(7).height = 36;
 
+  // 抬头信息
+  const orderDates = samples.map(s => s.orderDate).filter(x => x);
+  const productionTimes = samples.map(s => s.productionTime).filter(x => x);
+  const earliestOrder = orderDates.length > 0 ? orderDates.sort()[0] : todayStr();
+  const latestProd = productionTimes.length > 0 ? productionTimes[productionTimes.length - 1] : 'TBD';
+  const today = todayStr();
+  const invoiceNo = 'SI-' + today.replace(/-/g, '') + '-' + Math.floor(Math.random() * 900 + 100);
+
   const info = [
-    ['To:', c.company, 'Date:', s.orderDate || todayStr()],
-    ['Invoice No.:', s.code || '-', 'Sample Production Time:', s.productionTime || 'TBD'],
+    ['To:', customer.company, 'Date:', earliestOrder],
+    ['Invoice No.:', invoiceNo, 'Sample Production Time:', latestProd],
   ];
   const infoStart = 9;
   info.forEach((row, i) => {
@@ -3026,14 +2782,15 @@ async function exportSampleListEn(sampleId) {
     ws.getCell(r, 4).value = l2;
     ws.getCell(r, 4).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
     ws.getCell(r, 4).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
-    ws.mergeCells(r, 5, r, 7);
+    ws.mergeCells(r, 5, r, 6);
     ws.getCell(r, 5).value = v2;
     ws.getCell(r, 5).font = { name: 'Calibri', size: 11 };
     ws.getCell(r, 5).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
   });
 
+  // 表头
   const tableStart = infoStart + info.length + 1;
-  const headers = ['No.', 'Picture', 'Item Code', 'Description', 'Spec.', 'Qty', 'Sample Price (USD)'];
+  const headers = ['No.', 'Picture', 'Item Code', 'Description', 'Spec.', 'Sample Price (USD)'];
   ws.getRow(tableStart).height = 36;
   headers.forEach((h, i) => {
     const cell = ws.getCell(tableStart, i + 1);
@@ -3044,10 +2801,11 @@ async function exportSampleListEn(sampleId) {
     cell.border = thinBorderS();
   });
 
+  // 数据行
   let totalClient = 0;
-  for (let i = 0; i < items.length; i++) {
-    const it = items[i];
-    const p = it.productId ? productById(it.productId) : null;
+  for (let i = 0; i < samples.length; i++) {
+    const s = samples[i];
+    const p = s.productId ? productById(s.productId) : null;
     const r = tableStart + i + 1;
     ws.getRow(r).height = 80;
     ws.getCell(r, 1).value = i + 1;
@@ -3056,20 +2814,19 @@ async function exportSampleListEn(sampleId) {
     }
     ws.getCell(r, 2).value = '';
     ws.getCell(r, 3).value = (p && p.code) || '-';
-    ws.getCell(r, 4).value = it.productName || (p ? (p.nameEn || '') : '');
-    ws.getCell(r, 5).value = it.specs || (p ? p.specs : '') || '';
-    ws.getCell(r, 6).value = Number(it.qty) || 1;
-    const cp = (Number(it.clientPrice) || 0) * (Number(it.qty) || 1);
-    ws.getCell(r, 7).value = cp;
+    ws.getCell(r, 4).value = (p && p.nameEn) || s.productName || '';
+    ws.getCell(r, 5).value = s.specs || (p ? p.specs : '') || '';
+    const cp = Number(s.clientPrice) || 0;
+    ws.getCell(r, 6).value = cp;
     totalClient += cp;
 
-    for (let col = 1; col <= 7; col++) {
+    for (let col = 1; col <= 6; col++) {
       const cell = ws.getCell(r, col);
       cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1F2937' } };
       cell.border = thinBorderS();
-      if ([1, 2, 3, 6].includes(col)) {
+      if ([1, 2, 3].includes(col)) {
         cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      } else if (col === 7) {
+      } else if (col === 6) {
         cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
         cell.numFmt = '$#,##0.00';
       } else {
@@ -3078,16 +2835,17 @@ async function exportSampleListEn(sampleId) {
     }
   }
 
-  const totalRow = tableStart + items.length + 1;
+  // TOTAL DUE
+  const totalRow = tableStart + samples.length + 1;
   ws.getRow(totalRow).height = 30;
-  ws.mergeCells(totalRow, 1, totalRow, 6);
+  ws.mergeCells(totalRow, 1, totalRow, 5);
   const tc = ws.getCell(totalRow, 1);
   tc.value = 'TOTAL DUE (USD)';
   tc.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
   tc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
   tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
   tc.border = thinBorderS();
-  const tv = ws.getCell(totalRow, 7);
+  const tv = ws.getCell(totalRow, 6);
   tv.value = totalClient;
   tv.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
   tv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
@@ -3095,8 +2853,9 @@ async function exportSampleListEn(sampleId) {
   tv.border = thinBorderS();
   tv.numFmt = '$#,##0.00';
 
+  // PAYMENT INFORMATION
   const payStart = totalRow + 3;
-  ws.mergeCells(payStart, 1, payStart, 7);
+  ws.mergeCells(payStart, 1, payStart, 6);
   const ph = ws.getCell(payStart, 1);
   ph.value = 'PAYMENT INFORMATION';
   ph.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
@@ -3126,7 +2885,7 @@ async function exportSampleListEn(sampleId) {
     lc.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
     lc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFB' } };
     lc.border = thinBorderS();
-    ws.mergeCells(r, 3, r, 7);
+    ws.mergeCells(r, 3, r, 6);
     const vc = ws.getCell(r, 3);
     vc.value = row[1];
     vc.font = { name: 'Calibri', size: 11, color: { argb: 'FF1F2937' } };
@@ -3135,7 +2894,7 @@ async function exportSampleListEn(sampleId) {
   });
 
   const thankRow = payStart + 1 + bankInfo.length + 2;
-  ws.mergeCells(thankRow, 1, thankRow, 7);
+  ws.mergeCells(thankRow, 1, thankRow, 6);
   const tc2 = ws.getCell(thankRow, 1);
   tc2.value = 'Thank you for your business!';
   tc2.font = { name: 'Cambria', bold: true, italic: true, size: 13, color: { argb: 'FF1E3A8A' } };
@@ -3144,8 +2903,8 @@ async function exportSampleListEn(sampleId) {
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const safeName = c.company.replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
-  const filename = 'SampleInvoice_' + safeName + '_' + (s.code || todayStr()) + '.xlsx';
+  const safeName = customer.company.replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
+  const filename = 'SampleInvoice_' + safeName + '_' + today.replace(/-/g, '') + '.xlsx';
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = filename;
@@ -3153,6 +2912,71 @@ async function exportSampleListEn(sampleId) {
   URL.revokeObjectURL(a.href);
   toast('已导出 ' + filename, 'success');
 }
+
+// ============ 产品选择弹窗 - 样品模式 ============
+function openSampleProductPicker() {
+  if (DB.products.length === 0) { toast('请先添加产品', 'error'); return; }
+  _productPickerItemId = null; // 重置出货单上下文
+  document.getElementById('productPickerSearch').value = '';
+  renderProductPickerBodyForSample();
+  document.getElementById('productPickerMask').classList.add('show');
+  setTimeout(() => { try { document.getElementById('productPickerSearch').focus(); } catch (e) {} }, 80);
+}
+
+function renderProductPickerBodyForSample() {
+  const kw = (document.getElementById('productPickerSearch').value || '').toLowerCase();
+  const list = DB.products.filter(p =>
+    !kw || (p.code||'').toLowerCase().includes(kw)
+        || (p.nameEn||'').toLowerCase().includes(kw)
+        || (p.nameZh||'').toLowerCase().includes(kw)
+  );
+  const body = document.getElementById('productPickerBody');
+  if (list.length === 0) { body.innerHTML = '<div class="product-picker-empty">无匹配产品</div>'; return; }
+  body.innerHTML = list.map(p => {
+    const packing = hasPackingInfo(p)
+      ? p.qtyPerCarton + '/CTN · ' + calcCartonCBM(p).toFixed(4) + ' CBM'
+      : '';
+    return '<div class="product-picker-card" onclick="selectSampleProduct(\'' + p.id + '\')">' +
+      (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
+      '<div class="code">' + escapeHtml(p.code || '-') + '</div>' +
+      '<div class="name">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
+      (packing ? '<div class="packing">' + packing + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function selectSampleProduct(pid) {
+  const p = productById(pid);
+  if (!p) return;
+  const form = document.getElementById('sampleForm');
+  if (form) {
+    const pidInput = form.querySelector('input[name=productId]');
+    if (pidInput) pidInput.value = pid;
+    const nameInput = form.querySelector('input[name=productName]');
+    if (nameInput) nameInput.value = p.nameEn || p.nameZh || '';
+    const specInput = form.querySelector('input[name=specs]');
+    if (specInput && !specInput.value) specInput.value = p.specs || '';
+    const card = document.getElementById('sampleProductCard');
+    if (card) card.outerHTML = sampleProductCardHtml(p);
+  }
+  document.getElementById('productPickerMask').classList.remove('show');
+}
+
+function sampleProductCardHtml(p) {
+  if (!p) {
+    return '<div id="sampleProductCard" class="ship-product-card" style="cursor:pointer;" onclick="openSampleProductPicker()">' +
+      '<div class="no-img">+</div><div class="info"><span class="empty-line">点击选择产品（从产品库）</span></div>' +
+    '</div>';
+  }
+  return '<div id="sampleProductCard" class="ship-product-card" style="cursor:pointer;" onclick="openSampleProductPicker()">' +
+    (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
+    '<div class="info">' +
+      '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
+      '<div class="name-line">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
 
 let orderFilter = '', orderPaymentFilter = '';
 
@@ -4294,10 +4118,8 @@ function exportExcel() {
     })),
     '产品': DB.products.map(p => ({
       编号: p.code, 英文名: p.nameEn, 中文名: p.nameZh, 分类: p.category,
-      销售价: p.price, 币种: p.currency, 规格: p.specs,
-      工厂名: p.factoryName || '', 采购价不含税: p.purchasePriceNoTax || '', 采购价含税: p.purchasePriceWithTax || '',
-      中文包装: p.packingZh || p.packing || '', 英文包装: p.packingEn || '',
-      中文描述: p.descriptionZh || p.description || '', 英文描述: p.descriptionEn || ''
+      价格: p.price, 币种: p.currency, 规格: p.specs, HS编码: p.hsCode,
+      MOQ: p.moq, 包装: p.packing, 描述: p.description
     })),
     '样品': DB.samples.map(s => ({
       编号: s.sampleNo, 客户: customerLookup(s.customerId), 产品: s.productName,

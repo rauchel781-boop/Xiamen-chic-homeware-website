@@ -1940,12 +1940,8 @@ function editProduct(id) {
       <div class="form-grid">
         <div class="field"><label>规格</label>
           <input name="specs" value="${escapeHtml(p.specs || '')}" placeholder="如 33x4cm, 重量 1.3kg"></div>
-        <div class="field"><label>工厂名</label>
-          <input name="factoryName" value="${escapeHtml(p.factoryName || '')}" placeholder="供应工厂"></div>
-        <div class="field"><label>采购价 (不含税)</label>
-          <input name="purchasePriceNoTax" type="number" step="0.01" min="0" value="${escapeHtml(p.purchasePriceNoTax || '')}"></div>
-        <div class="field"><label>采购价 (含税)</label>
-          <input name="purchasePriceWithTax" type="number" step="0.01" min="0" value="${escapeHtml(p.purchasePriceWithTax || '')}"></div>
+        <div class="field"><label>MOQ</label>
+          <input name="moq" value="${escapeHtml(p.moq || '')}"></div>
         <div class="field"><label>中文包装</label>
           <input name="packingZh" value="${escapeHtml(p.packingZh || p.packing || '')}"></div>
         <div class="field"><label>英文包装 (Packing)</label>
@@ -2074,9 +2070,7 @@ function viewProduct(id) {
           <dt>分类</dt><dd>${p.category ? '<span class="tag tag-cyan">' + escapeHtml(p.category) + '</span>' : '-'}</dd>
           <dt>价格</dt><dd><strong>${escapeHtml(p.currency || '')} ${escapeHtml(p.price || '-')}</strong></dd>
           <dt>规格</dt><dd>${escapeHtml(p.specs || '-')}</dd>
-          <dt>工厂名</dt><dd>${escapeHtml(p.factoryName || '-')}</dd>
-          <dt>采购价(不含税)</dt><dd>${p.purchasePriceNoTax ? '¥' + Number(p.purchasePriceNoTax).toFixed(2) : '-'}</dd>
-          <dt>采购价(含税)</dt><dd>${p.purchasePriceWithTax ? '¥' + Number(p.purchasePriceWithTax).toFixed(2) : '-'}</dd>
+          <dt>MOQ</dt><dd>${escapeHtml(p.moq || '-')}</dd>
           <dt>中文包装</dt><dd>${escapeHtml(p.packingZh || p.packing || '-')}</dd>
           <dt>英文包装</dt><dd>${escapeHtml(p.packingEn || '-')}</dd>
           <dt>装箱</dt><dd>${hasPackingInfo(p) ? (p.qtyPerCarton + ' 个/箱，外箱 ' + p.cartonLength + '×' + p.cartonWidth + '×' + p.cartonHeight + ' cm，体积 ' + calcCartonCBM(p).toFixed(4) + ' CBM，毛重 ' + p.cartonGrossWeight + ' kg' + (p.cartonNetWeight ? '，净重 ' + p.cartonNetWeight + ' kg' : '')) : '<span class="muted">未录入</span>'}</dd>
@@ -2421,10 +2415,6 @@ function migrateProducts() {
     }
     if (p.hsCode !== undefined) {
       delete p.hsCode;
-      changed++;
-    }
-    if (p.moq !== undefined) {
-      delete p.moq;
       changed++;
     }
   });
@@ -4294,9 +4284,8 @@ function exportExcel() {
     })),
     '产品': DB.products.map(p => ({
       编号: p.code, 英文名: p.nameEn, 中文名: p.nameZh, 分类: p.category,
-      销售价: p.price, 币种: p.currency, 规格: p.specs,
-      工厂名: p.factoryName || '', 采购价不含税: p.purchasePriceNoTax || '', 采购价含税: p.purchasePriceWithTax || '',
-      中文包装: p.packingZh || p.packing || '', 英文包装: p.packingEn || '',
+      价格: p.price, 币种: p.currency, 规格: p.specs,
+      MOQ: p.moq, 中文包装: p.packingZh || p.packing || '', 英文包装: p.packingEn || '',
       中文描述: p.descriptionZh || p.description || '', 英文描述: p.descriptionEn || ''
     })),
     '样品': DB.samples.map(s => ({

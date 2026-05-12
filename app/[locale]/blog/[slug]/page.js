@@ -11,6 +11,7 @@ import { SITE } from '@/data/site-config';
 import { wpPosts, wpPostBySlug, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
 import { routing } from '@/i18n/routing';
+import { schemaLang } from '@/i18n/seo';
 
 // Build hreflang map for a given path — used in metadata.alternates.languages.
 function buildBlogAlternates(path) {
@@ -97,6 +98,7 @@ export default function BlogPost({ params }) {
     image: p.featured_image ? [p.featured_image.startsWith('http') ? p.featured_image : `${SITE.siteUrl}${p.featured_image}`] : undefined,
     datePublished: p.date,
     dateModified: p.date,
+    inLanguage: schemaLang(params.locale),
     author: { '@type': 'Organization', name: SITE.company.brand, '@id': `${SITE.siteUrl}/#organization` },
     publisher: { '@id': `${SITE.siteUrl}/#organization` },
     mainEntityOfPage: `${SITE.siteUrl}/blog/${p.slug}`,

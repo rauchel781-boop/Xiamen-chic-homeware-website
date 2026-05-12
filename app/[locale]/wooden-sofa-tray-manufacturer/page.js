@@ -219,6 +219,7 @@ export default function WoodenSofaTrayPage({ params }) {
     serviceType: 'Wooden Sofa Tray Manufacturing',
     name: 'Wooden Sofa Tray Manufacturer & OEM Supplier',
     description: META_DESC,
+    locale: params.locale,
     offerItems: PRODUCTS.items.map(it => ({ name: it.title, description: it.body })),
   });
 

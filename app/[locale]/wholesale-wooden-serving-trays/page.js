@@ -73,6 +73,7 @@ export default function Page({ params }) {
     serviceType: 'Wholesale Wooden Serving Tray Manufacturing',
     name: 'Wholesale Wooden Serving Trays — Acacia, Bamboo, Walnut Manufacturer',
     description: META_DESC,
+    locale: params.locale,
     offerItems: DESIGNS.map(d => ({ name: d.title, description: d.body })),
   });
 

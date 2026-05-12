@@ -20,6 +20,7 @@ import {
 } from '@/lib/wp-data';
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
 import { localizeProduct } from '@/lib/translated-content';
+import { schemaLang } from '@/i18n/seo';
 
 // Build hreflang map for a path — used in metadata.alternates.languages.
 // With localePrefix:'as-needed', the default locale (en) has NO prefix.
@@ -239,6 +240,7 @@ function ProductView({ p, locale }) {
     manufacturer: { '@id': `${SITE.siteUrl}/#organization` },
     category: p.categories?.[0]?.name || 'Wooden Products',
     url: `${SITE.siteUrl}/products/${p.slug}`,
+    inLanguage: schemaLang(locale),
     // ── No `offers` block by design ────────────────────────────────────
     // This is a B2B quote-only catalog — public prices don't exist. We
     // tried two intermediate schemes:

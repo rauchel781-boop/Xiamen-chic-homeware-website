@@ -79,6 +79,7 @@ export default function Page({ params }) {
     serviceType: 'Custom Wooden Storage Box Manufacturing',
     name: 'Custom Wooden Storage Boxes — Wholesale & Private Label Manufacturing',
     description: META_DESC,
+    locale: params.locale,
     offerItems: STYLES.map(s => ({ name: s.title, description: s.body })),
   });
 

@@ -110,6 +110,7 @@ export default function Page({ params }) {
     serviceType: 'Custom Wooden Box Manufacturing',
     name: 'Custom Wooden Boxes — Wholesale & Private Label Manufacturing',
     description: META_DESC,
+    locale: params.locale,
     offerItems: CATEGORIES.map(c => ({ name: c.title, description: c.body, url: c.href })),
   });
 

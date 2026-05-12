@@ -8,6 +8,7 @@ import FloatingChat from '@/components/FloatingChat';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { routing } from '@/i18n/routing';
+import { schemaLang } from '@/i18n/seo';
 
 // Body font — modern, friendly geometric sans (refined alternative to Inter).
 // Trimmed to 3 weights (was 5) — saves ~140 KB and ~200ms render-blocking.
@@ -119,22 +120,28 @@ const ORG_LD = {
   },
 };
 
-const WEBSITE_LD = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  '@id': `${SITE.siteUrl}/#website`,
-  url: SITE.siteUrl,
-  name: SITE.company.brand,
-  alternateName: SITE.company.legalName,
-  description:
-    'Factory-direct manufacturer of custom wooden products — OEM wooden boxes, ' +
-    'kitchenware, storage and gift packaging for B2B brands worldwide.',
-  publisher: { '@id': `${SITE.siteUrl}/#organization` },
-  inLanguage: 'en-US',
-  // NOTE: SearchAction removed — /products?q= filtering isn't implemented,
-  // and a SearchAction that points to a non-functional URL hurts trust signals.
-  // Add it back once /products supports a real ?q= search filter + UI.
-};
+// WEBSITE schema — emitted on every page. Built per-locale so the inLanguage
+// signal matches the actual rendered locale (was hard-coded to en-US before,
+// which mismatched the /de/, /es/, /fr/, /ja/ versions). SCHEMA_INLANGUAGE
+// map lives in i18n/seo.js for cross-file reuse.
+function buildWebsiteLd(locale) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE.siteUrl}/#website`,
+    url: SITE.siteUrl,
+    name: SITE.company.brand,
+    alternateName: SITE.company.legalName,
+    description:
+      'Factory-direct manufacturer of custom wooden products — OEM wooden boxes, ' +
+      'kitchenware, storage and gift packaging for B2B brands worldwide.',
+    publisher: { '@id': `${SITE.siteUrl}/#organization` },
+    inLanguage: schemaLang(locale),
+    // NOTE: SearchAction removed — /products?q= filtering isn't implemented,
+    // and a SearchAction that points to a non-functional URL hurts trust signals.
+    // Add it back once /products supports a real ?q= search filter + UI.
+  };
+}
 
 // Tells Next.js to pre-render every locale at build time.
 export function generateStaticParams() {
@@ -230,9 +237,9 @@ export default async function LocaleLayout({ children, params: { locale } }) {
   return (
     <html lang={locale} className={`${sans.variable} ${display.variable}`}>
       <body>
-        {/* Global structured data — Organization + WebSite */}
+        {/* Global structured data — Organization + WebSite (WebSite built per-locale) */}
         <JsonLd data={ORG_LD} />
-        <JsonLd data={WEBSITE_LD} />
+        <JsonLd data={buildWebsiteLd(locale)} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
           <main>{children}</main>

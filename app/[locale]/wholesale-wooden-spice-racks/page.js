@@ -52,6 +52,7 @@ export default function Page({ params }) {
     serviceType: 'Wholesale Wooden Spice Rack Supply',
     name: 'Wholesale Wooden Spice Racks — Factory-Direct B2B Supply',
     description: META_DESC,
+    locale: params.locale,
     offerItems: STYLES.map(s => ({ name: s.title, description: s.body })),
   });
 

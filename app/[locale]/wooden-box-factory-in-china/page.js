@@ -94,6 +94,7 @@ export default function Page({ params }) {
     serviceType: 'Wooden Box Manufacturing',
     name: 'Wooden Box Factory in China — OEM & ODM Manufacturer',
     description: META_DESC,
+    locale: params.locale,
     offerItems: CAPABILITIES_LIST.map(c => ({ name: c.title, description: c.body, url: c.href })),
   });
 
