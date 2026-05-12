@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
+import { buildServiceLd } from '@/lib/service-schema';
 
 const SLUG = 'custom-wooden-spice-rack';
 const TITLE = 'Custom Wooden Spice Rack Manufacturer with Glass Jar Matching Options';
@@ -91,11 +92,19 @@ export default function Page({ params }) {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   };
+  const serviceLd = buildServiceLd({
+    slug: SLUG,
+    serviceType: 'Custom Wooden Spice Rack Manufacturing',
+    name: 'Custom Wooden Spice Rack — OEM & Private Label Manufacturing',
+    description: META_DESC,
+    offerItems: STYLES.map(s => ({ name: s.name || s.title, description: s.body })),
+  });
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
+      <JsonLd data={serviceLd} />
 
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">

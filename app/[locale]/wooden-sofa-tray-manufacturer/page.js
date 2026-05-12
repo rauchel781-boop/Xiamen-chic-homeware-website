@@ -7,6 +7,7 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
+import { buildServiceLd } from '@/lib/service-schema';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
 
@@ -213,11 +214,19 @@ export default function WoodenSofaTrayPage({ params }) {
     brand: { '@type': 'Brand', name: SITE.company.brand },
     manufacturer: { '@type': 'Organization', name: SITE.company.legalName },
   };
+  const serviceLd = buildServiceLd({
+    slug: SLUG,
+    serviceType: 'Wooden Sofa Tray Manufacturing',
+    name: 'Wooden Sofa Tray Manufacturer & OEM Supplier',
+    description: META_DESC,
+    offerItems: PRODUCTS.items.map(it => ({ name: it.title, description: it.body })),
+  });
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={productLd} />
+      <JsonLd data={serviceLd} />
 
       {/* ─── HERO ──────────────────────────────────────────── */}
       <header className="bg-brand-cream border-b border-brand-line">

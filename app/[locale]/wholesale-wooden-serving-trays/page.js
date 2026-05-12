@@ -2,6 +2,7 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
+import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
@@ -67,11 +68,19 @@ export default function Page({ params }) {
   unstable_setRequestLocale(params.locale);
   const breadcrumbLd = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: BREADCRUMB.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}` })) };
   const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+  const serviceLd = buildServiceLd({
+    slug: SLUG,
+    serviceType: 'Wholesale Wooden Serving Tray Manufacturing',
+    name: 'Wholesale Wooden Serving Trays — Acacia, Bamboo, Walnut Manufacturer',
+    description: META_DESC,
+    offerItems: DESIGNS.map(d => ({ name: d.title, description: d.body })),
+  });
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
+      <JsonLd data={serviceLd} />
 
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">

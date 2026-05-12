@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
+import { buildServiceLd } from '@/lib/service-schema';
 
 const SLUG = 'wholesale-wooden-spice-racks';
 const TITLE = 'Wholesale Wooden Spice Racks — Bamboo & Acacia Organizers';
@@ -46,10 +47,18 @@ const BREADCRUMB = [{ name: 'Home', url: '/' }, { name: 'Wholesale Wooden Spice 
 export default function Page({ params }) {
   unstable_setRequestLocale(params.locale);
   const breadcrumbLd = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: BREADCRUMB.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}` })) };
+  const serviceLd = buildServiceLd({
+    slug: SLUG,
+    serviceType: 'Wholesale Wooden Spice Rack Supply',
+    name: 'Wholesale Wooden Spice Racks — Factory-Direct B2B Supply',
+    description: META_DESC,
+    offerItems: STYLES.map(s => ({ name: s.title, description: s.body })),
+  });
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
+      <JsonLd data={serviceLd} />
 
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">

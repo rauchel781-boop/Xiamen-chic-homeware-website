@@ -2,6 +2,7 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
+import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
@@ -104,11 +105,19 @@ export default function Page({ params }) {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   };
+  const serviceLd = buildServiceLd({
+    slug: SLUG,
+    serviceType: 'Custom Wooden Box Manufacturing',
+    name: 'Custom Wooden Boxes — Wholesale & Private Label Manufacturing',
+    description: META_DESC,
+    offerItems: CATEGORIES.map(c => ({ name: c.title, description: c.body, url: c.href })),
+  });
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
+      <JsonLd data={serviceLd} />
 
       {/* HERO */}
       <header className="bg-brand-cream border-b border-brand-line">
