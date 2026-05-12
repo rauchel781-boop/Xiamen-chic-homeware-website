@@ -187,6 +187,35 @@ const GALLERY = [
 ];
 
 // ─────────────────────────────────────────────────────────────────
+// Factory tour video — YouTube embed + VideoObject schema
+// ─────────────────────────────────────────────────────────────────
+// NOTE: uploadDate is a placeholder. Update to the real publish date
+// (visible on the YouTube watch page) so Google's freshness signal is honest.
+const VIDEO = {
+  id: '_HKxrZ_p5-4',
+  title: 'Inside Our Wooden Products Factory — Xiamen Chic Homeware',
+  description:
+    'A walk through the Xiamen Chic Homeware factory in Cao County, Shandong — raw material warehouse, CNC machining, sanding, finishing, QC and packing for OEM & ODM wooden product orders.',
+  uploadDate: '2026-03-15',
+};
+const VIDEO_LD = (locale) => ({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  '@id': `${SITE.siteUrl}/about#video`,
+  name: VIDEO.title,
+  description: VIDEO.description,
+  thumbnailUrl: [
+    `https://img.youtube.com/vi/${VIDEO.id}/maxresdefault.jpg`,
+    `https://img.youtube.com/vi/${VIDEO.id}/hqdefault.jpg`,
+  ],
+  uploadDate: VIDEO.uploadDate,
+  contentUrl: `https://www.youtube.com/watch?v=${VIDEO.id}`,
+  embedUrl: `https://www.youtube-nocookie.com/embed/${VIDEO.id}`,
+  publisher: { '@id': `${SITE.siteUrl}/#organization` },
+  inLanguage: 'en',
+});
+
+// ─────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────
 export default function AboutPage({ params: { locale } }) {
@@ -196,6 +225,7 @@ export default function AboutPage({ params: { locale } }) {
     <article className="bg-white">
       <JsonLd data={ABOUT_BREADCRUMB(locale)} />
       <JsonLd data={ABOUT_PAGE_LD(locale)} />
+      <JsonLd data={VIDEO_LD(locale)} />
       {/* ── Hero ── */}
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
@@ -257,6 +287,61 @@ export default function AboutPage({ params: { locale } }) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Factory tour video ── */}
+      <section className="py-20 lg:py-24 bg-white border-b border-brand-line">
+        <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
+              Factory Tour
+            </p>
+            <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
+              See the factory{' '}
+              <span className="text-brand-green">for yourself</span>.
+            </h2>
+            <p className="mt-4 text-brand-mute leading-relaxed">
+              A short walk through our wooden products factory — production lines,
+              finishing area, and quality control in action.
+            </p>
+          </div>
+
+          <div className="relative aspect-video rounded-2xl overflow-hidden border border-brand-line shadow-lg bg-brand-cream">
+            {/* youtube-nocookie variant — no tracking until user interacts.
+                loading="lazy" defers iframe creation until near viewport,
+                keeping LCP unaffected on the above-the-fold content. */}
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${VIDEO.id}?rel=0`}
+              title={VIDEO.title}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+
+          <p className="mt-5 text-center text-sm text-brand-mute">
+            Watch on{' '}
+            <a
+              href={`https://www.youtube.com/watch?v=${VIDEO.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-brand-green hover:text-brand-greenDark"
+            >
+              YouTube
+            </a>{' '}
+            · More videos on our{' '}
+            <a
+              href={SITE.social.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-brand-green hover:text-brand-greenDark"
+            >
+              channel
+            </a>
+          </p>
         </div>
       </section>
 
