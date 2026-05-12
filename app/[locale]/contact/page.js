@@ -3,6 +3,7 @@
 //           Office locations · FAQ · Final reassurance
 
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -308,8 +309,14 @@ export default function ContactPage({ params: { locale } }) {
           <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
             {OFFICES.map((o) => (
               <article key={o.city} className="bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
-                <div className="aspect-[16/9] bg-white overflow-hidden">
-                  <img src={o.image} alt={o.city} className="w-full h-full object-cover" />
+                <div className="relative aspect-[16/9] bg-white overflow-hidden">
+                  <Image
+                    src={o.image}
+                    alt={`${o.tag} — ${o.city}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="p-7 lg:p-8">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-2">{o.tag}</p>

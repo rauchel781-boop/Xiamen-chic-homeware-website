@@ -1,5 +1,6 @@
 // Factory section — editorial layout with balanced 2x2 photo grid (left)
 // and two location cards (right). Less wall-of-text, less bold spam.
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 
 const PHOTOS = [
@@ -49,11 +50,13 @@ export default function FactorySection() {
           {/* LEFT — 2x2 photo grid, all equal size */}
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
             {PHOTOS.map((p) => (
-              <div key={p.url} className="aspect-[5/4] rounded-xl overflow-hidden bg-white shadow-sm">
-                <img
+              <div key={p.url} className="relative aspect-[5/4] rounded-xl overflow-hidden bg-white shadow-sm">
+                <Image
                   src={p.url}
                   alt={p.alt}
-                  className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                  fill
+                  sizes="(max-width: 1024px) 50vw, 25vw"
+                  className="object-cover hover:scale-105 transition duration-500"
                 />
               </div>
             ))}

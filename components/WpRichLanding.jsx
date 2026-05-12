@@ -7,6 +7,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -117,12 +118,13 @@ function GallerySection({ title, lead, items, bg }) {
               className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition"
             >
               {it.image && (
-                <div className="aspect-square bg-brand-cream overflow-hidden">
-                  <img
+                <div className="relative aspect-square bg-brand-cream overflow-hidden">
+                  <Image
                     src={it.image}
                     alt={it.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
                   />
                 </div>
               )}
@@ -191,12 +193,13 @@ function ProcessStepsSection({ title, lead, items, bg }) {
               className="relative bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-md transition"
             >
               {it.image && (
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
                     src={it.image}
                     alt={it.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                    className="object-cover"
                   />
                 </div>
               )}
@@ -229,12 +232,13 @@ function ImageTextSection({ title, image, bodyHtml, reverse, bg }) {
     <section className={`py-16 lg:py-20 ${bg}`}>
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          <div className={`aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden ${reverse ? 'lg:order-2' : ''}`}>
-            <img
+          <div className={`relative aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden ${reverse ? 'lg:order-2' : ''}`}>
+            <Image
               src={image}
               alt={title}
-              loading="lazy"
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 1024px) 100vw, 600px"
+              className="object-cover"
             />
           </div>
           <div className={reverse ? 'lg:order-1' : ''}>

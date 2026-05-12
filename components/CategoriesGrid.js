@@ -1,5 +1,6 @@
 // Visual grid of top product categories.
 // Each card uses the first product's featured image as the cover.
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { wpProducts, wpProductCategories } from '@/lib/wp-data';
 
@@ -53,10 +54,12 @@ export default function CategoriesGrid() {
               >
                 <div className="relative aspect-[4/3] bg-white overflow-hidden">
                   {cover ? (
-                    <img
+                    <Image
                       src={cover}
                       alt={cat.label}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition duration-500"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-brand-mute text-sm">No image yet</div>

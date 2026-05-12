@@ -1,5 +1,6 @@
 // /wooden-box-factory-in-china — hand-coded factory positioning landing page.
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -119,8 +120,15 @@ export default function Page({ params }) {
                 <Link href="/about" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">About Our Factory</Link>
               </div>
             </div>
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <img src={HERO.image} alt="Wooden box factory in China" className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+              <Image
+                src={HERO.image}
+                alt="Wooden box factory in China — Xiamen Chic Homeware"
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                priority
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
@@ -138,8 +146,14 @@ export default function Page({ params }) {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {FACTORY_PHOTOS.map(p => (
-              <div key={p.src} className="aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
-                <img src={p.src} alt={p.alt} loading="lazy" className="w-full h-full object-cover" />
+              <div key={p.src} className="relative aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
+                <Image
+                  src={p.src}
+                  alt={p.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover"
+                />
               </div>
             ))}
           </div>
@@ -181,8 +195,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {PROCESS.map(s => (
               <div key={s.n} className="bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-md transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={s.image} alt={s.title} loading="lazy" className="w-full h-full object-cover" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="p-5">
                   <div className="text-2xl font-extrabold text-brand-green/40 leading-none mb-2">{s.n}</div>
@@ -221,8 +241,14 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <div className="aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
-              <img src="/wp-images/2026/02/inspection-2.jpg" alt="Quality control inspection" loading="lazy" className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
+              <Image
+                src="/wp-images/2026/02/inspection-2.jpg"
+                alt="Wooden box factory quality control inspection"
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                className="object-cover"
+              />
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Quality Control</p>
@@ -261,8 +287,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {CAPABILITIES_LIST.map(c => (
               <Link key={c.title} href={c.href} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col">
-                <div className="aspect-square bg-brand-cream overflow-hidden">
-                  <img src={c.image} alt={c.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-square bg-brand-cream overflow-hidden">
+                  <Image
+                    src={c.image}
+                    alt={c.title}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
                   <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{c.title}</h3>

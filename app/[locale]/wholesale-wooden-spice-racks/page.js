@@ -1,5 +1,6 @@
 // /wholesale-wooden-spice-racks — hand-coded SEO landing page (small, ~800 chars original).
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -71,8 +72,15 @@ export default function Page({ params }) {
                 <Link href="/custom-wooden-spice-rack" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">Custom OEM Options</Link>
               </div>
             </div>
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <img src={HERO.image} alt={TITLE} className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+              <Image
+                src={HERO.image}
+                alt={TITLE}
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                priority
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
@@ -102,8 +110,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {STYLES.map(s => (
               <article key={s.title} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={s.image} alt={s.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-5">
                   <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>

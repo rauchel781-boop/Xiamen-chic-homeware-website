@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 const SLIDES = [
   { src: '/factory/wooden-box-4.jpg', label: 'Bulk Production' },
@@ -36,10 +37,14 @@ export default function IntroCarousel() {
       >
         {SLIDES.map((s, i) => (
           <div className="ic-slide" key={i}>
-            <img
+            <Image
               src={s.src}
               alt={s.label}
-              loading={i === 0 ? 'eager' : 'lazy'} width="1200" height="900"
+              width={1200}
+              height={900}
+              sizes="100vw"
+              priority={i === 0}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
             />
             <div className="ic-overlay" />
             <div className="ic-caption">

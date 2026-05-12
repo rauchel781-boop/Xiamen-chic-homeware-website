@@ -1,5 +1,6 @@
 // /custom-wooden-spice-rack — hand-coded SEO landing page (~10k chars original).
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -121,8 +122,15 @@ export default function Page({ params }) {
                 <Link href="/wholesale-wooden-spice-racks" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">Explore Styles</Link>
               </div>
             </div>
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <img src={HERO.image} alt="Custom wooden spice rack" className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+              <Image
+                src={HERO.image}
+                alt="Custom wooden spice rack with matching glass jars — manufacturer hero"
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                priority
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
@@ -141,8 +149,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {STYLES.map(s => (
               <article key={s.title} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={s.image} alt={s.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-5">
                   <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>
@@ -167,8 +181,14 @@ export default function Page({ params }) {
           <div className="grid md:grid-cols-3 gap-6">
             {SETS.map(s => (
               <article key={s.title} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={s.image} alt={s.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>

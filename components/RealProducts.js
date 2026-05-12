@@ -1,6 +1,7 @@
 // Real Products showcase — editorial header + 8-card static grid (no carousel).
 // All 8 products are visible at once for quick scanning; rich hover state
 // reveals a "View product" pill in the lower-right of each card.
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 
 // Server component — receives `products` array as prop from home page.
@@ -46,10 +47,12 @@ function Card({ p }) {
       {/* Image with overlay */}
       <div className="relative aspect-square bg-brand-cream rounded-xl overflow-hidden border border-brand-line">
         {p.img ? (
-          <img
+          <Image
             src={p.img}
-            alt=""
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            alt={p.title || 'Featured wooden product'}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover group-hover:scale-105 transition duration-500"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-brand-mute text-xs uppercase tracking-wider">

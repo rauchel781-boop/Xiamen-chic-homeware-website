@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const CSS = `
 .gal {
@@ -99,7 +100,15 @@ export default function ProductGallery({ images, name }) {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="gal-main">
-        <img src={images[idx]} alt={`${name} — view ${idx + 1}`} width="1200" height="900" />
+        <Image
+          src={images[idx]}
+          alt={`${name} — view ${idx + 1}`}
+          width={1200}
+          height={900}
+          sizes="(max-width: 1024px) 100vw, 600px"
+          priority
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        />
         {total > 1 && (
           <>
             <button
@@ -135,7 +144,7 @@ export default function ProductGallery({ images, name }) {
               type="button"
               aria-label={`View image ${i + 1}`}
             >
-              <img src={src} alt="" loading="lazy" width="1200" height="900" />
+              <Image src={src} alt={`${name} thumbnail ${i + 1}`} width={1200} height={900} sizes="120px" style={{ width: '100%', height: 'auto', display: 'block' }} />
             </button>
           ))}
         </div>

@@ -1,6 +1,7 @@
 // 4-step manufacturing process — image-led card design.
 // Each step: real WP photo on top, number badge overlapping the image,
 // title and description below. Connected with a horizontal flow line on lg+.
+import Image from 'next/image';
 
 const STEPS = [
   {
@@ -71,10 +72,12 @@ function Card({ step: s }) {
     <article className="group relative z-10">
       {/* Image */}
       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-brand-cream shadow-sm border border-brand-line">
-        <img
+        <Image
           src={s.img}
           alt={s.alt}
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover group-hover:scale-105 transition duration-500"
         />
         {/* Connector dot for lg+ horizontal flow */}
         <span

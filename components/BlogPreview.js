@@ -1,4 +1,5 @@
 // Latest blog posts — bento layout: 1 large featured + 2 smaller stacked.
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { wpPosts, stripHtml } from '@/lib/wp-data';
 
@@ -58,8 +59,14 @@ function FeaturedCard({ post: p }) {
       className="group bg-brand-cream rounded-2xl overflow-hidden border border-brand-line hover:shadow-lg transition flex flex-col"
     >
       {p.featured_image && (
-        <div className="aspect-[16/10] bg-white overflow-hidden">
-          <img src={p.featured_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+        <div className="relative aspect-[16/10] bg-white overflow-hidden">
+          <Image
+            src={p.featured_image}
+            alt={stripHtml(p.title)}
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover group-hover:scale-105 transition duration-500"
+          />
         </div>
       )}
       <div className="p-7 lg:p-8 flex-1 flex flex-col">
@@ -92,8 +99,14 @@ function SmallCard({ post: p }) {
       className="group grid sm:grid-cols-[200px_1fr] gap-5 bg-brand-cream rounded-2xl overflow-hidden border border-brand-line hover:shadow-md transition"
     >
       {p.featured_image && (
-        <div className="aspect-[16/10] sm:aspect-auto sm:h-full bg-white overflow-hidden">
-          <img src={p.featured_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+        <div className="relative aspect-[16/10] sm:aspect-auto sm:h-full bg-white overflow-hidden">
+          <Image
+            src={p.featured_image}
+            alt={stripHtml(p.title)}
+            fill
+            sizes="(max-width: 640px) 100vw, 200px"
+            className="object-cover group-hover:scale-105 transition duration-500"
+          />
         </div>
       )}
       <div className="p-5 sm:py-6 sm:pr-6 sm:pl-0 flex-1 flex flex-col">

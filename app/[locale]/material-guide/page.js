@@ -4,6 +4,7 @@
 // and links to relevant product categories on this site.
 
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -593,8 +594,14 @@ function MaterialBlock({ material: m, flipped }) {
       <div className={`grid lg:grid-cols-2 gap-10 lg:gap-14 items-center`}>
         {/* Image */}
         <div className={`${flipped ? 'lg:order-2' : ''}`}>
-          <div className="aspect-[5/4] rounded-2xl overflow-hidden bg-brand-cream border border-brand-line">
-            <img src={m.image} alt={m.name} className="w-full h-full object-cover" />
+          <div className="relative aspect-[5/4] rounded-2xl overflow-hidden bg-brand-cream border border-brand-line">
+            <Image
+              src={m.image}
+              alt={`${m.name} wood — material sample for kitchenware`}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
           </div>
         </div>
 
@@ -1117,8 +1124,14 @@ function RelatedArticles() {
               className="group bg-white rounded-2xl overflow-hidden border border-brand-line hover:shadow-lg transition flex flex-col"
             >
               {p.featured_image && (
-                <div className="aspect-[16/10] bg-brand-cream overflow-hidden">
-                  <img src={p.featured_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                <div className="relative aspect-[16/10] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={p.featured_image}
+                    alt={p.title || 'Related article'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition duration-500"
+                  />
                 </div>
               )}
               <div className="p-6 flex-1 flex flex-col">

@@ -1,5 +1,6 @@
 // /wholesale-wooden-serving-trays — hand-coded SEO landing page.
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -93,8 +94,15 @@ export default function Page({ params }) {
                 <Link href="/products" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">Browse Products</Link>
               </div>
             </div>
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <img src={HERO.image} alt={TITLE} className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+              <Image
+                src={HERO.image}
+                alt={TITLE}
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                priority
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
@@ -126,8 +134,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {MATERIALS.map(m => (
               <article key={m.name} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col">
-                <div className="aspect-square bg-brand-cream overflow-hidden">
-                  <img src={m.image} alt={m.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-square bg-brand-cream overflow-hidden">
+                  <Image
+                    src={m.image}
+                    alt={m.name}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green mb-1">{m.label}</p>
@@ -171,8 +185,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {DESIGNS.map(d => (
               <article key={d.title} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={d.image} alt={d.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={d.image}
+                    alt={d.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-5">
                   <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{d.title}</h3>

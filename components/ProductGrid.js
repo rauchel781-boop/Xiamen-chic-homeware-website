@@ -1,5 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 
 const CSS = `
@@ -200,7 +201,7 @@ export default function ProductGrid({ products, categorySlug }) {
             >
               <div className="pg-card-img">
                 {p.closure && <div className="pg-card-badge">{p.closure}</div>}
-                <img src={p.images[0]} alt={p.name} loading="lazy" width="1200" height="900" />
+                <Image src={p.images[0]} alt={p.name} width={1200} height={900} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px" style={{ width: '100%', height: 'auto', display: 'block' }} />
               </div>
               <div className="pg-card-info">
                 <div className="pg-card-name">{p.name}</div>

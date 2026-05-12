@@ -1,5 +1,6 @@
 // /custom-wooden-storage-boxes-wholesale — hand-coded SEO landing page.
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -99,8 +100,15 @@ export default function Page({ params }) {
                 <Link href="/products/wooden-storage-box-with-lid" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">Browse Boxes</Link>
               </div>
             </div>
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <img src={HERO.image} alt={TITLE} className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+              <Image
+                src={HERO.image}
+                alt={TITLE}
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                priority
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
@@ -117,8 +125,14 @@ export default function Page({ params }) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {STYLES.map(s => (
               <article key={s.title} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={s.image} alt={s.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-5">
                   <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>
@@ -141,8 +155,14 @@ export default function Page({ params }) {
           <div className="grid md:grid-cols-3 gap-6">
             {MATERIALS.map(m => (
               <article key={m.name} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition">
-                <div className="aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <img src={m.image} alt={m.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500" />
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image
+                    src={m.image}
+                    alt={`${m.name} wood`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
+                  />
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-bold text-brand-ink mb-2">{m.name}</h3>
@@ -158,8 +178,14 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <div className="aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
-              <img src="/wp-images/2026/02/image-14.png" alt="Customization options" loading="lazy" className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line">
+              <Image
+                src="/wp-images/2026/02/image-14.png"
+                alt="Custom wooden storage box customization options"
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                className="object-cover"
+              />
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Customization</p>

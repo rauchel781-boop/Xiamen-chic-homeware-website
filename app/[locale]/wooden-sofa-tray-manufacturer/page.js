@@ -4,6 +4,7 @@
 // Static route takes precedence over the [slug] catch-all.
 
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -265,11 +266,14 @@ export default function WoodenSofaTrayPage({ params }) {
                 </Link>
               </div>
             </div>
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <img
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+              <Image
                 src={HERO.image}
                 alt={HERO.imageAlt}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                priority
+                className="object-cover"
               />
             </div>
           </div>
@@ -294,12 +298,13 @@ export default function WoodenSofaTrayPage({ params }) {
                 key={it.title}
                 className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition"
               >
-                <div className="aspect-square bg-brand-cream overflow-hidden">
-                  <img
+                <div className="relative aspect-square bg-brand-cream overflow-hidden">
+                  <Image
                     src={it.image}
                     alt={it.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
                   />
                 </div>
                 <div className="p-5">
@@ -318,8 +323,14 @@ export default function WoodenSofaTrayPage({ params }) {
       <section className="py-16 lg:py-20 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <div className="aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line">
-              <img src={EDU.image} alt={EDU.imageAlt} loading="lazy" className="w-full h-full object-cover" />
+            <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line">
+              <Image
+                src={EDU.image}
+                alt={EDU.imageAlt}
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                className="object-cover"
+              />
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
@@ -385,12 +396,13 @@ export default function WoodenSofaTrayPage({ params }) {
                 key={it.name}
                 className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col"
               >
-                <div className="aspect-square bg-brand-cream overflow-hidden">
-                  <img
+                <div className="relative aspect-square bg-brand-cream overflow-hidden">
+                  <Image
                     src={it.image}
                     alt={`${it.name} sofa tray`}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
                   />
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
@@ -428,12 +440,13 @@ export default function WoodenSofaTrayPage({ params }) {
                 key={it.title}
                 className="group bg-brand-cream rounded-2xl overflow-hidden hover:shadow-lg transition"
               >
-                <div className="aspect-[4/3] bg-white overflow-hidden">
-                  <img
+                <div className="relative aspect-[4/3] bg-white overflow-hidden">
+                  <Image
                     src={it.image}
                     alt={it.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-[1.03] transition duration-500"
                   />
                 </div>
                 <div className="p-5">

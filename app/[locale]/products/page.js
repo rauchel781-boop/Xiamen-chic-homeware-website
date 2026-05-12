@@ -2,6 +2,7 @@
 // showcase, material chips, sticky sidebar and rich product cards.
 
 import { unstable_setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -160,7 +161,15 @@ export default function ProductsIndex({ params: { locale } }) {
               return (
                 <Link key={s.slug} href={`/products/${s.slug}`} className="group bg-white rounded-2xl overflow-hidden border border-brand-line hover:shadow-lg transition">
                   <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
-                    {img && <img src={img} alt={s.label} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />}
+                    {img && (
+                      <Image
+                        src={img}
+                        alt={s.label}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
                     <div className="absolute bottom-4 left-5 right-5 text-white">
                       <h3 className="text-lg lg:text-xl font-extrabold">{s.label}</h3>
@@ -304,7 +313,13 @@ function ProductCard({ p, compact = false }) {
     <Link href={`/products/${p.slug}`} className="group block">
       <div className="relative aspect-square bg-brand-cream rounded-xl overflow-hidden border border-brand-line">
         {p.featured_image ? (
-          <img src={p.featured_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          <Image
+            src={p.featured_image}
+            alt={p.title || 'Wooden product'}
+            fill
+            sizes={compact ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
+            className="object-cover group-hover:scale-105 transition duration-500"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-brand-mute text-xs uppercase tracking-wider">No image</div>
         )}

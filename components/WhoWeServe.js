@@ -1,5 +1,7 @@
 // Who We Serve — clean centered intro + 4 equal-height segment cards.
 // Materials block has been split out into its own component (MaterialsSection.js).
+import Image from 'next/image';
+
 const SEGMENTS = [
   {
     title: 'Amazon FBA Sellers',
@@ -65,7 +67,13 @@ export default function WhoWeServe() {
 
         {/* Markets photo banner with overlay caption */}
         <div className="relative rounded-2xl overflow-hidden aspect-[16/6] bg-brand-cream">
-          <img src={MARKETS_PHOTO} alt="" className="w-full h-full object-cover" />
+          <Image
+            src={MARKETS_PHOTO}
+            alt="Global markets we serve — North America, Europe, Australia, Japan"
+            fill
+            sizes="(max-width: 1320px) 100vw, 1320px"
+            className="object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-brand-greenDeep/80 via-brand-greenDeep/40 to-transparent" />
           <div className="absolute inset-0 flex items-center px-8 lg:px-14 max-w-2xl">
             <div className="text-white">
