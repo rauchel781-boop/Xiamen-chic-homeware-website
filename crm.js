@@ -2426,6 +2426,8 @@ function renderQuotations() {
             <td class="text-right no-wrap">
               <button class="btn-link" onclick="viewQuotation('${q.id}')">详情</button>
               <button class="btn-link" onclick="editQuotation('${q.id}')">编辑</button>
+              <button class="btn-link" onclick="exportQuotationZh('${q.id}')" title="导出中文报价需求表">↓中</button>
+              <button class="btn-link" onclick="exportQuotationEn('${q.id}')" title="导出英文 Quotation">↓EN</button>
               ${q.status !== '已转订单' ? `<button class="btn-link" onclick="convertQtToOrder('${q.id}')">转订单</button>` : ''}
               <button class="btn-link danger" onclick="deleteQuotation('${q.id}')">删除</button>
             </td>
@@ -2690,6 +2692,244 @@ function printQuotation(id) {
     '<scr' + 'ipt>window.onload=function(){window.print();}</scr' + 'ipt>' +
     '</body></html>');
   w.document.close();
+}
+
+// === 报价单 Excel 导出 ===
+
+async function exportQuotationZh(id) {
+  if (typeof ExcelJS === 'undefined') { toast('Excel 库未加载', 'error'); return; }
+  const q = (DB.quotations || []).find(x => x.id === id);
+  if (!q) { toast('报价单不存在', 'error'); return; }
+  const items = q.items || [];
+  if (items.length === 0) { toast('报价单没有产品', 'error'); return; }
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('报价需求表', {
+    pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true },
+    pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
+  });
+
+  // 7 列：产品编号 | 产品图 | 数量 | 尺寸 | 中文描述 | 中文包装 | 不含税运人民币价格
+  [16, 18, 10, 18, 30, 22, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+
+  // 大标题
+  ws.mergeCells('A1:G1');
+  const t = ws.getCell('A1');
+  t.value = '报 价 需 求 表';
+  t.font = { name: 'Microsoft YaHei', bold: true, size: 24, color: { argb: 'FF1F2937' } };
+  t.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 42;
+
+  // 客户/日期信息
+  const c = customerById(q.customerId);
+  ws.mergeCells('A3:G3');
+  const info = ws.getCell('A3');
+  info.value = '客户：' + (c ? c.company : '-') + '    日期：' + todayStr() + '    单号：' + (q.code || '-');
+  info.font = { name: 'Microsoft YaHei', size: 11, color: { argb: 'FF4B5563' } };
+  info.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  ws.getRow(3).height = 24;
+
+  // 表头
+  const tableStart = 5;
+  const headers = ['产品编号', '产品图', '数量', '尺寸', '中文描述', '中文包装', '不含税运人民币价格'];
+  ws.getRow(tableStart).height = 40;
+  headers.forEach((h, i) => {
+    const cell = ws.getCell(tableStart, i + 1);
+    cell.value = h;
+    cell.font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF1F2937' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EFF7' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = thinBorderS();
+  });
+
+  // 数据行
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const p = it.productId && it.productId !== '__custom' ? productById(it.productId) : null;
+    const r = tableStart + i + 1;
+    ws.getRow(r).height = 120;  // 加大行高
+    ws.getCell(r, 1).value = (p && p.code) || '-';
+    if (p && p.image) await addProductImage(wb, ws, 'B' + r, p.image, 110, 110);  // 加大图
+    ws.getCell(r, 2).value = '';
+    ws.getCell(r, 3).value = Number(it.qty) || 0;
+    ws.getCell(r, 4).value = it.specs || (p && p.specs) || '';
+    ws.getCell(r, 5).value = (p && (p.descriptionZh || p.description)) || '';
+    ws.getCell(r, 6).value = (p && (p.packingZh || p.packing)) || '';
+    // 不含税运（即不含税不含运费） — 使用不含税采购价
+    const factoryPrice = p ? (Number(p.purchasePriceNoTax) || '') : '';
+    ws.getCell(r, 7).value = factoryPrice;
+
+    for (let col = 1; col <= 7; col++) {
+      const cell = ws.getCell(r, col);
+      cell.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FF1F2937' } };
+      cell.border = thinBorderS();
+      if ([1, 2, 3, 4].includes(col)) cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      else if (col === 7) {
+        cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+        cell.numFmt = '¥#,##0.00';
+      } else cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    }
+  }
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const safeName = ((c ? c.company : 'Unknown') + '').replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
+  const filename = '报价需求表_' + safeName + '_' + (q.code || todayStr()) + '.xlsx';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出 ' + filename, 'success');
+}
+
+async function exportQuotationEn(id) {
+  if (typeof ExcelJS === 'undefined') { toast('Excel 库未加载', 'error'); return; }
+  const q = (DB.quotations || []).find(x => x.id === id);
+  if (!q) { toast('报价单不存在', 'error'); return; }
+  const items = q.items || [];
+  if (items.length === 0) { toast('报价单没有产品', 'error'); return; }
+  const c = customerById(q.customerId);
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Quotation', {
+    pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true },
+    pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
+  });
+
+  // 7 列：No. | Picture | Qty | Spec | Description | Packing | Unit Price (USD)
+  [8, 18, 10, 18, 30, 22, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+  ws.getColumn(2).width = 20;
+
+  // 公司抬头（LOGO + 公司信息）
+  for (let r = 1; r <= 5; r++) ws.getRow(r).height = 20;
+  if (typeof COMPANY_LOGO_BASE64 !== 'undefined' && COMPANY_LOGO_BASE64) {
+    try {
+      const imgId = wb.addImage({ base64: 'data:image/png;base64,' + COMPANY_LOGO_BASE64, extension: 'png' });
+      ws.addImage(imgId, { tl: { col: 0.2, row: 0.2 }, ext: { width: 210, height: 95 } });
+    } catch (err) {}
+  }
+
+  ws.mergeCells('D1:G1');
+  ws.getCell('D1').value = COMPANY_INFO.name;
+  ws.getCell('D1').font = { name: 'Cambria', bold: true, size: 18, color: { argb: 'FF1F2937' } };
+  ws.getCell('D1').alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+
+  ws.mergeCells('D2:G2');
+  ws.getCell('D2').value = COMPANY_INFO.salesEn;
+  ws.getCell('D2').font = { name: 'Calibri', size: 9.5, color: { argb: 'FF6B7280' } };
+  ws.getCell('D2').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+
+  ws.mergeCells('D3:G3');
+  ws.getCell('D3').value = COMPANY_INFO.factoryEn;
+  ws.getCell('D3').font = { name: 'Calibri', size: 9.5, color: { argb: 'FF6B7280' } };
+  ws.getCell('D3').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+
+  ws.mergeCells('D4:G4');
+  ws.getCell('D4').value = 'Website: ' + COMPANY_INFO.website;
+  ws.getCell('D4').font = { name: 'Calibri', size: 9.5, italic: true, color: { argb: 'FF6B7280' } };
+  ws.getCell('D4').alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+
+  for (let col = 1; col <= 7; col++) {
+    ws.getCell(5, col).border = { bottom: { style: 'thin', color: { argb: 'FF2D5C3F' } } };
+  }
+
+  // 大标题
+  ws.mergeCells('A7:G7');
+  const t = ws.getCell('A7');
+  t.value = 'QUOTATION';
+  t.font = { name: 'Cambria', bold: true, size: 24, color: { argb: 'FF1F2937' } };
+  t.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(7).height = 38;
+
+  // 客户信息
+  const info = [
+    ['To:', c ? c.company : '-', 'Date:', todayStr()],
+    ['Quotation No.:', q.code || '-', 'Currency:', q.currency || 'USD'],
+  ];
+  const infoStart = 9;
+  info.forEach((row, i) => {
+    const r = infoStart + i;
+    ws.getRow(r).height = 22;
+    const [l1, v1, l2, v2] = row;
+    ws.getCell(r, 1).value = l1;
+    ws.getCell(r, 1).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(r, 1).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(r, 2, r, 3);
+    ws.getCell(r, 2).value = v1;
+    ws.getCell(r, 2).font = { name: 'Calibri', size: 11 };
+    ws.getCell(r, 2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.getCell(r, 4).value = l2;
+    ws.getCell(r, 4).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(r, 4).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(r, 5, r, 7);
+    ws.getCell(r, 5).value = v2;
+    ws.getCell(r, 5).font = { name: 'Calibri', size: 11 };
+    ws.getCell(r, 5).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  });
+
+  // 表头
+  const tableStart = infoStart + info.length + 1;
+  const headers = ['No.', 'Picture', 'Qty', 'Spec.', 'Description', 'Packing', 'Unit Price (USD)'];
+  ws.getRow(tableStart).height = 40;
+  headers.forEach((h, i) => {
+    const cell = ws.getCell(tableStart, i + 1);
+    cell.value = h;
+    cell.font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF1F2937' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EFF7' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = thinBorderS();
+  });
+
+  // 数据行
+  let total = 0;
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const p = it.productId && it.productId !== '__custom' ? productById(it.productId) : null;
+    const r = tableStart + i + 1;
+    ws.getRow(r).height = 120;
+    ws.getCell(r, 1).value = (p && p.code) || (i + 1);
+    if (p && p.image) await addProductImage(wb, ws, 'B' + r, p.image, 110, 110);
+    ws.getCell(r, 2).value = '';
+    const qty = Number(it.qty) || 0;
+    const price = Number(it.price) || 0;
+    ws.getCell(r, 3).value = qty;
+    ws.getCell(r, 4).value = it.specs || (p && p.specs) || '';
+    ws.getCell(r, 5).value = (p && p.descriptionEn) || '';
+    ws.getCell(r, 6).value = (p && p.packingEn) || '';
+    ws.getCell(r, 7).value = price;
+    total += qty * price;
+
+    for (let col = 1; col <= 7; col++) {
+      const cell = ws.getCell(r, col);
+      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1F2937' } };
+      cell.border = thinBorderS();
+      if ([1, 2, 3, 4].includes(col)) cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      else if (col === 7) {
+        cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+        cell.numFmt = '$#,##0.00';
+      } else cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    }
+  }
+
+  // Thank you 行
+  const thankRow = tableStart + items.length + 2;
+  ws.mergeCells(thankRow, 1, thankRow, 7);
+  const tc = ws.getCell(thankRow, 1);
+  tc.value = 'Thank you for your inquiry. Looking forward to your reply.';
+  tc.font = { name: 'Cambria', bold: true, italic: true, size: 12, color: { argb: 'FF1E3A8A' } };
+  tc.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(thankRow).height = 30;
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const filename = 'Quotation-' + (q.code || todayStr()) + '.xlsx';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出 ' + filename, 'success');
 }
 
 function convertQtToOrder(id) {
