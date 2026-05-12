@@ -621,7 +621,7 @@ function sanitizeRichHtml(html) {
 
 function renderRichText(s) {
   if (!s) return '';
-  if (isHtml(s)) return resolveRichTextImages(sanitizeRichHtml(s));
+  if (isHtml(s)) return sanitizeRichHtml(s);
   return nl2br(s);
 }
 
@@ -651,7 +651,7 @@ function compressImgFile(file, callback) {
 function richTextEditor(name, raw, opts) {
   opts = opts || {};
   const id = 'rte_' + name + '_' + Math.random().toString(36).substr(2, 6);
-  const initial = isHtml(raw) ? resolveRichTextImages(sanitizeRichHtml(raw)) : escapeHtml(raw || '').replace(/\n/g, '<br>');
+  const initial = isHtml(raw) ? sanitizeRichHtml(raw) : escapeHtml(raw || '').replace(/\n/g, '<br>');
   const placeholder = opts.placeholder || '在此输入...支持粘贴图片 (Ctrl+V)、拖入图片';
   const minH = opts.minHeight || 120;
   return `
@@ -1551,7 +1551,7 @@ function dossierBodyHtml(b, editing) {
     const cap = (b.content && b.content.caption) || '';
     if (editing) {
       return `<div class="dossier-image-wrap">
-        ${src ? `<img src="${imgUrl(src)}">` : '<div class="dossier-image-empty">尚未上传图片</div>'}
+        ${src ? `<img src="${src}">` : '<div class="dossier-image-empty">尚未上传图片</div>'}
         <input type="file" accept="image/*" onchange="dossierImageUpload(event,'${b.id}')"
           style="display:block;margin:8px auto;">
         <input type="text" class="dossier-image-caption-edit" placeholder="图片说明（可选）"
@@ -1561,7 +1561,7 @@ function dossierBodyHtml(b, editing) {
     }
     if (!src) return '<div class="muted">未上传图片</div>';
     return `<div class="dossier-image-wrap">
-      <img src="${imgUrl(src)}">
+      <img src="${src}">
       ${cap ? `<div class="dossier-image-caption">${escapeHtml(cap)}</div>` : ''}
     </div>`;
   }
@@ -1714,7 +1714,7 @@ function dossierImageUpload(e, bid) {
   const reader = new FileReader();
   reader.onload = ev => {
     const img = new Image();
-    img.onload = async () => {
+    img.onload = () => {
       const max = 1200;
       const scale = Math.min(max / img.width, max / img.height, 1);
       const canvas = document.createElement('canvas');
@@ -1733,10 +1733,7 @@ function dossierImageUpload(e, bid) {
       const b = c.dossier.find(x => x.id === bid);
       if (!b) return;
       b.content = b.content || { src: '', caption: '' };
-      // 删旧图
-      if (b.content.src) deleteImage(b.content.src);
-      const newId = await saveImage(data);
-      b.content.src = newId;
+      b.content.src = data;
       // 保留 caption 输入框中未提交的值
       const blockEl = document.querySelector('.dossier-block[data-block-id="' + bid + '"]');
       const capInp = blockEl && blockEl.querySelector('.dossier-image-caption-edit');
@@ -3120,17 +3117,12 @@ function thinBorderS() {
 async function addProductImage(wb, ws, cellRef, productImage, w, h) {
   if (!productImage) return;
   try {
-    let dataUrl = productImage;
-    if (typeof productImage === 'string' && productImage.startsWith('img_')) {
-      dataUrl = await imgDB.getDataUrl(productImage);
-      if (!dataUrl) return;
-    }
-    const wbImgId = wb.addImage({ base64: dataUrl, extension: 'png' });
-    const mm = cellRef.match(/^([A-Z]+)(\d+)$/);
-    if (!mm) return;
-    const col = mm[1].charCodeAt(0) - 'A'.charCodeAt(0);
-    const row = parseInt(mm[2]) - 1;
-    ws.addImage(wbImgId, { tl: { col: col + 0.1, row: row + 0.1 }, ext: { width: w, height: h } });
+    const imgId = wb.addImage({ base64: productImage, extension: 'png' });
+    const m = cellRef.match(/^([A-Z]+)(\d+)$/);
+    if (!m) return;
+    const col = m[1].charCodeAt(0) - 'A'.charCodeAt(0);
+    const row = parseInt(m[2]) - 1;
+    ws.addImage(imgId, { tl: { col: col + 0.1, row: row + 0.1 }, ext: { width: w, height: h } });
   } catch (err) { console.warn('Image embed failed', err); }
 }
 
@@ -4354,7 +4346,7 @@ function orderMarksHtml() {
                ondragover="event.preventDefault();this.classList.add('dragging')"
                ondragleave="this.classList.remove('dragging')">
             ${m.mainImage
-              ? '<img src="' + imgUrl(m.mainImage) + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'main\')">'
+              ? '<img src="' + m.mainImage + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'main\')">'
               : '<div class="image-uploader" style="padding:18px;" onclick="orderMarksUpload(\'main\')">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V</span></div>'}
           </div>
           ${m.mainImage ? '<button type="button" class="btn btn-sm" onclick="orderMarksClear(\'main\')" style="margin-top:4px;">移除图片</button>' : ''}
@@ -4369,7 +4361,7 @@ function orderMarksHtml() {
                ondragover="event.preventDefault();this.classList.add('dragging')"
                ondragleave="this.classList.remove('dragging')">
             ${m.sideImage
-              ? '<img src="' + imgUrl(m.sideImage) + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'side\')">'
+              ? '<img src="' + m.sideImage + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'side\')">'
               : '<div class="image-uploader" style="padding:18px;" onclick="orderMarksUpload(\'side\')">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V</span></div>'}
           </div>
           ${m.sideImage ? '<button type="button" class="btn btn-sm" onclick="orderMarksClear(\'side\')" style="margin-top:4px;">移除图片</button>' : ''}
@@ -4421,18 +4413,14 @@ function orderMarksDrop(e, which) {
 
 function processOrderMarksImage(file, which) {
   if (!file || !file.type.startsWith('image/')) { toast('请选择图片', 'error'); return; }
-  compressImgFile(file, async dataUrl => {
-    const id = await saveImage(dataUrl);
-    if (!id) return;
-    orderMarksChange(which + 'Image', id);
+  compressImgFile(file, dataUrl => {
+    orderMarksChange(which + 'Image', dataUrl);
     refreshOrderMarks();
     toast('图片已加载', 'success');
   });
 }
 
 function orderMarksClear(which) {
-  const cur = orderMarksObj()[which + 'Image'];
-  if (cur) deleteImage(cur);
   orderMarksChange(which + 'Image', '');
   refreshOrderMarks();
 }
@@ -5208,14 +5196,12 @@ function editFollowup(id, customerId) {
   if (f.customerId) { const sel = document.querySelector('#followupForm [name=customerId]'); if (sel) sel.value = f.customerId; }
 }
 
-async function saveFollowup(e, id) {
+function saveFollowup(e, id) {
   e.preventDefault();
   const form = e.target;
   if (rteIsEmpty(form, 'content')) { toast('请填写沟通内容', 'error'); return false; }
   const data = Object.fromEntries(new FormData(form).entries());
   data.content = rteGetValue(form, 'content');
-  // 把内嵌 base64 图片搬到 IndexedDB
-  data.content = await rewriteRichTextImages(data.content);
   if (id) Object.assign(DB.followups.find(x => x.id === id), data);
   else DB.followups.push({ id: uid(), createdAt: new Date().toISOString(), done: false, ...data });
   try {

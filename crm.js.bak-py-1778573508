@@ -3120,17 +3120,12 @@ function thinBorderS() {
 async function addProductImage(wb, ws, cellRef, productImage, w, h) {
   if (!productImage) return;
   try {
-    let dataUrl = productImage;
-    if (typeof productImage === 'string' && productImage.startsWith('img_')) {
-      dataUrl = await imgDB.getDataUrl(productImage);
-      if (!dataUrl) return;
-    }
-    const wbImgId = wb.addImage({ base64: dataUrl, extension: 'png' });
-    const mm = cellRef.match(/^([A-Z]+)(\d+)$/);
-    if (!mm) return;
-    const col = mm[1].charCodeAt(0) - 'A'.charCodeAt(0);
-    const row = parseInt(mm[2]) - 1;
-    ws.addImage(wbImgId, { tl: { col: col + 0.1, row: row + 0.1 }, ext: { width: w, height: h } });
+    const imgId = wb.addImage({ base64: productImage, extension: 'png' });
+    const m = cellRef.match(/^([A-Z]+)(\d+)$/);
+    if (!m) return;
+    const col = m[1].charCodeAt(0) - 'A'.charCodeAt(0);
+    const row = parseInt(m[2]) - 1;
+    ws.addImage(imgId, { tl: { col: col + 0.1, row: row + 0.1 }, ext: { width: w, height: h } });
   } catch (err) { console.warn('Image embed failed', err); }
 }
 

@@ -1,252 +1,3 @@
-// === IndexedDB 图片存储层 ===
-
-const imgDB = {
-  _db: null,
-  async open() {
-    if (this._db) return this._db;
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open('crm_images', 1);
-      req.onupgradeneeded = e => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains('images')) {
-          db.createObjectStore('images', { keyPath: 'id' });
-        }
-      };
-      req.onsuccess = e => { this._db = e.target.result; resolve(this._db); };
-      req.onerror = e => reject(e);
-    });
-  },
-  async put(id, dataUrl) {
-    await this.open();
-    const blob = dataUrlToBlob(dataUrl);
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readwrite');
-      tx.objectStore('images').put({ id, blob, size: blob.size, createdAt: new Date().toISOString() });
-      tx.oncomplete = () => resolve(id);
-      tx.onerror = e => reject(e);
-    });
-  },
-  async putBlob(id, blob) {
-    await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readwrite');
-      tx.objectStore('images').put({ id, blob, size: blob.size, createdAt: new Date().toISOString() });
-      tx.oncomplete = () => resolve(id);
-      tx.onerror = e => reject(e);
-    });
-  },
-  async get(id) {
-    await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readonly');
-      const req = tx.objectStore('images').get(id);
-      req.onsuccess = () => resolve(req.result ? req.result.blob : null);
-      req.onerror = e => reject(e);
-    });
-  },
-  async getDataUrl(id) {
-    const blob = await this.get(id);
-    if (!blob) return null;
-    return blobToDataUrl(blob);
-  },
-  async delete(id) {
-    await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readwrite');
-      tx.objectStore('images').delete(id);
-      tx.oncomplete = () => resolve();
-      tx.onerror = e => reject(e);
-    });
-  },
-  async getAllIds() {
-    await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readonly');
-      const req = tx.objectStore('images').getAllKeys();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = e => reject(e);
-    });
-  },
-  async getAllEntries() {
-    await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readonly');
-      const req = tx.objectStore('images').getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = e => reject(e);
-    });
-  },
-  async clear() {
-    await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = this._db.transaction(['images'], 'readwrite');
-      tx.objectStore('images').clear();
-      tx.oncomplete = () => resolve();
-      tx.onerror = e => reject(e);
-    });
-  },
-  async getStats() {
-    const ids = await this.getAllIds();
-    let totalSize = 0;
-    if (navigator.storage && navigator.storage.estimate) {
-      const e = await navigator.storage.estimate();
-      totalSize = e.usage || 0;
-    }
-    return { count: ids.length, usage: totalSize, quota: (navigator.storage && navigator.storage.estimate) ? (await navigator.storage.estimate()).quota : 0 };
-  }
-};
-
-function dataUrlToBlob(dataUrl) {
-  const arr = dataUrl.split(',');
-  const mime = (arr[0].match(/:(.*?);/) || ['', 'image/jpeg'])[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8 = new Uint8Array(n);
-  while (n--) u8[n] = bstr.charCodeAt(n);
-  return new Blob([u8], { type: mime });
-}
-
-function blobToDataUrl(blob) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
-
-// === 图片缓存（Map: imageId -> blobURL）===
-const imgCache = new Map();
-
-async function preloadAllImages() {
-  try {
-    const entries = await imgDB.getAllEntries();
-    entries.forEach(entry => {
-      if (!imgCache.has(entry.id)) {
-        imgCache.set(entry.id, URL.createObjectURL(entry.blob));
-      }
-    });
-    console.log('Loaded', entries.length, 'images from IndexedDB');
-  } catch (e) {
-    console.warn('preloadAllImages failed', e);
-  }
-}
-
-// 同步取 URL：如果是 imageId 引用，从 cache 返回 blobURL；否则原值返回
-function imgUrl(ref) {
-  if (!ref) return '';
-  if (typeof ref === 'string' && ref.startsWith('img_')) {
-    return imgCache.get(ref) || '';
-  }
-  return ref; // 旧 base64 兼容
-}
-
-// 保存新图片：dataUrl → 写入 IndexedDB + cache，返回 imageId
-async function saveImage(dataUrl) {
-  if (!dataUrl) return '';
-  if (typeof dataUrl === 'string' && dataUrl.startsWith('img_')) return dataUrl; // 已是 ID
-  const id = 'img_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-  try {
-    await imgDB.put(id, dataUrl);
-    const blob = await imgDB.get(id);
-    if (blob) imgCache.set(id, URL.createObjectURL(blob));
-    return id;
-  } catch (e) {
-    console.warn('saveImage failed', e);
-    toast('图片保存失败：' + e.message, 'error');
-    return '';
-  }
-}
-
-// 删除图片
-async function deleteImage(ref) {
-  if (!ref || typeof ref !== 'string' || !ref.startsWith('img_')) return;
-  try {
-    if (imgCache.has(ref)) {
-      URL.revokeObjectURL(imgCache.get(ref));
-      imgCache.delete(ref);
-    }
-    await imgDB.delete(ref);
-  } catch (e) { console.warn('deleteImage failed', e); }
-}
-
-// 富文本里 base64 图片 → imageId 引用
-async function rewriteRichTextImages(html) {
-  if (!html || typeof html !== 'string') return html;
-  // 找所有 data:image src
-  const matches = [...html.matchAll(/src="(data:image\/[^"]+)"/g)];
-  let result = html;
-  for (const m of matches) {
-    const id = await saveImage(m[1]);
-    if (id) result = result.replace(m[1], id);
-  }
-  return result;
-}
-
-// 富文本渲染时：把 imageId 替换为 blob URL
-function resolveRichTextImages(html) {
-  if (!html || typeof html !== 'string') return html;
-  return html.replace(/src="(img_[^"]+)"/g, (m, id) => {
-    const url = imgCache.get(id);
-    return 'src="' + (url || '') + '"';
-  });
-}
-
-// 一次性迁移：把所有 base64 搬到 IndexedDB
-async function migrateAllImagesToIndexedDB() {
-  if (DB.meta && DB.meta.imageMigrationV1Done) return 0;
-  let migrated = 0;
-
-  // 1. 产品图
-  for (const p of (DB.products || [])) {
-    if (p.image && typeof p.image === 'string' && p.image.startsWith('data:image/')) {
-      const id = await saveImage(p.image);
-      if (id) { p.image = id; migrated++; }
-    }
-  }
-
-  // 2. 订单唛头图
-  for (const o of (DB.orders || [])) {
-    if (o.marks && typeof o.marks === 'object') {
-      if (o.marks.mainImage && typeof o.marks.mainImage === 'string' && o.marks.mainImage.startsWith('data:image/')) {
-        const id = await saveImage(o.marks.mainImage);
-        if (id) { o.marks.mainImage = id; migrated++; }
-      }
-      if (o.marks.sideImage && typeof o.marks.sideImage === 'string' && o.marks.sideImage.startsWith('data:image/')) {
-        const id = await saveImage(o.marks.sideImage);
-        if (id) { o.marks.sideImage = id; migrated++; }
-      }
-    }
-  }
-
-  // 3. 客户档案块图片
-  for (const c of (DB.customers || [])) {
-    for (const b of (c.dossier || [])) {
-      if (b.type === 'image' && b.content && typeof b.content === 'object' && b.content.src && typeof b.content.src === 'string' && b.content.src.startsWith('data:image/')) {
-        const id = await saveImage(b.content.src);
-        if (id) { b.content.src = id; migrated++; }
-      }
-    }
-  }
-
-  // 4. 跟进富文本内嵌图片
-  for (const f of (DB.followups || [])) {
-    if (f.content && typeof f.content === 'string' && f.content.indexOf('data:image/') >= 0) {
-      const before = f.content;
-      f.content = await rewriteRichTextImages(f.content);
-      if (f.content !== before) migrated++;
-    }
-  }
-
-  DB.meta = DB.meta || {};
-  DB.meta.imageMigrationV1Done = true;
-  saveDB();
-  if (migrated > 0) {
-    toast('已迁移 ' + migrated + ' 处图片到大容量存储', 'success');
-    console.log('Image migration complete:', migrated);
-  }
-  return migrated;
-}
-
 /* ============================================================
  * 常量定义
  * ============================================================ */
@@ -621,7 +372,7 @@ function sanitizeRichHtml(html) {
 
 function renderRichText(s) {
   if (!s) return '';
-  if (isHtml(s)) return resolveRichTextImages(sanitizeRichHtml(s));
+  if (isHtml(s)) return sanitizeRichHtml(s);
   return nl2br(s);
 }
 
@@ -651,7 +402,7 @@ function compressImgFile(file, callback) {
 function richTextEditor(name, raw, opts) {
   opts = opts || {};
   const id = 'rte_' + name + '_' + Math.random().toString(36).substr(2, 6);
-  const initial = isHtml(raw) ? resolveRichTextImages(sanitizeRichHtml(raw)) : escapeHtml(raw || '').replace(/\n/g, '<br>');
+  const initial = isHtml(raw) ? sanitizeRichHtml(raw) : escapeHtml(raw || '').replace(/\n/g, '<br>');
   const placeholder = opts.placeholder || '在此输入...支持粘贴图片 (Ctrl+V)、拖入图片';
   const minH = opts.minHeight || 120;
   return `
@@ -1551,7 +1302,7 @@ function dossierBodyHtml(b, editing) {
     const cap = (b.content && b.content.caption) || '';
     if (editing) {
       return `<div class="dossier-image-wrap">
-        ${src ? `<img src="${imgUrl(src)}">` : '<div class="dossier-image-empty">尚未上传图片</div>'}
+        ${src ? `<img src="${src}">` : '<div class="dossier-image-empty">尚未上传图片</div>'}
         <input type="file" accept="image/*" onchange="dossierImageUpload(event,'${b.id}')"
           style="display:block;margin:8px auto;">
         <input type="text" class="dossier-image-caption-edit" placeholder="图片说明（可选）"
@@ -1561,7 +1312,7 @@ function dossierBodyHtml(b, editing) {
     }
     if (!src) return '<div class="muted">未上传图片</div>';
     return `<div class="dossier-image-wrap">
-      <img src="${imgUrl(src)}">
+      <img src="${src}">
       ${cap ? `<div class="dossier-image-caption">${escapeHtml(cap)}</div>` : ''}
     </div>`;
   }
@@ -1714,7 +1465,7 @@ function dossierImageUpload(e, bid) {
   const reader = new FileReader();
   reader.onload = ev => {
     const img = new Image();
-    img.onload = async () => {
+    img.onload = () => {
       const max = 1200;
       const scale = Math.min(max / img.width, max / img.height, 1);
       const canvas = document.createElement('canvas');
@@ -1733,10 +1484,7 @@ function dossierImageUpload(e, bid) {
       const b = c.dossier.find(x => x.id === bid);
       if (!b) return;
       b.content = b.content || { src: '', caption: '' };
-      // 删旧图
-      if (b.content.src) deleteImage(b.content.src);
-      const newId = await saveImage(data);
-      b.content.src = newId;
+      b.content.src = data;
       // 保留 caption 输入框中未提交的值
       const blockEl = document.querySelector('.dossier-block[data-block-id="' + bid + '"]');
       const capInp = blockEl && blockEl.querySelector('.dossier-image-caption-edit');
@@ -2111,7 +1859,7 @@ function renderProducts() {
             <tbody>
             ${list.map(p => `
               <tr>
-                <td>${p.image ? `<img src="${imgUrl(p.image)}" class="product-thumb">` : '<div class="product-thumb"></div>'}</td>
+                <td>${p.image ? `<img src="${p.image}" class="product-thumb">` : '<div class="product-thumb"></div>'}</td>
                 <td class="code no-wrap">${escapeHtml(p.code || '')}</td>
                 <td><strong>${escapeHtml(p.nameEn || '')}</strong></td>
                 <td>${escapeHtml(p.nameZh || '')}</td>
@@ -2164,7 +1912,7 @@ function editProduct(id) {
             ondrop="handleProductImageDrop(event)"
             ondragover="event.preventDefault();this.classList.add('dragging')"
             ondragleave="this.classList.remove('dragging')">
-            ${p.image ? `<img src="${imgUrl(p.image)}" class="product-thumb-large" onclick="document.getElementById('productImage').click()">` :
+            ${p.image ? `<img src="${p.image}" class="product-thumb-large" onclick="document.getElementById('productImage').click()">` :
               '<div class="image-uploader" onclick="document.getElementById(\'productImage\').click()">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V 粘贴</span><br><span style="font-size:10px;">自动压缩</span></div>'}
           </div>
           <input type="file" id="productImage" accept="image/*" style="display:none;" onchange="handleProductImage(event)">
@@ -2256,17 +2004,16 @@ function processProductImageFile(file) {
   if (!file || !file.type || !file.type.startsWith('image/')) {
     toast('请选择图片文件', 'error'); return;
   }
-  compressImgFile(file, async dataUrl => {
-    const id = await saveImage(dataUrl);
-    if (!id) return;
+  // 用更高质量的压缩（1200px，比原 handleImageFile 的 400px 清晰）
+  compressImgFile(file, dataUrl => {
     const inp = document.querySelector('#productForm [name=image]');
-    if (inp) inp.value = id;
+    if (inp) inp.value = dataUrl;
     const wrap = document.getElementById('imgWrap');
     if (wrap) {
       wrap.classList.remove('dragging');
-      wrap.innerHTML = `<img src="${imgUrl(id)}" class="product-thumb-large" onclick="document.getElementById('productImage').click()">`;
+      wrap.innerHTML = `<img src="${dataUrl}" class="product-thumb-large" onclick="document.getElementById('productImage').click()">`;
     }
-    toast('图片已加载', 'success');
+    toast('图片已加载 (' + Math.round(dataUrl.length / 1024) + 'KB)', 'success');
   });
 }
 
@@ -2320,7 +2067,7 @@ function viewProduct(id) {
   if (!p) return;
   openModal(p.nameEn || p.nameZh || '产品详情', `
     <div style="display:flex;gap:18px;">
-      <div>${p.image ? `<img src="${imgUrl(p.image)}" class="product-thumb-large">` : '<div class="product-thumb-large"></div>'}</div>
+      <div>${p.image ? `<img src="${p.image}" class="product-thumb-large">` : '<div class="product-thumb-large"></div>'}</div>
       <div style="flex:1;">
         <dl class="detail-grid">
           <dt>产品编号</dt><dd class="code">${escapeHtml(p.code || '-')}</dd>
@@ -2709,7 +2456,7 @@ function renderSampleExpandedItems(s) {
       const sub = (fp * qty).toFixed(2);
       return '<tr>' +
         '<td class="text-center muted">' + (idx + 1) + '</td>' +
-        '<td class="text-center">' + (p && p.image ? '<img src="' + imgUrl(p.image) + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
+        '<td class="text-center">' + (p && p.image ? '<img src="' + p.image + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
         '<td class="code">' + escapeHtml((p && p.code) || '-') + '</td>' +
         '<td>' + escapeHtml(it.productName || (p && p.nameEn) || '-') + '</td>' +
         '<td class="muted">' + escapeHtml(it.specs || '-') + '</td>' +
@@ -2979,7 +2726,7 @@ function sampleItemProductCardHtml(item) {
     return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
   }
   return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + imgUrl(p.image) + '">' : '<div class="no-img">无图</div>') +
+    (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
     '<div class="info">' +
       '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
       '<div class="name-line">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
@@ -3120,17 +2867,12 @@ function thinBorderS() {
 async function addProductImage(wb, ws, cellRef, productImage, w, h) {
   if (!productImage) return;
   try {
-    let dataUrl = productImage;
-    if (typeof productImage === 'string' && productImage.startsWith('img_')) {
-      dataUrl = await imgDB.getDataUrl(productImage);
-      if (!dataUrl) return;
-    }
-    const wbImgId = wb.addImage({ base64: dataUrl, extension: 'png' });
-    const mm = cellRef.match(/^([A-Z]+)(\d+)$/);
-    if (!mm) return;
-    const col = mm[1].charCodeAt(0) - 'A'.charCodeAt(0);
-    const row = parseInt(mm[2]) - 1;
-    ws.addImage(wbImgId, { tl: { col: col + 0.1, row: row + 0.1 }, ext: { width: w, height: h } });
+    const imgId = wb.addImage({ base64: productImage, extension: 'png' });
+    const m = cellRef.match(/^([A-Z]+)(\d+)$/);
+    if (!m) return;
+    const col = m[1].charCodeAt(0) - 'A'.charCodeAt(0);
+    const row = parseInt(m[2]) - 1;
+    ws.addImage(imgId, { tl: { col: col + 0.1, row: row + 0.1 }, ext: { width: w, height: h } });
   } catch (err) { console.warn('Image embed failed', err); }
 }
 
@@ -3549,7 +3291,7 @@ function renderOrderExpandedItems(o) {
       const sub = (qty * up).toFixed(2);
       return '<tr>' +
         '<td class="text-center muted">' + (idx + 1) + '</td>' +
-        '<td class="text-center">' + (p && p.image ? '<img src="' + imgUrl(p.image) + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
+        '<td class="text-center">' + (p && p.image ? '<img src="' + p.image + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
         '<td class="code">' + escapeHtml((p && p.code) || '-') + '</td>' +
         '<td>' + escapeHtml(it.productName || (p && p.nameEn) || '-') + '</td>' +
         '<td class="muted">' + escapeHtml(it.specs || '-') + '</td>' +
@@ -3788,7 +3530,7 @@ function orderItemProductCardHtml(item) {
     return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
   }
   return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + imgUrl(p.image) + '">' : '<div class="no-img">无图</div>') +
+    (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
     '<div class="info">' +
       '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
       '<div class="name-line">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
@@ -4354,7 +4096,7 @@ function orderMarksHtml() {
                ondragover="event.preventDefault();this.classList.add('dragging')"
                ondragleave="this.classList.remove('dragging')">
             ${m.mainImage
-              ? '<img src="' + imgUrl(m.mainImage) + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'main\')">'
+              ? '<img src="' + m.mainImage + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'main\')">'
               : '<div class="image-uploader" style="padding:18px;" onclick="orderMarksUpload(\'main\')">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V</span></div>'}
           </div>
           ${m.mainImage ? '<button type="button" class="btn btn-sm" onclick="orderMarksClear(\'main\')" style="margin-top:4px;">移除图片</button>' : ''}
@@ -4369,7 +4111,7 @@ function orderMarksHtml() {
                ondragover="event.preventDefault();this.classList.add('dragging')"
                ondragleave="this.classList.remove('dragging')">
             ${m.sideImage
-              ? '<img src="' + imgUrl(m.sideImage) + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'side\')">'
+              ? '<img src="' + m.sideImage + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'side\')">'
               : '<div class="image-uploader" style="padding:18px;" onclick="orderMarksUpload(\'side\')">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V</span></div>'}
           </div>
           ${m.sideImage ? '<button type="button" class="btn btn-sm" onclick="orderMarksClear(\'side\')" style="margin-top:4px;">移除图片</button>' : ''}
@@ -4421,18 +4163,14 @@ function orderMarksDrop(e, which) {
 
 function processOrderMarksImage(file, which) {
   if (!file || !file.type.startsWith('image/')) { toast('请选择图片', 'error'); return; }
-  compressImgFile(file, async dataUrl => {
-    const id = await saveImage(dataUrl);
-    if (!id) return;
-    orderMarksChange(which + 'Image', id);
+  compressImgFile(file, dataUrl => {
+    orderMarksChange(which + 'Image', dataUrl);
     refreshOrderMarks();
     toast('图片已加载', 'success');
   });
 }
 
 function orderMarksClear(which) {
-  const cur = orderMarksObj()[which + 'Image'];
-  if (cur) deleteImage(cur);
   orderMarksChange(which + 'Image', '');
   refreshOrderMarks();
 }
@@ -4680,7 +4418,7 @@ function shipProductCardHtml(item) {
     return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择产品</span></div></div>';
   }
   return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + imgUrl(p.image) + '">' : '<div class="no-img">无图</div>') +
+    (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
     '<div class="info">' +
       '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
       '<div class="name-line">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
@@ -4833,7 +4571,7 @@ function viewShipment(id) {
             const p = productById(it.productId);
             const r = calcShipmentItem(it);
             const imgCell = p && p.image
-              ? '<td><img src="' + imgUrl(p.image) + '" class="ship-detail-thumb"></td>'
+              ? '<td><img src="' + p.image + '" class="ship-detail-thumb"></td>'
               : '<td><div class="ship-detail-no-img">无图</div></td>';
             if (!r.valid) {
               return '<tr>' + imgCell + '<td colspan="8" style="color:#ef4444;font-size:11px;">⚠ ' + (p ? escapeHtml(p.nameEn || p.code || '') : '[产品已删除]') + ' (数量 ' + (it.qty || 0) + ') — 缺装箱信息，未计算</td></tr>';
@@ -5208,14 +4946,12 @@ function editFollowup(id, customerId) {
   if (f.customerId) { const sel = document.querySelector('#followupForm [name=customerId]'); if (sel) sel.value = f.customerId; }
 }
 
-async function saveFollowup(e, id) {
+function saveFollowup(e, id) {
   e.preventDefault();
   const form = e.target;
   if (rteIsEmpty(form, 'content')) { toast('请填写沟通内容', 'error'); return false; }
   const data = Object.fromEntries(new FormData(form).entries());
   data.content = rteGetValue(form, 'content');
-  // 把内嵌 base64 图片搬到 IndexedDB
-  data.content = await rewriteRichTextImages(data.content);
   if (id) Object.assign(DB.followups.find(x => x.id === id), data);
   else DB.followups.push({ id: uid(), createdAt: new Date().toISOString(), done: false, ...data });
   try {
@@ -5762,7 +5498,7 @@ function renderProductPickerV2Body() {
               : `onclick="pickerToggleProduct('${p.id}', !${checked})"`;
             return `<tr style="cursor:pointer;${checked ? 'background:#eff6ff;' : ''}" ${rowClick}>
               ${isReplace ? '' : `<td onclick="event.stopPropagation()"><input type="checkbox" ${checked ? 'checked' : ''} onchange="pickerToggleProduct('${p.id}', this.checked)"></td>`}
-              <td>${p.image ? `<img src="${imgUrl(p.image)}" style="width:40px;height:40px;object-fit:contain;background:#f9fafb;border-radius:3px;">` : '<div style="width:40px;height:40px;background:#f3f4f6;border-radius:3px;"></div>'}</td>
+              <td>${p.image ? `<img src="${p.image}" style="width:40px;height:40px;object-fit:contain;background:#f9fafb;border-radius:3px;">` : '<div style="width:40px;height:40px;background:#f3f4f6;border-radius:3px;"></div>'}</td>
               <td class="code">${escapeHtml(p.code || '-')}</td>
               <td>${escapeHtml(p.nameZh || '-')}</td>
               <td class="muted">${escapeHtml(p.nameEn || '-')}</td>
@@ -5942,20 +5678,9 @@ function closeProductPicker() {
   _pickerTargetItemId = null;
 }
 
-(async () => {
-  loadDB();
-  try { await preloadAllImages(); } catch(e) { console.warn('preload failed', e); }
-  // 第一次跑迁移
-  try {
-    if (DB.meta && !DB.meta.imageMigrationV1Done) {
-      console.log('开始迁移图片到 IndexedDB...');
-      await migrateAllImagesToIndexedDB();
-      await preloadAllImages();  // 重新加载新存的图
-    }
-  } catch(e) { console.warn('migrate failed', e); }
-  renderNav();
-  render();
-  checkAutoBackup();
-})();
+loadDB();
+renderNav();
+render();
+checkAutoBackup();
 
 window.addEventListener('beforeunload', saveDB);
