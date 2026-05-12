@@ -1,46 +1,48 @@
 // /capabilities — high-level overview of factory capabilities.
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
 
-export const metadata = {
-  title: 'Capabilities — CHIC Wooden Products Factory',
-  description:
-    'CNC routing, laser engraving, hot foil, screen print, kiln drying, finishing and packing — modern equipment and a strict QC system for wholesale and OEM wooden box programs.',
-  alternates: { canonical: '/capabilities', languages: hreflangFor(SITE.siteUrl, '/capabilities') },
-};
-
-const ITEMS = [
-  { t: 'Manufacturing Equipment', d: 'CNC routers, sliding panel saws, edge banders, finishing booths.' },
-  { t: 'Quality Control',         d: 'Multi-stage inspection from incoming materials to pre-shipment.' },
-  { t: 'OEM / ODM',               d: 'Branding, packaging, and full design support for private label.' },
-  { t: 'Production Capacity',     d: 'Stable monthly output with predictable lead times.' },
-  { t: 'Engineering Support',     d: 'CAD review, prototyping, and DFM suggestions.' },
-  { t: 'Logistics',               d: 'Reliable export packing and worldwide shipping coordination.' },
-];
+export async function generateMetadata({ params: { locale } = {} }) {
+  const t = await getTranslations({ locale, namespace: 'capabilities' });
+  return {
+    title: t('metaTitle'),
+    description: t('metaDesc'),
+    alternates: { canonical: '/capabilities', languages: hreflangFor(SITE.siteUrl, '/capabilities') },
+  };
+}
 
 export default function CapabilitiesPage({ params }) {
   unstable_setRequestLocale(params.locale);
+  const t = useTranslations('capabilities');
+  const tCta = useTranslations('cta');
+  const tNav = useTranslations('nav');
+
+  const ITEMS = [1, 2, 3, 4, 5, 6].map(i => ({
+    t: t(`item${i}Title`),
+    d: t(`item${i}Body`),
+  }));
+
   return (
     <article className="bg-white">
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
           <nav className="text-xs text-brand-mute mb-4">
-            <Link href="/" className="hover:text-brand-green">Home</Link>
+            <Link href="/" className="hover:text-brand-green">{tNav('home')}</Link>
             {' / '}
-            <span className="text-brand-ink">Capabilities</span>
+            <span className="text-brand-ink">{t('breadcrumb')}</span>
           </nav>
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-            What We Can Do
+            {t('heroEyebrow')}
           </p>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-            Modern equipment.{' '}
-            <span className="text-brand-green">Strict quality.</span>
+            {t('heroH1Pre')}{' '}
+            <span className="text-brand-green">{t('heroH1Highlight')}</span>
           </h1>
           <p className="mt-5 text-brand-mute leading-relaxed max-w-2xl">
-            Designed for wholesale and OEM customers — modern machinery, experienced operators,
-            and a documented quality system that holds export-grade standards.
+            {t('heroLead')}
           </p>
         </div>
       </header>
@@ -64,13 +66,13 @@ export default function CapabilitiesPage({ params }) {
               href="/contact"
               className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
             >
-              Get a Free Quote
+              {tCta('getFreeQuote')}
             </Link>
             <Link
               href="/about"
               className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
             >
-              About Our Factory
+              {t('ctaAbout')}
             </Link>
           </div>
         </div>

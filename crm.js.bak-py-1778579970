@@ -2056,36 +2056,6 @@ function customerOptions(selectedId) {
   ).join('');
 }
 
-function customerIdByName(name) {
-  const c = (DB.customers || []).find(x => x.company === name);
-  return c ? c.id : '';
-}
-
-// 可搜索客户输入框
-// onChangeExpr: 选中时执行的 JS 表达式，里面用 this.value 代表客户ID
-// hiddenName: 如果给了，会同时生成一个 hidden input 给表单提交使用
-function customerSearchInput(currentId, onChangeExpr, hiddenName) {
-  const cur = customerById(currentId);
-  const display = cur ? cur.company : '';
-  const listId = 'custList_' + Math.random().toString(36).substr(2, 6);
-  const opts = (DB.customers || []).map(c =>
-    '<option value="' + escapeHtml(c.company) + '">' + (c.country ? c.country + ' · ' : '') + escapeHtml(c.contact || '')
-  ).join('');
-  // 构造 oninput 处理：先把名字转 ID，再执行回调
-  let oninput;
-  if (hiddenName) {
-    oninput = 'this.nextElementSibling.value=customerIdByName(this.value);' + (onChangeExpr || '');
-  } else {
-    oninput = '(function(el){var id=customerIdByName(el.value);' + (onChangeExpr ? onChangeExpr.replace(/this\.value/g, 'id') : '') + '})(this)';
-  }
-  let html = '<input list="' + listId + '" value="' + escapeHtml(display) + '" oninput="' + oninput + '" placeholder="输入客户名搜索...">';
-  if (hiddenName) {
-    html += '<input type="hidden" name="' + hiddenName + '" value="' + (currentId || '') + '">';
-  }
-  html += '<datalist id="' + listId + '">' + opts + '</datalist>';
-  return html;
-}
-
 /* ============================================================
  * 产品库
  * ============================================================ */
@@ -2452,7 +2422,7 @@ function editQuotation(id, customerId) {
         <div class="field"><label>日期</label>
           <input name="date" type="date" value="${fmtDate(q.date)}"></div>
         <div class="field"><label>客户 <span class="req">*</span></label>
-          ${customerSearchInput(q.customerId, "", "customerId")}</div>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(q.customerId)}</select></div>
         <div class="field"><label>币种</label>
           <select name="currency">${CURRENCIES.map(c => `<option ${q.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>有效期</label>
@@ -2504,16 +2474,14 @@ function editQuotation(id, customerId) {
 function renderQtItems() {
   const tbody = document.getElementById('qtItemsBody');
   if (!tbody) return;
-  // 确保每个 item 有 _tmpId
-  window.__qtItems.forEach(it => { if (!it._tmpId) it._tmpId = uid(); });
   tbody.innerHTML = window.__qtItems.map((it, i) => `
-    <tr data-qt-item="${it._tmpId}">
-      <td>
-        <div style="display:flex;gap:6px;align-items:stretch;">
-          ${qtProductCardHtml(it)}
-          <button type="button" class="btn btn-sm" onclick="openQtItemPicker('${it._tmpId}')" style="white-space:nowrap;">${(it.productId && it.productId !== '__custom') ? '更换' : '选择'}</button>
-        </div>
-        ${it.productId === '__custom' ? `<input style="margin-top:4px;width:100%;" placeholder="产品名" value="${escapeHtml(it.customName||'')}" oninput="window.__qtItems[${i}].customName=this.value">` : ''}
+    <tr>
+      <td><select onchange="onQtProductChange(${i}, this)">
+        <option value="">选择产品...</option>
+        ${DB.products.map(p => `<option value="${p.id}" ${it.productId===p.id?'selected':''}>${escapeHtml(p.nameEn || p.nameZh)} (${escapeHtml(p.code||'')})</option>`).join('')}
+        <option value="__custom" ${it.productId==='__custom'?'selected':''}>自定义产品</option>
+      </select>
+      ${it.productId === '__custom' ? `<input style="margin-top:3px;" placeholder="产品名" value="${escapeHtml(it.customName||'')}" oninput="window.__qtItems[${i}].customName=this.value">` : ''}
       </td>
       <td><input value="${escapeHtml(it.specs||'')}" oninput="window.__qtItems[${i}].specs=this.value"></td>
       <td><input type="number" class="num" value="${it.qty||0}" oninput="window.__qtItems[${i}].qty=Number(this.value);recalcQt()"></td>
@@ -2523,39 +2491,6 @@ function renderQtItems() {
     </tr>
   `).join('');
   recalcQt();
-}
-
-function qtProductCardHtml(it) {
-  if (it.productId === '__custom') {
-    return '<div class="ship-product-card"><div class="no-img">自</div><div class="info"><span class="empty-line">自定义产品</span></div></div>';
-  }
-  const p = productById(it.productId);
-  if (!p) {
-    return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
-  }
-  return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + imgUrl(p.image) + '">' : '<div class="no-img">无图</div>') +
-    '<div class="info">' +
-      '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
-      '<div class="name-line">' + escapeHtml(p.nameZh || p.nameEn || '-') + '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-function openQtItemPicker(tmpId) {
-  if (DB.products.length === 0) {
-    // 没产品时让用户自定义
-    const it = window.__qtItems.find(x => x._tmpId === tmpId);
-    if (it) {
-      it.productId = '__custom';
-      it.customName = '';
-      it.qty = 1;
-      it.price = 0;
-      renderQtItems();
-    }
-    return;
-  }
-  openProductPickerV2('quotation-replace', { itemId: tmpId });
 }
 
 function onQtProductChange(i, sel) {
@@ -2572,12 +2507,8 @@ function onQtProductChange(i, sel) {
 }
 
 function addQtItem() {
-  if (DB.products.length === 0) {
-    window.__qtItems.push({ _tmpId: uid(), productId: '__custom', customName: '', specs: '', qty: 1, price: 0 });
-    renderQtItems();
-    return;
-  }
-  openProductPickerV2('quotation-add');
+  window.__qtItems.push({ productId: '', specs: '', qty: 1, price: 0 });
+  renderQtItems();
 }
 
 function removeQtItem(i) {
@@ -2970,7 +2901,7 @@ function renderSampleForm() {
       <div class="field"><label>样品单号</label>
         <input value="${escapeHtml(s.code || '')}" oninput="_editingSample.code=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(s.customerId, '_editingSample.customerId=this.value')}</div>
+        <select onchange="_editingSample.customerId=this.value">${customerOptions(s.customerId)}</select></div>
       <div class="field"><label>币种</label>
         <select onchange="_editingSample.currency=this.value">${CURRENCIES.map(c => `<option ${s.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div class="field"><label>下单时间</label>
@@ -3762,7 +3693,7 @@ function renderOrderForm() {
       <div class="field"><label>订单号</label>
         <input value="${escapeHtml(o.orderNo || '')}" oninput="_editingOrder.orderNo=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(o.customerId, '_editingOrder.customerId=this.value')}</div>
+        <select onchange="_editingOrder.customerId=this.value">${customerOptions(o.customerId)}</select></div>
       <div class="field"><label>币种</label>
         <select onchange="_editingOrder.currency=this.value;refreshOrderTotal()">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div class="field"><label>下单日期</label>
@@ -5008,7 +4939,7 @@ function renderPayments() {
           <td>${escapeHtml(p.counterparty || '-')}</td>
           <td class="muted no-wrap">${p.relatedNo ? escapeHtml(p.relatedNo) : '-'}</td>
           <td>${escapeHtml(p.method || '-')}</td>
-          <td>${p.voucherImage ? '<img src="' + imgUrl(p.voucherImage) + '" style="width:36px;height:36px;object-fit:contain;background:#f9fafb;border-radius:3px;cursor:pointer;" onclick="viewPaymentVoucher(\''+p.id+'\')">' : '<span class="muted">-</span>'}</td>
+          <td>${p.voucherImage ? '<img src="' + imgUrl(p.voucherImage) + '" style="width:36px;height:36px;object-fit:contain;background:#f9fafb;border-radius:3px;cursor:pointer;" onclick="viewPaymentVoucher(\\''+p.id+'\\')">' : '<span class="muted">-</span>'}</td>
           <td class="muted">${escapeHtml(truncate(p.notes || '', 30))}</td>
           <td class="text-right no-wrap">
             <button class="btn-link" onclick="editPayment('${p.id}')">编辑</button>
@@ -5390,7 +5321,7 @@ function renderShipmentForm() {
       <div class="field"><label>出货日期 <span class="req">*</span></label>
         <input type="date" value="${fmtDate(s.date)}" onchange="_editingShipment.date=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(s.customerId, '_editingShipment.customerId=this.value')}</div>
+        <select onchange="_editingShipment.customerId=this.value">${customerOptions(s.customerId)}</select></div>
       <div class="field"><label>状态</label>
         <select onchange="_editingShipment.status=this.value">${SHIPMENT_STATUSES.map(st => `<option ${s.status===st.name?'selected':''}>${st.name}</option>`).join('')}</select></div>
       <div class="field"><label>关联订单号 (选填)</label>
@@ -5945,7 +5876,7 @@ function editFollowup(id, customerId) {
       <div class="form-grid">
         <div class="field"><label>日期 <span class="req">*</span></label><input name="date" type="date" required value="${fmtDate(f.date)}"></div>
         <div class="field"><label>客户 <span class="req">*</span></label>
-          ${customerSearchInput(f.customerId, '', 'customerId')}</div>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(f.customerId)}</select></div>
         <div class="field"><label>沟通方式</label>
           <select name="channel">${CHANNELS.map(c => `<option ${f.channel===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>下次跟进提醒</label><input name="reminderDate" type="date" value="${fmtDate(f.reminderDate)}"></div>
@@ -6737,19 +6668,6 @@ function pickerConfirmAddAll() {
     const wrap = document.getElementById('purchaseItems');
     if (wrap) wrap.innerHTML = _editingPurchase.items.map(it => purchaseItemHtml(it)).join('');
     refreshPurchaseTotal();
-  } else if (_pickerMode === 'quotation-add') {
-    pids.forEach(pid => {
-      const prod = productById(pid);
-      if (!window.__qtItems) window.__qtItems = [];
-      window.__qtItems.push({
-        _tmpId: uid(),
-        productId: pid,
-        specs: (prod && prod.specs) || '',
-        qty: 1,
-        price: (prod && Number(prod.price)) || 0,
-      });
-    });
-    renderQtItems();
   }
 
   closeProductPicker();
@@ -6805,15 +6723,6 @@ function pickerReplaceConfirm(pid) {
       const el = document.querySelector('[data-purchase-item="' + _pickerTargetItemId + '"]');
       if (el) el.outerHTML = purchaseItemHtml(it);
       refreshPurchaseTotal();
-    }
-  } else if (_pickerMode === 'quotation-replace') {
-    const it = (window.__qtItems || []).find(x => x._tmpId === _pickerTargetItemId);
-    if (it) {
-      it.productId = pid;
-      if (!it.specs) it.specs = p.specs || '';
-      if (!it.price && p.price) it.price = Number(p.price);
-      delete it.customName;
-      renderQtItems();
     }
   }
   closeProductPicker();

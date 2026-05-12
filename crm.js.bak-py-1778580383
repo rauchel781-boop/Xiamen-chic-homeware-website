@@ -2056,36 +2056,6 @@ function customerOptions(selectedId) {
   ).join('');
 }
 
-function customerIdByName(name) {
-  const c = (DB.customers || []).find(x => x.company === name);
-  return c ? c.id : '';
-}
-
-// 可搜索客户输入框
-// onChangeExpr: 选中时执行的 JS 表达式，里面用 this.value 代表客户ID
-// hiddenName: 如果给了，会同时生成一个 hidden input 给表单提交使用
-function customerSearchInput(currentId, onChangeExpr, hiddenName) {
-  const cur = customerById(currentId);
-  const display = cur ? cur.company : '';
-  const listId = 'custList_' + Math.random().toString(36).substr(2, 6);
-  const opts = (DB.customers || []).map(c =>
-    '<option value="' + escapeHtml(c.company) + '">' + (c.country ? c.country + ' · ' : '') + escapeHtml(c.contact || '')
-  ).join('');
-  // 构造 oninput 处理：先把名字转 ID，再执行回调
-  let oninput;
-  if (hiddenName) {
-    oninput = 'this.nextElementSibling.value=customerIdByName(this.value);' + (onChangeExpr || '');
-  } else {
-    oninput = '(function(el){var id=customerIdByName(el.value);' + (onChangeExpr ? onChangeExpr.replace(/this\.value/g, 'id') : '') + '})(this)';
-  }
-  let html = '<input list="' + listId + '" value="' + escapeHtml(display) + '" oninput="' + oninput + '" placeholder="输入客户名搜索...">';
-  if (hiddenName) {
-    html += '<input type="hidden" name="' + hiddenName + '" value="' + (currentId || '') + '">';
-  }
-  html += '<datalist id="' + listId + '">' + opts + '</datalist>';
-  return html;
-}
-
 /* ============================================================
  * 产品库
  * ============================================================ */
@@ -2452,7 +2422,7 @@ function editQuotation(id, customerId) {
         <div class="field"><label>日期</label>
           <input name="date" type="date" value="${fmtDate(q.date)}"></div>
         <div class="field"><label>客户 <span class="req">*</span></label>
-          ${customerSearchInput(q.customerId, "", "customerId")}</div>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(q.customerId)}</select></div>
         <div class="field"><label>币种</label>
           <select name="currency">${CURRENCIES.map(c => `<option ${q.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>有效期</label>
@@ -2970,7 +2940,7 @@ function renderSampleForm() {
       <div class="field"><label>样品单号</label>
         <input value="${escapeHtml(s.code || '')}" oninput="_editingSample.code=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(s.customerId, '_editingSample.customerId=this.value')}</div>
+        <select onchange="_editingSample.customerId=this.value">${customerOptions(s.customerId)}</select></div>
       <div class="field"><label>币种</label>
         <select onchange="_editingSample.currency=this.value">${CURRENCIES.map(c => `<option ${s.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div class="field"><label>下单时间</label>
@@ -3762,7 +3732,7 @@ function renderOrderForm() {
       <div class="field"><label>订单号</label>
         <input value="${escapeHtml(o.orderNo || '')}" oninput="_editingOrder.orderNo=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(o.customerId, '_editingOrder.customerId=this.value')}</div>
+        <select onchange="_editingOrder.customerId=this.value">${customerOptions(o.customerId)}</select></div>
       <div class="field"><label>币种</label>
         <select onchange="_editingOrder.currency=this.value;refreshOrderTotal()">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div class="field"><label>下单日期</label>
@@ -5390,7 +5360,7 @@ function renderShipmentForm() {
       <div class="field"><label>出货日期 <span class="req">*</span></label>
         <input type="date" value="${fmtDate(s.date)}" onchange="_editingShipment.date=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(s.customerId, '_editingShipment.customerId=this.value')}</div>
+        <select onchange="_editingShipment.customerId=this.value">${customerOptions(s.customerId)}</select></div>
       <div class="field"><label>状态</label>
         <select onchange="_editingShipment.status=this.value">${SHIPMENT_STATUSES.map(st => `<option ${s.status===st.name?'selected':''}>${st.name}</option>`).join('')}</select></div>
       <div class="field"><label>关联订单号 (选填)</label>
@@ -5945,7 +5915,7 @@ function editFollowup(id, customerId) {
       <div class="form-grid">
         <div class="field"><label>日期 <span class="req">*</span></label><input name="date" type="date" required value="${fmtDate(f.date)}"></div>
         <div class="field"><label>客户 <span class="req">*</span></label>
-          ${customerSearchInput(f.customerId, '', 'customerId')}</div>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(f.customerId)}</select></div>
         <div class="field"><label>沟通方式</label>
           <select name="channel">${CHANNELS.map(c => `<option ${f.channel===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>下次跟进提醒</label><input name="reminderDate" type="date" value="${fmtDate(f.reminderDate)}"></div>

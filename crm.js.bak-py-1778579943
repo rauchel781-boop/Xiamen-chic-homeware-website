@@ -259,7 +259,6 @@ const NAV_MENU = [
   { id: 'samples',       name: '样品',     icon: '⬢' },
   { id: 'orders',        name: '订单',     icon: '▤' },
   { id: 'purchases',     name: '采购',     icon: '⊞' },
-  { id: 'payments',      name: '收款/付款', icon: '¥' },
   { id: 'shipments',     name: '出货单',   icon: '📦' },
   { id: 'followups',     name: '跟进',     icon: '◉' },
   { id: 'templates',     name: '邮件模板', icon: '✉' },
@@ -516,7 +515,6 @@ let DB = {
   orders: [],
   shipments: [],
   purchases: [],
-  payments: [],
   followups: [],
   templates: [],
   meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
@@ -538,7 +536,6 @@ function loadDB() {
     DB.quotations = DB.quotations || [];
     DB.shipments = DB.shipments || [];
     DB.purchases = DB.purchases || [];
-    DB.payments = DB.payments || [];
     migrateProducts();
     migrateSamples();
     migrateOrders();
@@ -999,7 +996,7 @@ function render() {
   const fn = ({
     dashboard: renderDashboard, customers: renderCustomers,
     products: renderProducts, quotations: renderQuotations,
-    samples: renderSamples, orders: renderOrders, purchases: renderPurchases, payments: renderPayments, shipments: renderShipments, followups: renderFollowups,
+    samples: renderSamples, orders: renderOrders, purchases: renderPurchases, shipments: renderShipments, followups: renderFollowups,
     templates: renderTemplates, backup: renderBackup
   })[currentPage];
   fn && fn();
@@ -1041,10 +1038,6 @@ function renderDashboard() {
   // 本月出货统计
   const thisMonth = todayStr().substring(0, 7);
   const monthShipments = (DB.shipments || []).filter(s => (s.date || '').startsWith(thisMonth));
-  // 本月财务
-  const monthPayments = (DB.payments || []).filter(p => (p.date || '').startsWith(thisMonth));
-  const monthIncome = monthPayments.filter(p => p.type === 'income').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const monthExpense = monthPayments.filter(p => p.type === 'expense').reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const monthShipStats = monthShipments.reduce((acc, s) => {
     const t = calcShipmentTotal(s);
     acc.cartons += t.cartons;
@@ -1079,21 +1072,6 @@ function renderDashboard() {
         <div class="stat-label">本月出货</div>
         <div class="stat-value blue">${monthShipments.length}</div>
         <div class="stat-sub">${monthShipStats.cartons.toFixed(0)} 箱 · ${monthShipStats.cbm.toFixed(2)} CBM · ${monthShipStats.gross.toFixed(0)} kg</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">本月收款</div>
-        <div class="stat-value green">${Math.round(monthIncome).toLocaleString()}</div>
-        <div class="stat-sub">${monthPayments.filter(p=>p.type==='income').length} 笔（混合币种）</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">本月付款</div>
-        <div class="stat-value red">${Math.round(monthExpense).toLocaleString()}</div>
-        <div class="stat-sub">${monthPayments.filter(p=>p.type==='expense').length} 笔（混合币种）</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">本月净额</div>
-        <div class="stat-value ${monthIncome - monthExpense >= 0 ? 'blue' : 'red'}">${Math.round(monthIncome - monthExpense).toLocaleString()}</div>
-        <div class="stat-sub">收入 − 支出</div>
       </div>
     </div>
 
@@ -2056,36 +2034,6 @@ function customerOptions(selectedId) {
   ).join('');
 }
 
-function customerIdByName(name) {
-  const c = (DB.customers || []).find(x => x.company === name);
-  return c ? c.id : '';
-}
-
-// 可搜索客户输入框
-// onChangeExpr: 选中时执行的 JS 表达式，里面用 this.value 代表客户ID
-// hiddenName: 如果给了，会同时生成一个 hidden input 给表单提交使用
-function customerSearchInput(currentId, onChangeExpr, hiddenName) {
-  const cur = customerById(currentId);
-  const display = cur ? cur.company : '';
-  const listId = 'custList_' + Math.random().toString(36).substr(2, 6);
-  const opts = (DB.customers || []).map(c =>
-    '<option value="' + escapeHtml(c.company) + '">' + (c.country ? c.country + ' · ' : '') + escapeHtml(c.contact || '')
-  ).join('');
-  // 构造 oninput 处理：先把名字转 ID，再执行回调
-  let oninput;
-  if (hiddenName) {
-    oninput = 'this.nextElementSibling.value=customerIdByName(this.value);' + (onChangeExpr || '');
-  } else {
-    oninput = '(function(el){var id=customerIdByName(el.value);' + (onChangeExpr ? onChangeExpr.replace(/this\.value/g, 'id') : '') + '})(this)';
-  }
-  let html = '<input list="' + listId + '" value="' + escapeHtml(display) + '" oninput="' + oninput + '" placeholder="输入客户名搜索...">';
-  if (hiddenName) {
-    html += '<input type="hidden" name="' + hiddenName + '" value="' + (currentId || '') + '">';
-  }
-  html += '<datalist id="' + listId + '">' + opts + '</datalist>';
-  return html;
-}
-
 /* ============================================================
  * 产品库
  * ============================================================ */
@@ -2452,7 +2400,7 @@ function editQuotation(id, customerId) {
         <div class="field"><label>日期</label>
           <input name="date" type="date" value="${fmtDate(q.date)}"></div>
         <div class="field"><label>客户 <span class="req">*</span></label>
-          ${customerSearchInput(q.customerId, "", "customerId")}</div>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(q.customerId)}</select></div>
         <div class="field"><label>币种</label>
           <select name="currency">${CURRENCIES.map(c => `<option ${q.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>有效期</label>
@@ -2504,16 +2452,14 @@ function editQuotation(id, customerId) {
 function renderQtItems() {
   const tbody = document.getElementById('qtItemsBody');
   if (!tbody) return;
-  // 确保每个 item 有 _tmpId
-  window.__qtItems.forEach(it => { if (!it._tmpId) it._tmpId = uid(); });
   tbody.innerHTML = window.__qtItems.map((it, i) => `
-    <tr data-qt-item="${it._tmpId}">
-      <td>
-        <div style="display:flex;gap:6px;align-items:stretch;">
-          ${qtProductCardHtml(it)}
-          <button type="button" class="btn btn-sm" onclick="openQtItemPicker('${it._tmpId}')" style="white-space:nowrap;">${(it.productId && it.productId !== '__custom') ? '更换' : '选择'}</button>
-        </div>
-        ${it.productId === '__custom' ? `<input style="margin-top:4px;width:100%;" placeholder="产品名" value="${escapeHtml(it.customName||'')}" oninput="window.__qtItems[${i}].customName=this.value">` : ''}
+    <tr>
+      <td><select onchange="onQtProductChange(${i}, this)">
+        <option value="">选择产品...</option>
+        ${DB.products.map(p => `<option value="${p.id}" ${it.productId===p.id?'selected':''}>${escapeHtml(p.nameEn || p.nameZh)} (${escapeHtml(p.code||'')})</option>`).join('')}
+        <option value="__custom" ${it.productId==='__custom'?'selected':''}>自定义产品</option>
+      </select>
+      ${it.productId === '__custom' ? `<input style="margin-top:3px;" placeholder="产品名" value="${escapeHtml(it.customName||'')}" oninput="window.__qtItems[${i}].customName=this.value">` : ''}
       </td>
       <td><input value="${escapeHtml(it.specs||'')}" oninput="window.__qtItems[${i}].specs=this.value"></td>
       <td><input type="number" class="num" value="${it.qty||0}" oninput="window.__qtItems[${i}].qty=Number(this.value);recalcQt()"></td>
@@ -2523,39 +2469,6 @@ function renderQtItems() {
     </tr>
   `).join('');
   recalcQt();
-}
-
-function qtProductCardHtml(it) {
-  if (it.productId === '__custom') {
-    return '<div class="ship-product-card"><div class="no-img">自</div><div class="info"><span class="empty-line">自定义产品</span></div></div>';
-  }
-  const p = productById(it.productId);
-  if (!p) {
-    return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
-  }
-  return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + imgUrl(p.image) + '">' : '<div class="no-img">无图</div>') +
-    '<div class="info">' +
-      '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
-      '<div class="name-line">' + escapeHtml(p.nameZh || p.nameEn || '-') + '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-function openQtItemPicker(tmpId) {
-  if (DB.products.length === 0) {
-    // 没产品时让用户自定义
-    const it = window.__qtItems.find(x => x._tmpId === tmpId);
-    if (it) {
-      it.productId = '__custom';
-      it.customName = '';
-      it.qty = 1;
-      it.price = 0;
-      renderQtItems();
-    }
-    return;
-  }
-  openProductPickerV2('quotation-replace', { itemId: tmpId });
 }
 
 function onQtProductChange(i, sel) {
@@ -2572,12 +2485,8 @@ function onQtProductChange(i, sel) {
 }
 
 function addQtItem() {
-  if (DB.products.length === 0) {
-    window.__qtItems.push({ _tmpId: uid(), productId: '__custom', customName: '', specs: '', qty: 1, price: 0 });
-    renderQtItems();
-    return;
-  }
-  openProductPickerV2('quotation-add');
+  window.__qtItems.push({ productId: '', specs: '', qty: 1, price: 0 });
+  renderQtItems();
 }
 
 function removeQtItem(i) {
@@ -2970,7 +2879,7 @@ function renderSampleForm() {
       <div class="field"><label>样品单号</label>
         <input value="${escapeHtml(s.code || '')}" oninput="_editingSample.code=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(s.customerId, '_editingSample.customerId=this.value')}</div>
+        <select onchange="_editingSample.customerId=this.value">${customerOptions(s.customerId)}</select></div>
       <div class="field"><label>币种</label>
         <select onchange="_editingSample.currency=this.value">${CURRENCIES.map(c => `<option ${s.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div class="field"><label>下单时间</label>
@@ -3762,7 +3671,7 @@ function renderOrderForm() {
       <div class="field"><label>订单号</label>
         <input value="${escapeHtml(o.orderNo || '')}" oninput="_editingOrder.orderNo=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(o.customerId, '_editingOrder.customerId=this.value')}</div>
+        <select onchange="_editingOrder.customerId=this.value">${customerOptions(o.customerId)}</select></div>
       <div class="field"><label>币种</label>
         <select onchange="_editingOrder.currency=this.value;refreshOrderTotal()">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
       <div class="field"><label>下单日期</label>
@@ -4929,277 +4838,6 @@ function createPurchaseFromOrder(orderId) {
   }, 100);
 }
 
-// === 收款/付款（财务流水）模块 ===
-
-const PAYMENT_METHODS = ['T/T', 'PayPal', '现金', '支票', '微信', '支付宝', '银行转账', '其他'];
-
-let paymentFilter = '', paymentTypeFilter = '', paymentMonthFilter = '';
-let _editingPayment = null;
-
-function renderPayments() {
-  document.getElementById('pageTitle').textContent = '收款 / 付款';
-  document.getElementById('topbarActions').innerHTML = `
-    <button class="btn btn-success" onclick="editPayment(null,'income')">+ 收款</button>
-    <button class="btn btn-danger" onclick="editPayment(null,'expense')">+ 付款</button>
-  `;
-  setTabs('');
-  const kw = paymentFilter.toLowerCase();
-  const list = (DB.payments || []).filter(p => {
-    if (paymentTypeFilter && p.type !== paymentTypeFilter) return false;
-    if (paymentMonthFilter && (p.date || '').substring(0, 7) !== paymentMonthFilter) return false;
-    if (kw) {
-      const hay = (p.counterparty || '').toLowerCase() + ' ' + (p.code || '').toLowerCase() + ' ' + (p.relatedNo || '').toLowerCase() + ' ' + (p.notes || '').toLowerCase();
-      if (!hay.includes(kw)) return false;
-    }
-    return true;
-  }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-
-  // 月份选项（基于现有数据）
-  const months = [...new Set((DB.payments || []).map(p => (p.date || '').substring(0, 7)).filter(x => x))].sort().reverse();
-
-  // 合计
-  const totalIncome = list.filter(p => p.type === 'income').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const totalExpense = list.filter(p => p.type === 'expense').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-
-  document.getElementById('content').innerHTML = `
-    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
-      <div class="stat-card">
-        <div class="stat-label">收款合计（当前筛选）</div>
-        <div class="stat-value green">${totalIncome.toLocaleString()}</div>
-        <div class="stat-sub">${list.filter(p => p.type === 'income').length} 笔</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">付款合计（当前筛选）</div>
-        <div class="stat-value red">${totalExpense.toLocaleString()}</div>
-        <div class="stat-sub">${list.filter(p => p.type === 'expense').length} 笔</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">净额</div>
-        <div class="stat-value ${totalIncome - totalExpense >= 0 ? 'blue' : 'red'}">${(totalIncome - totalExpense).toLocaleString()}</div>
-        <div class="stat-sub">混合币种</div>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <div class="table-toolbar">
-        <input class="search-box" placeholder="搜索 编号/对方/关联号/备注..." value="${escapeHtml(paymentFilter)}" oninput="paymentFilter=this.value;renderPayments()">
-        <select class="btn" onchange="paymentTypeFilter=this.value;renderPayments()">
-          <option value="">全部类型</option>
-          <option value="income" ${paymentTypeFilter==='income'?'selected':''}>收款</option>
-          <option value="expense" ${paymentTypeFilter==='expense'?'selected':''}>付款</option>
-        </select>
-        <select class="btn" onchange="paymentMonthFilter=this.value;renderPayments()">
-          <option value="">全部月份</option>
-          ${months.map(m => `<option value="${m}" ${paymentMonthFilter===m?'selected':''}>${m}</option>`).join('')}
-        </select>
-        <span class="muted">共 ${list.length} 笔</span>
-      </div>
-      ${list.length === 0 ? '<div class="empty">暂无记录</div>' : `
-      <table>
-        <thead><tr>
-          <th>日期</th><th>类型</th><th class="text-right">金额</th><th>对方</th>
-          <th>关联</th><th>方式</th><th>凭证</th><th>备注</th>
-          <th class="text-right">操作</th>
-        </tr></thead>
-        <tbody>
-        ${list.map(p => `<tr>
-          <td class="no-wrap">${fmtDate(p.date)}</td>
-          <td><span class="tag ${p.type === 'income' ? 'tag-green' : 'tag-red'}">${p.type === 'income' ? '收款' : '付款'}</span></td>
-          <td class="text-right no-wrap"><strong style="color:${p.type === 'income' ? '#10b981' : '#ef4444'};">${p.type === 'income' ? '+' : '-'} ${escapeHtml(p.currency || '')} ${Number(p.amount || 0).toLocaleString()}</strong></td>
-          <td>${escapeHtml(p.counterparty || '-')}</td>
-          <td class="muted no-wrap">${p.relatedNo ? escapeHtml(p.relatedNo) : '-'}</td>
-          <td>${escapeHtml(p.method || '-')}</td>
-          <td>${p.voucherImage ? '<img src="' + imgUrl(p.voucherImage) + '" style="width:36px;height:36px;object-fit:contain;background:#f9fafb;border-radius:3px;cursor:pointer;" onclick="viewPaymentVoucher(\''+p.id+'\')">' : '<span class="muted">-</span>'}</td>
-          <td class="muted">${escapeHtml(truncate(p.notes || '', 30))}</td>
-          <td class="text-right no-wrap">
-            <button class="btn-link" onclick="editPayment('${p.id}')">编辑</button>
-            <button class="btn-link danger" onclick="deletePayment('${p.id}')">删除</button>
-          </td>
-        </tr>`).join('')}
-        </tbody>
-      </table>`}
-    </div>
-  `;
-}
-
-function editPayment(id, defaultType) {
-  if (id) {
-    const p = (DB.payments || []).find(x => x.id === id);
-    if (!p) return;
-    _editingPayment = JSON.parse(JSON.stringify(p));
-  } else {
-    _editingPayment = {
-      id: uid(),
-      code: nextCode('TXN'),
-      type: defaultType || 'income',
-      date: todayStr(),
-      amount: '',
-      currency: defaultType === 'expense' ? 'CNY' : 'USD',
-      counterparty: '',
-      relatedType: '',
-      relatedId: '',
-      relatedNo: '',
-      method: 'T/T',
-      voucherImage: '',
-      notes: '',
-      createdAt: new Date().toISOString(),
-    };
-  }
-  const title = _editingPayment.type === 'income' ? '收款' : '付款';
-  openModal((id ? '编辑' : '新建') + title + ' ' + _editingPayment.code,
-    renderPaymentForm(),
-    `<button class="btn" onclick="closeModal()">取消</button>
-     <button class="btn btn-primary" onclick="savePaymentForm('${id || ''}')">保存</button>`,
-    'lg');
-}
-
-function renderPaymentForm() {
-  const p = _editingPayment;
-  return `
-    <div class="form-grid">
-      <div class="field"><label>类型</label>
-        <select onchange="_editingPayment.type=this.value">
-          <option value="income" ${p.type === 'income' ? 'selected' : ''}>收款</option>
-          <option value="expense" ${p.type === 'expense' ? 'selected' : ''}>付款</option>
-        </select>
-      </div>
-      <div class="field"><label>编号</label>
-        <input value="${escapeHtml(p.code || '')}" oninput="_editingPayment.code=this.value"></div>
-      <div class="field"><label>日期 <span class="req">*</span></label>
-        <input type="date" value="${fmtDate(p.date)}" onchange="_editingPayment.date=this.value"></div>
-      <div class="field"><label>付款方式</label>
-        <select onchange="_editingPayment.method=this.value">
-          ${PAYMENT_METHODS.map(m => `<option ${p.method===m?'selected':''}>${m}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>金额 <span class="req">*</span></label>
-        <input type="number" min="0" step="0.01" value="${escapeHtml(p.amount || '')}" oninput="_editingPayment.amount=this.value"></div>
-      <div class="field"><label>币种</label>
-        <select onchange="_editingPayment.currency=this.value">
-          ${CURRENCIES.map(c => `<option ${p.currency===c?'selected':''}>${c}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field full"><label>对方 (客户名 / 工厂名 / 其他)</label>
-        <input value="${escapeHtml(p.counterparty || '')}" oninput="_editingPayment.counterparty=this.value" placeholder="如 Beauty Page Inc / 山东工厂"></div>
-      <div class="field"><label>关联类型</label>
-        <select onchange="_editingPayment.relatedType=this.value">
-          <option value="" ${!p.relatedType?'selected':''}>无</option>
-          <option value="order" ${p.relatedType==='order'?'selected':''}>订单</option>
-          <option value="purchase" ${p.relatedType==='purchase'?'selected':''}>采购单</option>
-          <option value="sample" ${p.relatedType==='sample'?'selected':''}>样品单</option>
-          <option value="other" ${p.relatedType==='other'?'selected':''}>其他</option>
-        </select>
-      </div>
-      <div class="field"><label>关联单号</label>
-        <input value="${escapeHtml(p.relatedNo || '')}" oninput="_editingPayment.relatedNo=this.value" placeholder="如 SO202605001"></div>
-      <div class="field full"><label>凭证图片</label>
-        <div tabindex="0" id="paymentVoucherBox" class="product-img-drop"
-             onpaste="paymentVoucherPaste(event)"
-             ondrop="paymentVoucherDrop(event)"
-             ondragover="event.preventDefault();this.classList.add('dragging')"
-             ondragleave="this.classList.remove('dragging')">
-          ${p.voucherImage
-            ? '<img src="' + imgUrl(p.voucherImage) + '" style="max-width:100%;max-height:200px;display:block;border-radius:3px;cursor:pointer;" onclick="paymentVoucherUpload()">'
-            : '<div class="image-uploader" onclick="paymentVoucherUpload()">点击上传凭证<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V 粘贴</span></div>'}
-        </div>
-        ${p.voucherImage ? '<button type="button" class="btn btn-sm" style="margin-top:6px;" onclick="paymentVoucherClear()">移除凭证</button>' : ''}
-      </div>
-      <div class="field full"><label>备注</label>
-        <textarea oninput="_editingPayment.notes=this.value">${escapeHtml(p.notes || '')}</textarea></div>
-    </div>
-  `;
-}
-
-function paymentVoucherUpload() {
-  const inp = document.createElement('input');
-  inp.type = 'file';
-  inp.accept = 'image/*';
-  inp.onchange = e => {
-    if (e.target.files[0]) processPaymentVoucher(e.target.files[0]);
-  };
-  inp.click();
-}
-
-function paymentVoucherPaste(e) {
-  const cd = e.clipboardData || window.clipboardData;
-  if (!cd) return;
-  for (let i = 0; i < cd.items.length; i++) {
-    if (cd.items[i].type && cd.items[i].type.startsWith('image/')) {
-      e.preventDefault();
-      processPaymentVoucher(cd.items[i].getAsFile());
-      return;
-    }
-  }
-}
-
-function paymentVoucherDrop(e) {
-  e.preventDefault();
-  if (e.currentTarget) e.currentTarget.classList.remove('dragging');
-  if (e.dataTransfer && e.dataTransfer.files.length > 0) {
-    processPaymentVoucher(e.dataTransfer.files[0]);
-  }
-}
-
-function processPaymentVoucher(file) {
-  if (!file || !file.type.startsWith('image/')) { toast('请选择图片', 'error'); return; }
-  compressImgFile(file, async dataUrl => {
-    if (_editingPayment.voucherImage) deleteImage(_editingPayment.voucherImage);
-    const id = await saveImage(dataUrl);
-    if (!id) return;
-    _editingPayment.voucherImage = id;
-    // 刷新表单的凭证区
-    const box = document.getElementById('paymentVoucherBox');
-    if (box) {
-      box.innerHTML = '<img src="' + imgUrl(id) + '" style="max-width:100%;max-height:200px;display:block;border-radius:3px;cursor:pointer;" onclick="paymentVoucherUpload()">';
-    }
-    toast('凭证已加载', 'success');
-  });
-}
-
-function paymentVoucherClear() {
-  if (_editingPayment.voucherImage) deleteImage(_editingPayment.voucherImage);
-  _editingPayment.voucherImage = '';
-  // 重新渲染表单
-  const modal = document.getElementById('modalBody');
-  if (modal) modal.innerHTML = renderPaymentForm();
-}
-
-function viewPaymentVoucher(id) {
-  const p = (DB.payments || []).find(x => x.id === id);
-  if (!p || !p.voucherImage) return;
-  const url = imgUrl(p.voucherImage);
-  if (!url) return;
-  openModal('凭证 ' + (p.code || ''), `<img src="${url}" style="max-width:100%;height:auto;display:block;margin:0 auto;">`, '<button class="btn" onclick="closeModal()">关闭</button>');
-}
-
-function savePaymentForm(id) {
-  const p = _editingPayment;
-  if (!p) return;
-  if (!p.date) { toast('请填写日期', 'error'); return; }
-  if (!Number(p.amount) || Number(p.amount) <= 0) { toast('请填写金额', 'error'); return; }
-  if (!p.code) p.code = nextCode('TXN');
-  if (!DB.payments) DB.payments = [];
-  if (id) {
-    const idx = DB.payments.findIndex(x => x.id === id);
-    if (idx >= 0) DB.payments[idx] = p;
-    else DB.payments.push(p);
-  } else {
-    DB.payments.push(p);
-  }
-  try { saveDB(); } catch(err) { toast('保存失败：' + err.message, 'error'); return; }
-  _editingPayment = null;
-  closeModal();
-  renderPayments();
-  toast('已保存', 'success');
-}
-
-function deletePayment(id) {
-  if (!confirm('确定删除该笔记录？')) return;
-  const p = (DB.payments || []).find(x => x.id === id);
-  if (p && p.voucherImage) deleteImage(p.voucherImage);
-  DB.payments = (DB.payments || []).filter(x => x.id !== id);
-  saveDB(); renderPayments(); toast('已删除');
-}
-
 // 占位 - 阶段 2/3 实现
 function createShipmentFromOrder(id) {
   const o = (DB.orders || []).find(x => x.id === id);
@@ -5390,7 +5028,7 @@ function renderShipmentForm() {
       <div class="field"><label>出货日期 <span class="req">*</span></label>
         <input type="date" value="${fmtDate(s.date)}" onchange="_editingShipment.date=this.value"></div>
       <div class="field"><label>客户 <span class="req">*</span></label>
-        ${customerSearchInput(s.customerId, '_editingShipment.customerId=this.value')}</div>
+        <select onchange="_editingShipment.customerId=this.value">${customerOptions(s.customerId)}</select></div>
       <div class="field"><label>状态</label>
         <select onchange="_editingShipment.status=this.value">${SHIPMENT_STATUSES.map(st => `<option ${s.status===st.name?'selected':''}>${st.name}</option>`).join('')}</select></div>
       <div class="field"><label>关联订单号 (选填)</label>
@@ -5945,7 +5583,7 @@ function editFollowup(id, customerId) {
       <div class="form-grid">
         <div class="field"><label>日期 <span class="req">*</span></label><input name="date" type="date" required value="${fmtDate(f.date)}"></div>
         <div class="field"><label>客户 <span class="req">*</span></label>
-          ${customerSearchInput(f.customerId, '', 'customerId')}</div>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(f.customerId)}</select></div>
         <div class="field"><label>沟通方式</label>
           <select name="channel">${CHANNELS.map(c => `<option ${f.channel===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>下次跟进提醒</label><input name="reminderDate" type="date" value="${fmtDate(f.reminderDate)}"></div>
@@ -6466,8 +6104,7 @@ async function importData(e) {
       DB = Object.assign({
         customers: [], leads: [], opportunities: [], products: [],
         productCategories: [], quotations: [], samples: [], orders: [],
-        shipments: [], purchases: [],
-  payments: [], followups: [], templates: [],
+        shipments: [], purchases: [], followups: [], templates: [],
         meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
       }, data);
       DB.shipments = DB.shipments || [];
@@ -6496,8 +6133,7 @@ async function importData(e) {
       DB = Object.assign({
         customers: [], leads: [], opportunities: [], products: [],
         productCategories: [], quotations: [], samples: [], orders: [],
-        shipments: [], purchases: [],
-  payments: [], followups: [], templates: [],
+        shipments: [], purchases: [], followups: [], templates: [],
         meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
       }, data);
       DB.shipments = DB.shipments || [];
@@ -6529,8 +6165,7 @@ function clearAllData() {
   DB = {
     customers: [], leads: [], opportunities: [], products: [],
     productCategories: [], quotations: [], samples: [], orders: [],
-    shipments: [], purchases: [],
-  payments: [], followups: [],
+    shipments: [], purchases: [], followups: [],
     templates: DEFAULT_TEMPLATES.map(t => ({ ...t, id: uid() })),
     meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
   };
@@ -6737,19 +6372,6 @@ function pickerConfirmAddAll() {
     const wrap = document.getElementById('purchaseItems');
     if (wrap) wrap.innerHTML = _editingPurchase.items.map(it => purchaseItemHtml(it)).join('');
     refreshPurchaseTotal();
-  } else if (_pickerMode === 'quotation-add') {
-    pids.forEach(pid => {
-      const prod = productById(pid);
-      if (!window.__qtItems) window.__qtItems = [];
-      window.__qtItems.push({
-        _tmpId: uid(),
-        productId: pid,
-        specs: (prod && prod.specs) || '',
-        qty: 1,
-        price: (prod && Number(prod.price)) || 0,
-      });
-    });
-    renderQtItems();
   }
 
   closeProductPicker();
@@ -6805,15 +6427,6 @@ function pickerReplaceConfirm(pid) {
       const el = document.querySelector('[data-purchase-item="' + _pickerTargetItemId + '"]');
       if (el) el.outerHTML = purchaseItemHtml(it);
       refreshPurchaseTotal();
-    }
-  } else if (_pickerMode === 'quotation-replace') {
-    const it = (window.__qtItems || []).find(x => x._tmpId === _pickerTargetItemId);
-    if (it) {
-      it.productId = pid;
-      if (!it.specs) it.specs = p.specs || '';
-      if (!it.price && p.price) it.price = Number(p.price);
-      delete it.customName;
-      renderQtItems();
     }
   }
   closeProductPicker();
