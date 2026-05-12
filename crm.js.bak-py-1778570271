@@ -3424,26 +3424,6 @@ function orderItemHtml(item) {
           <input value="${escapeHtml(item.specs||'')}" oninput="changeOrderItem('${item.id}','specs',this.value)">
         </div>
       </div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="field">
-          <label>中文描述</label>
-          <textarea rows="2" oninput="changeOrderItem('${item.id}','descriptionZh',this.value)">${escapeHtml(item.descriptionZh||'')}</textarea>
-        </div>
-        <div class="field">
-          <label>英文描述</label>
-          <textarea rows="2" oninput="changeOrderItem('${item.id}','descriptionEn',this.value)">${escapeHtml(item.descriptionEn||'')}</textarea>
-        </div>
-      </div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="field">
-          <label>中文包装</label>
-          <input value="${escapeHtml(item.packingZh||'')}" oninput="changeOrderItem('${item.id}','packingZh',this.value)">
-        </div>
-        <div class="field">
-          <label>英文包装</label>
-          <input value="${escapeHtml(item.packingEn||'')}" oninput="changeOrderItem('${item.id}','packingEn',this.value)">
-        </div>
-      </div>
     </div>
   `;
 }
@@ -4810,10 +4790,7 @@ function pickerConfirmAddAll() {
         productId: pid,
         productName: (p && (p.nameEn || p.nameZh)) || '',
         specs: (p && p.specs) || '',
-        descriptionZh: (p && (p.descriptionZh || p.description)) || '',
-        descriptionEn: (p && p.descriptionEn) || '',
-        packingZh: (p && (p.packingZh || p.packing)) || '',
-        packingEn: (p && p.packingEn) || '',
+        productCraft: '',
         qty: 1,
         unitPrice: (p && p.price) || '',
       };
@@ -4856,10 +4833,6 @@ function pickerReplaceConfirm(pid) {
       it.productId = pid;
       if (!it.productName) it.productName = p.nameEn || p.nameZh || '';
       if (!it.specs) it.specs = p.specs || '';
-      if (!it.descriptionZh) it.descriptionZh = p.descriptionZh || p.description || '';
-      if (!it.descriptionEn) it.descriptionEn = p.descriptionEn || '';
-      if (!it.packingZh) it.packingZh = p.packingZh || p.packing || '';
-      if (!it.packingEn) it.packingEn = p.packingEn || '';
       if (!it.unitPrice && p.price) it.unitPrice = p.price;
       const el = document.querySelector('[data-order-item="' + _pickerTargetItemId + '"]');
       if (el) el.outerHTML = orderItemHtml(it);

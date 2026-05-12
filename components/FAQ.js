@@ -1,43 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 
-// FAQ items pulled from xmchichomeware.com home page (5 questions).
-const ITEMS = [
-  {
-    q: 'Are you a wooden products manufacturer or a trading company?',
-    a: 'We are a professional wooden products manufacturer in China, with our factory located in Cao County and a sales office in Xiamen.',
-  },
-  {
-    q: 'Do you support OEM and private label production?',
-    a: 'Yes. We provide OEM and ODM wooden products manufacturing services, including custom materials, sizes, logo branding, and packaging.',
-  },
-  {
-    q: 'What types of wooden products do you manufacture?',
-    a: 'We manufacture wooden kitchenware, storage organizers, gift boxes, desk organizers, and custom wooden homeware products.',
-  },
-  {
-    q: 'Which markets do you mainly export to?',
-    a: 'Our wooden products are mainly exported to the United States, Europe, Australia, and other global markets.',
-  },
-  {
-    q: 'How do I choose the right wood material for my product?',
-    a: (
-      <>
-        Choosing the right wood depends on product usage, target price, and market positioning.
-        You can refer to our{' '}
-        <Link href="/material-guide" className="text-brand-green underline hover:text-brand-greenDark">
-          Material Selection Guide
-        </Link>
-        {' '}for a clear comparison of common wood options used in kitchenware and storage products.
-      </>
-    ),
-  },
-];
-
-// FAQPage JSON-LD — built from the items below for Google rich results
+// FAQPage JSON-LD — built from the items below for Google rich results.
+// Plain-text answers (no JSX) so the LD payload stays valid.
 function buildFaqLd(items) {
   return {
     '@context': 'https://schema.org',
@@ -47,15 +16,37 @@ function buildFaqLd(items) {
       name: it.q,
       acceptedAnswer: {
         '@type': 'Answer',
-        // Strip the inline JSX into plain text for the LD
-        text: typeof it.a === 'string' ? it.a : 'Refer to the question on our website for the full answer.',
+        text: it.plainAnswer,
       },
     })),
   };
 }
 
 export default function FAQ() {
+  const t = useTranslations('home.faq');
   const [open, setOpen] = useState(0);
+
+  // Pull translated strings up-front. The 5th answer keeps a JSX inline
+  // <Link> to /material-guide; for JSON-LD we use the joined plain text.
+  const ITEMS = [
+    { q: t('q1'), plainAnswer: t('a1'), a: t('a1') },
+    { q: t('q2'), plainAnswer: t('a2'), a: t('a2') },
+    { q: t('q3'), plainAnswer: t('a3'), a: t('a3') },
+    { q: t('q4'), plainAnswer: t('a4'), a: t('a4') },
+    {
+      q: t('q5'),
+      plainAnswer: `${t('a5Pre')} ${t('a5Link')} ${t('a5Post')}`,
+      a: (
+        <>
+          {t('a5Pre')}{' '}
+          <Link href="/material-guide" className="text-brand-green underline hover:text-brand-greenDark">
+            {t('a5Link')}
+          </Link>
+          {' '}{t('a5Post')}
+        </>
+      ),
+    },
+  ];
 
   return (
     <section className="bg-white py-20 lg:py-28">
@@ -65,21 +56,20 @@ export default function FAQ() {
           {/* LEFT — title block + contact card */}
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-              Got Questions?
+              {t('eyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-              Frequently asked{' '}
-              <span className="text-brand-green">questions</span>
+              {t('titlePre')}{' '}
+              <span className="text-brand-green">{t('titleHighlight')}</span>
             </h2>
             <p className="mt-5 text-brand-mute leading-relaxed max-w-md">
-              Quick answers about our factory, materials, and OEM &amp; ODM services.
-              Don&apos;t see your question below? Reach out — we usually reply within 24 hours.
+              {t('intro')}
             </p>
 
             {/* Still-have-questions card */}
             <div className="mt-8 rounded-2xl bg-brand-cream border border-brand-line p-6 lg:p-7">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-3">
-                Still have a question?
+                {t('stillHaveLabel')}
               </p>
               <ul className="space-y-3 text-sm">
                 <li>
@@ -95,7 +85,7 @@ export default function FAQ() {
                     <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-brand-line text-brand-green group-hover:bg-brand-green group-hover:text-white group-hover:border-brand-green transition shrink-0">
                       <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M17.6 6.32A8.78 8.78 0 0 0 12.05 4c-4.85 0-8.8 3.95-8.8 8.8 0 1.55.4 3.05 1.18 4.38L3.16 21.5l4.45-1.17a8.8 8.8 0 0 0 4.43 1.2h.01c4.85 0 8.8-3.95 8.8-8.8 0-2.35-.92-4.56-2.58-6.21zm-5.55 13.55h-.01a7.3 7.3 0 0 1-3.72-1.02l-.27-.16-2.78.73.74-2.71-.18-.28a7.27 7.27 0 0 1-1.12-3.9c0-4.04 3.29-7.32 7.34-7.32a7.3 7.3 0 0 1 5.18 2.15 7.27 7.27 0 0 1 2.15 5.18c0 4.04-3.29 7.33-7.33 7.33z"/></svg>
                     </span>
-                    <span className="font-medium">WhatsApp Chat</span>
+                    <span className="font-medium">{t('whatsappChat')}</span>
                   </a>
                 </li>
                 <li>
@@ -103,7 +93,7 @@ export default function FAQ() {
                     <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-brand-line text-brand-green group-hover:bg-brand-green group-hover:text-white group-hover:border-brand-green transition shrink-0">
                       <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </span>
-                    <span className="font-medium">Send a detailed inquiry →</span>
+                    <span className="font-medium">{t('sendInquiry')} →</span>
                   </Link>
                 </li>
               </ul>

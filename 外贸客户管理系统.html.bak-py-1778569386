@@ -413,22 +413,6 @@ hr.div { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
   width: 36px; height: 36px; object-fit: contain; background: #f9fafb;
   border-radius: 3px; vertical-align: middle;
 }
-
-/* ===== 产品选择弹窗 V2 ===== */
-.ppk-cat {
-  padding: 8px 14px; cursor: pointer; font-size: 12.5px; color: #4b5563;
-  border-left: 3px solid transparent;
-}
-.ppk-cat:hover { background: #f3f4f6; color: #2c3e50; }
-.ppk-cat.active { background: #e0e7ff; border-left-color: #4a90e2; color: #1e40af; font-weight: 500; }
-.product-picker { width: 980px !important; max-width: 96vw !important; }
-.product-picker-body { padding: 0 !important; display: flex !important; flex-direction: column; overflow: hidden; }
-.product-picker-body table { border-collapse: collapse; }
-.product-picker-body table th, .product-picker-body table td {
-  padding: 6px 10px; font-size: 12px; border-bottom: 1px solid #edf0f4;
-  vertical-align: middle;
-}
-.product-picker-body table tbody tr:hover { background: #fafbfc; }
 .ship-detail-no-img {
   width: 36px; height: 36px; background: #f3f4f6; border-radius: 3px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -626,13 +610,13 @@ hr.div { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
 </div>
 
 <div class="product-picker-mask" id="productPickerMask">
-  <div class="product-picker" style="display:flex;flex-direction:column;">
+  <div class="product-picker">
     <div class="product-picker-header">
       <strong>选择产品</strong>
-      <input class="product-picker-search" id="productPickerSearch" placeholder="搜索 产品编号 / 英文名 / 中文名..." oninput="renderProductPickerV2Body()">
-      <button class="btn" onclick="closeProductPicker()">关闭</button>
+      <input class="product-picker-search" id="productPickerSearch" placeholder="搜索 产品编号 / 英文名 / 中文名..." oninput="renderProductPickerBody()">
+      <button class="btn" onclick="closeProductPicker()">取消</button>
     </div>
-    <div class="product-picker-body" id="productPickerBody" style="flex:1;overflow:hidden;"></div>
+    <div class="product-picker-body" id="productPickerBody"></div>
   </div>
 </div>
 

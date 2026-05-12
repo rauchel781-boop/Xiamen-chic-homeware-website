@@ -104,5 +104,53 @@
   },
   "language": {
     "label": "Language"
+  },
+  "home": {
+    "trustBar": {
+      "stat1Label": "Years OEM",
+      "stat1Sub": "Manufacturing experience",
+      "stat2Label": "Export Countries",
+      "stat2Sub": "US, EU, AU, JP, KR…",
+      "stat3Label": "SKUs Produced",
+      "stat3Sub": "Across 40+ categories",
+      "stat4Label": "Factory Floor",
+      "stat4Sub": "Caoxian production base"
+    },
+    "impactBanner": {
+      "eyebrow": "Built Under One Roof",
+      "headline": "From product design to bulk production — handled by one team.",
+      "body": "We're a true wooden products manufacturer, not a trading company. That means consistent quality, factory-direct pricing, and one point of contact from quotation to global delivery.",
+      "startProject": "Start a Project",
+      "aboutFactory": "About Our Factory",
+      "pillar1Name": "Design",
+      "pillar1Label": "CAD & mockups",
+      "pillar2Name": "Sample",
+      "pillar2Label": "Photo + video",
+      "pillar3Name": "Quality",
+      "pillar3Label": "AQL audited",
+      "pillar4Name": "Logistics",
+      "pillar4Label": "FBA & door-to-door"
+    },
+    "faq": {
+      "eyebrow": "Got Questions?",
+      "titlePre": "Frequently asked",
+      "titleHighlight": "questions",
+      "intro": "Quick answers about our factory, materials, and OEM & ODM services. Don't see your question below? Reach out — we usually reply within 24 hours.",
+      "stillHaveLabel": "Still have a question?",
+      "whatsappChat": "WhatsApp Chat",
+      "sendInquiry": "Send a detailed inquiry",
+      "q1": "Are you a wooden products manufacturer or a trading company?",
+      "a1": "We are a professional wooden products manufacturer in China, with our factory located in Cao County and a sales office in Xiamen.",
+      "q2": "Do you support OEM and private label production?",
+      "a2": "Yes. We provide OEM and ODM wooden products manufacturing services, including custom materials, sizes, logo branding, and packaging.",
+      "q3": "What types of wooden products do you manufacture?",
+      "a3": "We manufacture wooden kitchenware, storage organizers, gift boxes, desk organizers, and custom wooden homeware products.",
+      "q4": "Which markets do you mainly export to?",
+      "a4": "Our wooden products are mainly exported to the United States, Europe, Australia, and other global markets.",
+      "q5": "How do I choose the right wood material for my product?",
+      "a5Pre": "Choosing the right wood depends on product usage, target price, and market positioning. You can refer to our",
+      "a5Link": "Material Selection Guide",
+      "a5Post": "for a clear comparison of common wood options used in kitchenware and storage products."
+    }
   }
 }

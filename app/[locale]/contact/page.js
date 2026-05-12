@@ -141,7 +141,7 @@ export default function ContactPage({ params: { locale } }) {
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQS.map(f => ({
+    mainEntity: FAQ.map(f => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },

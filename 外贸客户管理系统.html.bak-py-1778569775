@@ -422,7 +422,7 @@ hr.div { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
 .ppk-cat:hover { background: #f3f4f6; color: #2c3e50; }
 .ppk-cat.active { background: #e0e7ff; border-left-color: #4a90e2; color: #1e40af; font-weight: 500; }
 .product-picker { width: 980px !important; max-width: 96vw !important; }
-.product-picker-body { padding: 0 !important; display: flex !important; flex-direction: column; overflow: hidden; }
+.product-picker-body { padding: 0 !important; display: block !important; }
 .product-picker-body table { border-collapse: collapse; }
 .product-picker-body table th, .product-picker-body table td {
   padding: 6px 10px; font-size: 12px; border-bottom: 1px solid #edf0f4;
