@@ -2842,12 +2842,10 @@ async function exportQuotationEn(id) {
   t.alignment = { horizontal: 'center', vertical: 'middle' };
   ws.getRow(7).height = 38;
 
-  // 客户信息（左侧 To 块 + 右侧 Date/No/Currency）
+  // 客户信息
   const info = [
     ['To:', c ? c.company : '-', 'Date:', todayStr()],
-    ['Address:', (c && c.address) || '-', 'Quotation No.:', q.code || '-'],
-    ['Attn:', (c && c.contact) || '-', 'Currency:', q.currency || 'USD'],
-    ['Tel/Email:', ((c && c.phone) || '') + ((c && c.email) ? ' / ' + c.email : '') || '-', 'Valid Until:', q.validUntil || '30 days'],
+    ['Quotation No.:', q.code || '-', 'Currency:', q.currency || 'USD'],
   ];
   const infoStart = 9;
   info.forEach((row, i) => {
@@ -2860,7 +2858,7 @@ async function exportQuotationEn(id) {
     ws.mergeCells(r, 2, r, 3);
     ws.getCell(r, 2).value = v1;
     ws.getCell(r, 2).font = { name: 'Calibri', size: 11 };
-    ws.getCell(r, 2).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    ws.getCell(r, 2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
     ws.getCell(r, 4).value = l2;
     ws.getCell(r, 4).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
     ws.getCell(r, 4).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
@@ -2914,38 +2912,8 @@ async function exportQuotationEn(id) {
     }
   }
 
-  // REMARKS 段
-  const remarksStart = tableStart + items.length + 2;
-  ws.mergeCells(remarksStart, 1, remarksStart, 7);
-  const rh = ws.getCell(remarksStart, 1);
-  rh.value = 'REMARKS';
-  rh.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
-  rh.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
-  rh.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
-  ws.getRow(remarksStart).height = 26;
-
-  const remarks = [
-    '1. Payment Term: T/T 30% deposit, 70% balance before shipment.',
-    '2. Lead Time: 30-45 days after deposit and confirmed artwork.',
-    '3. Validity: This quotation is valid for 30 days from the date of issue.',
-    '4. MOQ: As per discussed item by item.',
-    '5. Quality: Same as approved sample.',
-    '6. Packing: As per discussed (export carton with master mark).',
-    '7. Price Terms: FOB China port unless otherwise stated.',
-    '8. Bank charges outside China to be borne by the buyer.',
-  ];
-  remarks.forEach((r, i) => {
-    const row = remarksStart + 1 + i;
-    ws.mergeCells(row, 1, row, 7);
-    const cell = ws.getCell(row, 1);
-    cell.value = r;
-    cell.font = { name: 'Calibri', size: 10.5, color: { argb: 'FF1F2937' } };
-    cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
-    ws.getRow(row).height = 20;
-  });
-
   // Thank you 行
-  const thankRow = remarksStart + remarks.length + 2;
+  const thankRow = tableStart + items.length + 2;
   ws.mergeCells(thankRow, 1, thankRow, 7);
   const tc = ws.getCell(thankRow, 1);
   tc.value = 'Thank you for your inquiry. Looking forward to your reply.';
