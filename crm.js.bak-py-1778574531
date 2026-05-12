@@ -5373,7 +5373,6 @@ function openMailto(customerId) {
 
 function renderBackup() {
   document.getElementById('pageTitle').textContent = '数据备份';
-  setTimeout(() => loadImgStorageInfo(), 50);
   document.getElementById('topbarActions').innerHTML = '';
   setTabs('');
 
@@ -5401,8 +5400,7 @@ function renderBackup() {
           <dt>跟进</dt><dd>${DB.followups.length} 条</dd>
           <dt>邮件模板</dt><dd>${DB.templates.length} 个</dd>
           <dt>最后更新</dt><dd>${lastUpdate}</dd>
-          <dt>数据大小</dt><dd>${sizeMB} MB (${sizeKB} KB) <span class="muted" style="font-size:10px;">文字数据，已不含图片</span></dd>
-          <dt>图片存储</dt><dd id="imgStorageInfo">加载中...</dd>
+          <dt>数据大小</dt><dd>${sizeMB} MB (${sizeKB} KB) ${sizeBytes > 4*1024*1024 ? ' <span class="tag tag-orange">接近浏览器存储上限</span>' : ''}</dd>
         </div>
       </div>
     </div>
@@ -5411,8 +5409,7 @@ function renderBackup() {
       <div class="panel-header">导出备份</div>
       <div class="panel-body">
         <p class="muted" style="margin-bottom:10px;">建议每周导出一次。文件名自动加日期方便区分版本。</p>
-        <button class="btn btn-primary" onclick="exportData()">↓ 导出 JSON 备份 (仅数据)</button>
-        <button class="btn btn-success" onclick="exportFullZip()" style="margin-left:6px;">↓ 导出完整 ZIP (数据+图片)</button>
+        <button class="btn btn-primary" onclick="exportData()">↓ 导出 JSON 备份</button>
         <button class="btn" onclick="exportExcel()" style="margin-left:6px;">↓ 导出 Excel (CSV)</button>
       </div>
     </div>
@@ -5460,10 +5457,8 @@ function renderBackup() {
     <div class="panel" style="margin-bottom:12px;">
       <div class="panel-header">导入备份</div>
       <div class="panel-body">
-        <p class="muted" style="margin-bottom:10px;">从 ZIP 或 JSON 文件恢复（ZIP 含图片，JSON 仅数据）。<strong style="color:#ef4444;">导入会覆盖当前所有数据！</strong></p>
-        <input type="file" id="importFileZip" accept=".zip" onchange="importData(event)" style="display:none;">
-        <button class="btn" onclick="document.getElementById('importFileZip').click()" style="margin-right:6px;">↑ 选择 ZIP 文件导入</button>
-        <input type="file" id="importFile" accept=".json,.zip" onchange="importData(event)" style="display:none;">
+        <p class="muted" style="margin-bottom:10px;">从 JSON 文件恢复。<strong style="color:#ef4444;">导入会覆盖当前所有数据！</strong></p>
+        <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display:none;">
         <button class="btn" onclick="document.getElementById('importFile').click()">↑ 选择 JSON 文件导入</button>
       </div>
     </div>
@@ -5523,52 +5518,6 @@ function setAutoBackupInterval(days) {
   DB.meta.autoBackup.intervalDays = Number(days) || 7;
   saveDB();
   toast('已设置备份频率：每 ' + days + ' 天', 'success');
-}
-
-async function exportFullZip() {
-  if (typeof JSZip === 'undefined') { toast('ZIP 库未加载，请刷新页面', 'error'); return; }
-  toast('正在打包完整数据...', 'info');
-  try {
-    const zip = new JSZip();
-    // 1. 文字数据 → data.json
-    zip.file('data.json', JSON.stringify(DB, null, 2));
-    // 2. 所有图片 → images/<id>
-    const entries = await imgDB.getAllEntries();
-    for (const e of entries) {
-      const ext = (e.blob.type || 'image/jpeg').split('/')[1].split(';')[0] || 'jpg';
-      zip.file('images/' + e.id + '.' + ext, e.blob);
-    }
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '外贸CRM_完整备份_' + todayStr() + '.zip';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast('已导出完整备份 (' + Math.round(blob.size / 1024 / 1024 * 10) / 10 + 'MB · 含 ' + entries.length + ' 张图)', 'success');
-  } catch (err) {
-    console.error(err);
-    toast('完整备份失败：' + err.message, 'error');
-  }
-}
-
-function loadImgStorageInfo() {
-  const el = document.getElementById('imgStorageInfo');
-  if (!el) return;
-  (async () => {
-    try {
-      const stats = await imgDB.getStats();
-      const usageMB = (stats.usage / 1024 / 1024).toFixed(2);
-      const quotaMB = (stats.quota / 1024 / 1024).toFixed(0);
-      const pct = stats.quota > 0 ? Math.round(stats.usage / stats.quota * 100) : 0;
-      let warn = '';
-      if (pct >= 80) warn = ' <span class="tag tag-red">已用 ' + pct + '%</span>';
-      else if (pct >= 50) warn = ' <span class="tag tag-orange">已用 ' + pct + '%</span>';
-      else warn = ' <span class="muted" style="font-size:10px;">已用 ' + pct + '%</span>';
-      el.innerHTML = stats.count + ' 张图 · ' + usageMB + ' MB / 配额约 ' + quotaMB + ' MB' + warn;
-    } catch (e) {
-      el.innerHTML = '<span class="muted">无法读取</span>';
-    }
-  })();
 }
 
 function exportData() {
@@ -5682,70 +5631,14 @@ function downloadCSV(rows, name) {
   URL.revokeObjectURL(a.href);
 }
 
-async function importData(e) {
+function importData(e) {
   const file = e.target.files[0];
   if (!file) return;
   if (!confirm('导入会覆盖当前所有数据，确定继续？建议先导出当前数据备份。')) {
     e.target.value = ''; return;
   }
-
-  const isZip = file.name.toLowerCase().endsWith('.zip') || file.type === 'application/zip';
-
-  if (isZip) {
-    if (typeof JSZip === 'undefined') { toast('ZIP 库未加载，请刷新页面', 'error'); e.target.value = ''; return; }
-    try {
-      toast('正在解压...', 'info');
-      const zip = await JSZip.loadAsync(file);
-      const dataFile = zip.file('data.json');
-      if (!dataFile) throw new Error('ZIP 中缺少 data.json');
-      const dataText = await dataFile.async('string');
-      const data = JSON.parse(dataText);
-      if (!data.customers || !Array.isArray(data.customers)) throw new Error('文件格式不正确');
-
-      // 清空 IndexedDB
-      await imgDB.clear();
-      for (const url of imgCache.values()) URL.revokeObjectURL(url);
-      imgCache.clear();
-
-      // 恢复图片
-      const imgFiles = Object.keys(zip.files).filter(n => n.startsWith('images/') && !zip.files[n].dir);
-      let restored = 0;
-      for (const path of imgFiles) {
-        const fn = path.replace('images/', '');
-        const id = fn.replace(/\.[a-z0-9]+$/i, '');
-        const blob = await zip.files[path].async('blob');
-        await imgDB.putBlob(id, blob);
-        imgCache.set(id, URL.createObjectURL(blob));
-        restored++;
-      }
-
-      // 恢复数据
-      DB = Object.assign({
-        customers: [], leads: [], opportunities: [], products: [],
-        productCategories: [], quotations: [], samples: [], orders: [],
-        shipments: [], followups: [], templates: [],
-        meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
-      }, data);
-      DB.shipments = DB.shipments || [];
-      DB.meta = DB.meta || {};
-      DB.meta.counters = DB.meta.counters || {};
-      DB.meta.tags = DB.meta.tags || [];
-      DB.meta.imageMigrationV1Done = true;  // 来自 ZIP 不需要再迁移
-      saveDB();
-      renderNav();
-      render();
-      toast('导入完成！客户 ' + DB.customers.length + ' 个，图片 ' + restored + ' 张', 'success');
-    } catch (err) {
-      console.error(err);
-      toast('ZIP 导入失败：' + err.message, 'error');
-    }
-    e.target.value = '';
-    return;
-  }
-
-  // JSON 旧版兼容
   const reader = new FileReader();
-  reader.onload = async ev => {
+  reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
       if (!data.customers || !Array.isArray(data.customers)) throw new Error('文件格式不正确');
@@ -5759,17 +5652,10 @@ async function importData(e) {
       DB.meta = DB.meta || {};
       DB.meta.counters = DB.meta.counters || {};
       DB.meta.tags = DB.meta.tags || [];
-      // 重置迁移标记让启动时重新迁移图片（如果 JSON 里是 base64）
-      DB.meta.imageMigrationV1Done = false;
       saveDB();
       renderNav();
       render();
-      toast('导入成功！将自动迁移图片到本地存储，请勿关闭页面', 'success');
-      setTimeout(async () => {
-        await migrateAllImagesToIndexedDB();
-        await preloadAllImages();
-        render();
-      }, 500);
+      toast('导入成功！共 ' + DB.customers.length + ' 个客户', 'success');
     } catch (err) {
       toast('导入失败：' + err.message, 'error');
     }
