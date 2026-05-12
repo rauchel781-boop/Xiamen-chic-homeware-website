@@ -288,7 +288,6 @@ function loadDB() {
     DB.shipments = DB.shipments || [];
     migrateProducts();
     migrateSamples();
-    migrateOrders();
     DB.templates = DB.templates || [];
     DB.meta = DB.meta || {};
     DB.meta.counters = DB.meta.counters || {};
@@ -3212,438 +3211,105 @@ async function exportSampleListEn(sampleId) {
   toast('已导出 ' + filename, 'success');
 }
 
-// === 订单模块（重构版：单子 + 多产品行）===
-
-let orderFilter = '', orderPaymentFilter = '', orderCustomerFilter = '';
-let _editingOrder = null;
-let _orderPickerItemId = null;
-let _expandedOrders = new Set();
-
-function migrateOrders() {
-  let changed = 0;
-  (DB.orders || []).forEach(o => {
-    if (!o.items || typeof o.items === 'string') {
-      const oldItemsText = (typeof o.items === 'string') ? o.items : '';
-      const it = {
-        id: uid(),
-        productId: '',
-        productName: oldItemsText || '[旧数据]',
-        specs: '',
-        productCraft: '',
-        qty: 1,
-        unitPrice: Number(o.amount) || 0,
-      };
-      o.items = [it];
-      if (!o.incoterms) o.incoterms = 'FOB';
-      if (!o.paymentTerms) o.paymentTerms = '';
-      if (!o.destinationPort) o.destinationPort = '';
-      if (!o.marks) o.marks = '';
-      changed++;
-    }
-  });
-  if (changed > 0) { saveDB(); console.log('Migrated', changed, 'orders'); }
-}
-
-function toggleOrderExpand(id) {
-  if (_expandedOrders.has(id)) _expandedOrders.delete(id);
-  else _expandedOrders.add(id);
-  renderOrders();
-}
-
-function renderOrderExpandedItems(o) {
-  const items = o.items || [];
-  if (items.length === 0) return '<div class="muted" style="padding:8px;">无产品</div>';
-  const cur = o.currency || 'USD';
-  return '<table style="width:100%;background:#fff;border:1px solid #e5e7eb;">' +
-    '<thead><tr style="background:#f8fafb;">' +
-      '<th style="width:42px;text-align:center;">#</th>' +
-      '<th style="width:60px;text-align:center;">图片</th>' +
-      '<th>产品编号</th>' +
-      '<th>产品名</th>' +
-      '<th>规格</th>' +
-      '<th>工艺要求</th>' +
-      '<th class="text-right">数量</th>' +
-      '<th class="text-right">单价(' + cur + ')</th>' +
-      '<th class="text-right">小计</th>' +
-    '</tr></thead><tbody>' +
-    items.map((it, idx) => {
-      const p = it.productId ? productById(it.productId) : null;
-      const qty = Number(it.qty) || 0;
-      const up = Number(it.unitPrice) || 0;
-      const sub = (qty * up).toFixed(2);
-      return '<tr>' +
-        '<td class="text-center muted">' + (idx + 1) + '</td>' +
-        '<td class="text-center">' + (p && p.image ? '<img src="' + p.image + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
-        '<td class="code">' + escapeHtml((p && p.code) || '-') + '</td>' +
-        '<td>' + escapeHtml(it.productName || (p && p.nameEn) || '-') + '</td>' +
-        '<td class="muted">' + escapeHtml(it.specs || '-') + '</td>' +
-        '<td class="muted" style="max-width:240px;font-size:11px;">' + escapeHtml(truncate(it.productCraft || (p && (p.descriptionZh || p.description)) || '-', 60)) + '</td>' +
-        '<td class="text-right">' + qty + '</td>' +
-        '<td class="text-right">' + (up ? cur + ' ' + up.toFixed(2) : '-') + '</td>' +
-        '<td class="text-right"><strong>' + (sub !== '0.00' ? cur + ' ' + sub : '-') + '</strong></td>' +
-      '</tr>';
-    }).join('') +
-    '</tbody></table>';
-}
+let orderFilter = '', orderPaymentFilter = '';
 
 function renderOrders() {
   document.getElementById('pageTitle').textContent = '订单管理';
   document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editOrder()">+ 新建订单</button>`;
   setTabs('');
   const kw = orderFilter.toLowerCase();
-  const list = (DB.orders || []).filter(o => {
+  const list = DB.orders.filter(o => {
     const c = customerById(o.customerId);
-    const items = o.items || [];
-    const productMatch = items.some(it => (it.productName||'').toLowerCase().includes(kw));
-    return (!kw || (o.orderNo||'').toLowerCase().includes(kw) || productMatch || (c && c.company.toLowerCase().includes(kw)))
-        && (!orderPaymentFilter || o.paymentStatus === orderPaymentFilter)
-        && (!orderCustomerFilter || o.customerId === orderCustomerFilter);
+    return (!kw || (o.orderNo||'').toLowerCase().includes(kw) || (o.items||'').toLowerCase().includes(kw) || (c && c.company.toLowerCase().includes(kw)))
+        && (!orderPaymentFilter || o.paymentStatus === orderPaymentFilter);
   }).sort((a,b) => (b.orderDate||'').localeCompare(a.orderDate||''));
 
-  const total = list.reduce((s, o) => s + calcOrderTotal(o), 0);
-  const unpaid = list.filter(o => o.paymentStatus !== '已结清').reduce((s, o) => s + calcOrderTotal(o), 0);
+  const total = list.reduce((s, o) => s + (Number(o.amount) || 0), 0);
+  const unpaid = list.filter(o => o.paymentStatus !== '已结清').reduce((s, o) => s + (Number(o.amount) || 0), 0);
 
   document.getElementById('content').innerHTML = `
     <div class="table-wrap">
       <div class="table-toolbar">
         <input class="search-box" placeholder="搜索 订单号 / 产品 / 客户..." value="${escapeHtml(orderFilter)}" oninput="orderFilter=this.value;renderOrders()">
-        <select class="btn" onchange="orderCustomerFilter=this.value;renderOrders()">
-          <option value="">全部客户</option>
-          ${DB.customers.map(c => `<option value="${c.id}" ${orderCustomerFilter===c.id?'selected':''}>${escapeHtml(c.company)}</option>`).join('')}
-        </select>
         <select class="btn" onchange="orderPaymentFilter=this.value;renderOrders()">
           <option value="">全部付款状态</option>
           ${PAYMENT_STATUSES.map(s => `<option ${orderPaymentFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
         </select>
-        <span class="muted">共 ${list.length} 单 / 合计 ${total.toLocaleString()} / 未结清 ${unpaid.toLocaleString()}</span>
+        <span class="muted">共 ${list.length} 条 / 合计 ${total.toLocaleString()} / 未结清 ${unpaid.toLocaleString()}</span>
       </div>
       ${list.length === 0 ? '<div class="empty">暂无订单</div>' : `
       <table>
-        <thead><tr>
-          <th style="width:30px;"></th>
-          <th style="width:50px;">图片</th>
-          <th>订单号</th><th>客户</th><th>产品</th>
-          <th class="text-right">产品数</th>
-          <th class="text-right">金额</th><th>付款</th><th>生产</th><th>交期</th>
-          <th class="text-right">操作</th>
-        </tr></thead>
+        <thead><tr><th>订单号</th><th>客户</th><th>产品</th><th class="text-right">金额</th><th>付款</th><th>生产</th><th>交期</th><th class="text-right">操作</th></tr></thead>
         <tbody>
-        ${list.map(o => {
-          const items = o.items || [];
-          const firstP = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
-          const amount = calcOrderTotal(o);
-          const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameEn || '-').join('; ');
-          const expanded = _expandedOrders.has(o.id);
-          let html = `<tr>
-            <td class="text-center" style="cursor:pointer;user-select:none;" onclick="toggleOrderExpand('${o.id}')" title="${expanded?'收起':'展开'}产品明细">
-              <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
-            </td>
-            <td>${firstP && firstP.image ? '<img src="' + firstP.image + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
-            <td class="code"><strong>${escapeHtml(o.orderNo || '-')}</strong>
-              <div class="muted" style="font-size:10px;">${fmtDate(o.orderDate)}</div></td>
-            <td>${customerNameWithFlag(o.customerId)}</td>
-            <td class="muted">${escapeHtml(truncate(productNames, 35))}</td>
-            <td class="text-right">${items.length}</td>
-            <td class="text-right no-wrap"><strong>${escapeHtml(o.currency || '')} ${amount.toLocaleString()}</strong></td>
-            <td><span class="tag ${getStatus(PAYMENT_STATUSES, o.paymentStatus).tag}">${escapeHtml(o.paymentStatus || '-')}</span></td>
-            <td><span class="tag ${getStatus(PRODUCTION_STATUSES, o.productionStatus).tag}">${escapeHtml(o.productionStatus || '-')}</span></td>
-            <td class="no-wrap">${fmtDate(o.deliveryDate)}</td>
-            <td class="text-right no-wrap">
-              <button class="btn-link" onclick="editOrder('${o.id}')">编辑</button>
-              <button class="btn-link" onclick="exportOrderPIZh('${o.id}')" title="导出中文订单确认书">↓中</button>
-              <button class="btn-link" onclick="exportOrderPIEn('${o.id}')" title="导出英文 Proforma Invoice">↓EN</button>
-              <button class="btn-link" onclick="createShipmentFromOrder('${o.id}')" title="基于此订单创建出货单">→出货</button>
-              <button class="btn-link danger" onclick="deleteOrder('${o.id}')">删除</button>
-            </td>
-          </tr>`;
-          if (expanded) {
-            html += '<tr><td colspan="11" style="padding:0;background:#fafbfc;"><div style="padding:8px 12px;">' + renderOrderExpandedItems(o) + '</div></td></tr>';
-          }
-          return html;
-        }).join('')}
+        ${list.map(o => `<tr>
+          <td class="code"><strong>${escapeHtml(o.orderNo || '')}</strong>
+            <div class="muted" style="font-size:10px;">${fmtDate(o.orderDate)}</div></td>
+          <td>${customerNameWithFlag(o.customerId)}</td>
+          <td class="muted">${escapeHtml(truncate(o.items, 35))}</td>
+          <td class="text-right no-wrap"><strong>${escapeHtml(o.currency || '')} ${Number(o.amount || 0).toLocaleString()}</strong></td>
+          <td><span class="tag ${getStatus(PAYMENT_STATUSES, o.paymentStatus).tag}">${escapeHtml(o.paymentStatus || '-')}</span></td>
+          <td><span class="tag ${getStatus(PRODUCTION_STATUSES, o.productionStatus).tag}">${escapeHtml(o.productionStatus || '-')}</span></td>
+          <td class="no-wrap">${fmtDate(o.deliveryDate)}</td>
+          <td class="text-right no-wrap">
+            <button class="btn-link" onclick="editOrder('${o.id}')">编辑</button>
+            <button class="btn-link danger" onclick="deleteOrder('${o.id}')">删除</button>
+          </td>
+        </tr>`).join('')}
         </tbody>
       </table>`}
     </div>
   `;
 }
 
-function calcOrderTotal(o) {
-  return (o.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.unitPrice) || 0), 0);
-}
-
-function editOrder(id, customerId, presetItems) {
+function editOrder(id, customerId) {
   if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
-  if (id) {
-    const o = (DB.orders || []).find(x => x.id === id);
-    if (!o) return;
-    _editingOrder = JSON.parse(JSON.stringify(o));
-    if (!_editingOrder.items) _editingOrder.items = [];
-  } else {
-    _editingOrder = {
-      id: uid(),
-      orderNo: nextCode('SO'),
-      customerId: customerId || '',
-      orderDate: todayStr(),
-      deliveryDate: '',
-      currency: 'USD',
-      paymentStatus: '未付款',
-      productionStatus: '未开始',
-      paymentTerms: '',
-      incoterms: 'FOB',
-      destinationPort: '',
-      marks: '',
-      notes: '',
-      items: presetItems || [],
-      createdAt: new Date().toISOString(),
-    };
-  }
-  openModal((id ? '编辑订单 ' : '新建订单 ') + _editingOrder.orderNo,
-    renderOrderForm(),
-    `<button class="btn" onclick="closeModal()">取消</button>
-     <button class="btn btn-primary" onclick="saveOrderForm('${id || ''}')">保存</button>`,
-    'xl');
-}
-
-function renderOrderForm() {
-  const o = _editingOrder;
-  const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA'];
-  return `
-    <div class="form-grid cols-3" style="margin-bottom:14px;">
-      <div class="field"><label>订单号</label>
-        <input value="${escapeHtml(o.orderNo || '')}" oninput="_editingOrder.orderNo=this.value"></div>
-      <div class="field"><label>客户 <span class="req">*</span></label>
-        <select onchange="_editingOrder.customerId=this.value">${customerOptions(o.customerId)}</select></div>
-      <div class="field"><label>币种</label>
-        <select onchange="_editingOrder.currency=this.value;refreshOrderTotal()">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div class="field"><label>下单日期</label>
-        <input type="date" value="${fmtDate(o.orderDate)}" onchange="_editingOrder.orderDate=this.value"></div>
-      <div class="field"><label>交货日期</label>
-        <input type="date" value="${fmtDate(o.deliveryDate)}" onchange="_editingOrder.deliveryDate=this.value"></div>
-      <div class="field"><label>INCO Terms</label>
-        <select onchange="_editingOrder.incoterms=this.value">${INCOTERMS.map(t => `<option ${o.incoterms===t?'selected':''}>${t}</option>`).join('')}</select></div>
-      <div class="field"><label>付款状态</label>
-        <select onchange="_editingOrder.paymentStatus=this.value">${PAYMENT_STATUSES.map(s => `<option ${o.paymentStatus===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
-      <div class="field"><label>生产状态</label>
-        <select onchange="_editingOrder.productionStatus=this.value">${PRODUCTION_STATUSES.map(s => `<option ${o.productionStatus===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
-      <div class="field"><label>目的港</label>
-        <input value="${escapeHtml(o.destinationPort||'')}" oninput="_editingOrder.destinationPort=this.value" placeholder="如 Los Angeles"></div>
-      <div class="field full"><label>付款条款</label>
-        <input value="${escapeHtml(o.paymentTerms||'')}" oninput="_editingOrder.paymentTerms=this.value" placeholder="如 TT 30% deposit, 70% before shipment"></div>
-      <div class="field full"><label>唛头</label>
-        <input value="${escapeHtml(o.marks||'')}" oninput="_editingOrder.marks=this.value"></div>
-      <div class="field full"><label>备注</label>
-        <textarea oninput="_editingOrder.notes=this.value">${escapeHtml(o.notes||'')}</textarea></div>
-    </div>
-
-    <div style="margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center;">
-      <strong style="font-size:14px;">订单产品</strong>
-      <button type="button" class="btn btn-sm btn-primary" onclick="addOrderItem()">+ 添加产品</button>
-    </div>
-    <div id="orderItems">${o.items.length === 0 ? '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>' : o.items.map(it => orderItemHtml(it)).join('')}</div>
-    <div id="orderTotal" style="margin-top:14px;">${orderTotalHtml()}</div>
-  `;
-}
-
-function orderItemHtml(item) {
-  return `
-    <div class="ship-item" data-order-item="${item.id}" style="border:1px solid #e5e7eb;border-radius:6px;padding:10px;margin-bottom:8px;background:#fff;">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:flex-end;">
-        <div class="field">
-          <label>产品</label>
-          <div style="display:flex;gap:6px;align-items:stretch;">
-            ${orderItemProductCardHtml(item)}
-            <button type="button" class="btn btn-sm" onclick="openOrderItemPicker('${item.id}')" style="white-space:nowrap;">${item.productId ? '更换' : '选择'}</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>数量</label>
-          <input type="number" min="0" step="1" value="${escapeHtml(item.qty || '')}" oninput="changeOrderItem('${item.id}','qty',this.value)" placeholder="个数">
-        </div>
-        <div class="field">
-          <label>单价</label>
-          <input type="number" min="0" step="0.01" value="${escapeHtml(item.unitPrice||'')}" oninput="changeOrderItem('${item.id}','unitPrice',this.value)">
-        </div>
-        <div class="field">
-          <label>小计</label>
-          <input value="${orderItemSubtotal(item)}" disabled style="background:#f9fafb;">
-        </div>
-        <div>
-          <button type="button" class="btn btn-sm" onclick="removeOrderItem('${item.id}')" style="color:#ef4444;">删除</button>
-        </div>
+  const o = id ? DB.orders.find(x => x.id === id) : {
+    customerId: customerId || '', orderDate: todayStr(), currency: 'USD',
+    paymentStatus: '未付款', productionStatus: '未开始'
+  };
+  openModal(id ? '编辑订单' : '新建订单', `
+    <form id="orderForm" onsubmit="return saveOrder(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field"><label>订单号</label>
+          <input name="orderNo" value="${escapeHtml(o.orderNo || '')}" placeholder="留空自动生成"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(o.customerId)}</select></div>
+        <div class="field"><label>下单日期</label><input name="orderDate" type="date" value="${fmtDate(o.orderDate)}"></div>
+        <div class="field"><label>交货日期</label><input name="deliveryDate" type="date" value="${fmtDate(o.deliveryDate)}"></div>
+        <div class="field"><label>金额</label><input name="amount" type="number" step="0.01" value="${escapeHtml(o.amount || '')}"></div>
+        <div class="field"><label>币种</label>
+          <select name="currency">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>付款状态</label>
+          <select name="paymentStatus">${PAYMENT_STATUSES.map(s => `<option ${o.paymentStatus===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+        <div class="field"><label>生产状态</label>
+          <select name="productionStatus">${PRODUCTION_STATUSES.map(s => `<option ${o.productionStatus===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+        <div class="field full"><label>产品明细</label>
+          <textarea name="items" placeholder="产品A x 100pcs">${escapeHtml(o.items || '')}</textarea></div>
+        <div class="field full"><label>备注</label>
+          <textarea name="notes">${escapeHtml(o.notes || '')}</textarea></div>
       </div>
-      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="field">
-          <label>产品名（可改）</label>
-          <input value="${escapeHtml(item.productName||'')}" oninput="changeOrderItem('${item.id}','productName',this.value)">
-        </div>
-        <div class="field">
-          <label>规格</label>
-          <input value="${escapeHtml(item.specs||'')}" oninput="changeOrderItem('${item.id}','specs',this.value)">
-        </div>
-      </div>
-      <div class="field" style="margin-top:8px;">
-        <label>工艺/备注</label>
-        <input value="${escapeHtml(item.productCraft||'')}" oninput="changeOrderItem('${item.id}','productCraft',this.value)" placeholder="可选">
-      </div>
-    </div>
-  `;
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('orderForm').requestSubmit()">保存</button>`, 'lg');
+  if (o.customerId) { const sel = document.querySelector('#orderForm [name=customerId]'); if (sel) sel.value = o.customerId; }
 }
 
-function orderItemProductCardHtml(item) {
-  const p = productById(item.productId);
-  if (!p) {
-    return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
+function saveOrder(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.orders.find(x => x.id === id), data);
+  else {
+    if (!data.orderNo) data.orderNo = nextCode('SO');
+    DB.orders.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
   }
-  return '<div class="ship-product-card">' +
-    (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
-    '<div class="info">' +
-      '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
-      '<div class="name-line">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-function orderItemSubtotal(item) {
-  const sub = (Number(item.qty) || 0) * (Number(item.unitPrice) || 0);
-  return sub > 0 ? sub.toFixed(2) : '';
-}
-
-function orderTotalHtml() {
-  const total = calcOrderTotal(_editingOrder);
-  const cur = (_editingOrder && _editingOrder.currency) || 'USD';
-  return `
-    <div style="border:2px solid #4a90e2;border-radius:6px;padding:12px 14px;background:#eff6ff;">
-      <div style="font-weight:600;margin-bottom:8px;color:#1e40af;font-size:13px;">订单合计</div>
-      <div style="font-size:16px;">总金额：<strong style="color:#1e40af;font-size:18px;">${cur} ${total.toFixed(2)}</strong></div>
-    </div>
-  `;
-}
-
-function addOrderItem() {
-  if (!_editingOrder) return;
-  if (DB.products.length === 0) { toast('请先添加产品', 'error'); return; }
-  const it = { id: uid(), productId: '', productName: '', specs: '', productCraft: '', qty: '', unitPrice: '' };
-  _editingOrder.items.push(it);
-  const wrap = document.getElementById('orderItems');
-  if (_editingOrder.items.length === 1) wrap.innerHTML = '';
-  wrap.insertAdjacentHTML('beforeend', orderItemHtml(it));
-  refreshOrderTotal();
-}
-
-function removeOrderItem(itemId) {
-  if (!confirm('确定删除该行？')) return;
-  _editingOrder.items = _editingOrder.items.filter(x => x.id !== itemId);
-  const el = document.querySelector('[data-order-item="' + itemId + '"]');
-  if (el) el.remove();
-  if (_editingOrder.items.length === 0) {
-    document.getElementById('orderItems').innerHTML = '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>';
-  }
-  refreshOrderTotal();
-}
-
-function changeOrderItem(itemId, field, value) {
-  const it = _editingOrder.items.find(x => x.id === itemId);
-  if (!it) return;
-  it[field] = value;
-  if (field === 'qty' || field === 'unitPrice') {
-    // 更新该行小计输入框
-    const el = document.querySelector('[data-order-item="' + itemId + '"]');
-    if (el) {
-      const subs = el.querySelectorAll('input[disabled]');
-      if (subs && subs.length > 0) subs[0].value = orderItemSubtotal(it);
-    }
-    refreshOrderTotal();
-  }
-}
-
-function refreshOrderTotal() {
-  const el = document.getElementById('orderTotal');
-  if (el) el.innerHTML = orderTotalHtml();
-}
-
-function openOrderItemPicker(itemId) {
-  if (DB.products.length === 0) { toast('请先添加产品', 'error'); return; }
-  _orderPickerItemId = itemId;
-  _productPickerItemId = null;
-  _samplePickerItemId = null;
-  document.getElementById('productPickerSearch').value = '';
-  renderProductPickerBodyForOrderItem();
-  document.getElementById('productPickerMask').classList.add('show');
-  setTimeout(() => { try { document.getElementById('productPickerSearch').focus(); } catch(e){} }, 80);
-}
-
-function renderProductPickerBodyForOrderItem() {
-  const kw = (document.getElementById('productPickerSearch').value || '').toLowerCase();
-  const list = DB.products.filter(p =>
-    !kw || (p.code||'').toLowerCase().includes(kw)
-        || (p.nameEn||'').toLowerCase().includes(kw)
-        || (p.nameZh||'').toLowerCase().includes(kw)
-  );
-  const body = document.getElementById('productPickerBody');
-  if (list.length === 0) { body.innerHTML = '<div class="product-picker-empty">无匹配产品</div>'; return; }
-  body.innerHTML = list.map(p =>
-    '<div class="product-picker-card" onclick="selectOrderItemProduct(\'' + p.id + '\')">' +
-      (p.image ? '<img src="' + p.image + '">' : '<div class="no-img">无图</div>') +
-      '<div class="code">' + escapeHtml(p.code || '-') + '</div>' +
-      '<div class="name">' + escapeHtml(p.nameEn || p.nameZh || '-') + '</div>' +
-      (p.price ? '<div class="packing">' + (p.currency || '') + ' ' + p.price + '</div>' : '') +
-    '</div>'
-  ).join('');
-}
-
-function selectOrderItemProduct(pid) {
-  if (!_orderPickerItemId) return;
-  const p = productById(pid);
-  if (!p) return;
-  const it = _editingOrder.items.find(x => x.id === _orderPickerItemId);
-  if (!it) return;
-  it.productId = pid;
-  if (!it.productName) it.productName = p.nameEn || p.nameZh || '';
-  if (!it.specs) it.specs = p.specs || '';
-  if (!it.unitPrice && p.price) it.unitPrice = p.price;
-  const el = document.querySelector('[data-order-item="' + _orderPickerItemId + '"]');
-  if (el) el.outerHTML = orderItemHtml(it);
-  refreshOrderTotal();
-  document.getElementById('productPickerMask').classList.remove('show');
-  _orderPickerItemId = null;
-}
-
-function saveOrderForm(id) {
-  const o = _editingOrder;
-  if (!o) return;
-  if (!o.customerId) { toast('请选择客户', 'error'); return; }
-  if (o.items.length === 0) { toast('请添加至少一个产品', 'error'); return; }
-  if (!o.orderNo) o.orderNo = nextCode('SO');
-  for (const it of o.items) {
-    if (!it.productId && !it.productName) { toast('每个产品行必须选产品或填产品名', 'error'); return; }
-  }
-  // 保存时同步 amount 字段（dashboard 等老逻辑用）
-  o.amount = calcOrderTotal(o);
-  if (!DB.orders) DB.orders = [];
-  if (id) {
-    const idx = DB.orders.findIndex(x => x.id === id);
-    if (idx >= 0) DB.orders[idx] = o;
-    else DB.orders.push(o);
-  } else {
-    DB.orders.push(o);
-  }
-  try { saveDB(); } catch(err) { toast('保存失败：' + err.message, 'error'); return; }
-  _editingOrder = null;
-  closeModal();
-  renderOrders();
-  toast('已保存', 'success');
+  saveDB(); closeModal(); renderOrders(); toast('已保存', 'success'); return false;
 }
 
 function deleteOrder(id) {
   if (!confirm('确定删除该订单？')) return;
-  DB.orders = (DB.orders || []).filter(x => x.id !== id);
+  DB.orders = DB.orders.filter(x => x.id !== id);
   saveDB(); renderOrders(); toast('已删除');
 }
-
-// 占位 - 阶段 2/3 实现
-function exportOrderPIZh(id) { toast('订单导出功能将在下一阶段实现', 'info'); }
-function exportOrderPIEn(id) { toast('订单导出功能将在下一阶段实现', 'info'); }
-function createShipmentFromOrder(id) { toast('订单→出货功能将在下一阶段实现', 'info'); }
 
 /* ============================================================
  * 出货单 (Shipments)

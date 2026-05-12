@@ -10,6 +10,7 @@ import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts } from '@/lib/wp-data';
 import { hreflangFor } from '@/i18n/routing';
+import { schemaLang } from '@/i18n/seo';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const title = 'Wood Materials Guide — Choose the Right Wood for Your Product';
@@ -351,22 +352,56 @@ export default function MaterialsGuide({ params: { locale } }) {
       { '@type': 'ListItem', position: 2, name: 'Material Guide' },
     ],
   };
+  // TechArticle — the editorial/journalistic shell that Google ranks for
+  // "wood guide" / "best wood for X" queries. Enriched with image array
+  // (signals visual content), about (entity tagging via wood Wikidata refs
+  // wouldn't add value here — using simple Thing/name instead), and proper
+  // publish/modified dates so freshness signal is honest.
   const guideLd = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
+    '@id': `${SITE.siteUrl}/material-guide#article`,
     headline: 'Wood Materials Guide for Custom Manufacturing',
     description: 'Compare 12 wood materials used for kitchenware, storage boxes and home organizers — hardness, cost, weight, moisture resistance and best-fit applications.',
     author: { '@id': `${SITE.siteUrl}/#organization` },
     publisher: { '@id': `${SITE.siteUrl}/#organization` },
     url: `${SITE.siteUrl}/material-guide`,
-    inLanguage: 'en',
+    inLanguage: schemaLang(locale),
     mainEntityOfPage: `${SITE.siteUrl}/material-guide`,
+    datePublished: '2026-01-01',
+    dateModified: '2026-05-12',
+    image: MATERIALS.slice(0, 6).map(m => `${SITE.siteUrl}${m.image}`),
+    keywords: MATERIALS.map(m => m.name).join(', '),
+    about: MATERIALS.map(m => ({ '@type': 'Thing', name: m.name })),
+    articleSection: 'Materials Guide',
+    proficiencyLevel: 'Beginner',
+  };
+
+  // ItemList — explicit signal that this page is a comparison of 12 entities.
+  // Helps Google show the guide for "X vs Y wood" and "best wood for [use case]"
+  // queries by making the comparison structure machine-readable.
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: '12 Wood Materials for Custom Manufacturing',
+    description: 'All wood and bamboo materials we work with at Xiamen Chic Homeware — hardness ratings, cost tier, best-fit applications.',
+    numberOfItems: MATERIALS.length,
+    itemListOrder: 'https://schema.org/ItemListOrderAscending',
+    itemListElement: MATERIALS.map((m, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: m.name,
+      url: `${SITE.siteUrl}/material-guide#${m.slug}`,
+      image: `${SITE.siteUrl}${m.image}`,
+      description: m.tagline,
+    })),
   };
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={guideLd} />
+      <JsonLd data={itemListLd} />
       {/* Hero */}
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
