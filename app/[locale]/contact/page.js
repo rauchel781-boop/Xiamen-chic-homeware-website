@@ -2,7 +2,8 @@
 // Sections: Hero · Quick channels · Form + side panel · What happens next ·
 //           Office locations · FAQ · Final reassurance
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
@@ -12,8 +13,9 @@ import { schemaLang } from '@/i18n/seo';
 import ContactClient from './ContactClient';
 
 export async function generateMetadata({ params: { locale } = {} }) {
-  const title = 'Contact CHIC — Get a Free Quote on Custom Wooden Products';
-  const description = 'Send your specs, sketches or reference samples — we typically reply within 24 hours with a quote and sample timeline. Email, WhatsApp, WeChat or contact form.';
+  const t = await getTranslations({ locale, namespace: 'contact' });
+  const title = t('metaTitle');
+  const description = t('metaDesc');
   return {
     title, description,
     alternates: { canonical: `/contact`, languages: hreflangFor(SITE.siteUrl, '/contact') },
@@ -25,97 +27,86 @@ export async function generateMetadata({ params: { locale } = {} }) {
   };
 }
 
-const CHANNELS = [
-  {
-    label: 'Email',
-    value: 'sales@xmchichomeware.com',
-    href:  'mailto:sales@xmchichomeware.com',
-    note:  'Best for detailed briefs &amp; attachments',
-    icon:  'mail',
-  },
-  {
-    label: 'WhatsApp',
-    value: '+86 189 6009 8762',
-    href:  'https://wa.me/8618960098762',
-    note:  'Fastest reply during 09:00 – 22:00 (UTC+8)',
-    icon:  'whatsapp',
-  },
-  {
-    label: 'WeChat',
-    value: '18960098762',
-    href:  '#wechat',
-    note:  'Add for ongoing project chat',
-    icon:  'wechat',
-  },
-  {
-    label: 'Phone',
-    value: '+86 189 6009 8762',
-    href:  'tel:+8618960098762',
-    note:  'Mon – Sat, 09:00 – 18:00 (UTC+8)',
-    icon:  'phone',
-  },
-];
-
-const STEPS = [
-  { n: 1, title: 'You send a brief',    body: 'Describe the product, target quantity, market and any reference photos or sketches.' },
-  { n: 2, title: 'We reply in ≤ 24h',   body: 'Quote, suggested materials, MOQ and lead time. Questions if anything is unclear.' },
-  { n: 3, title: 'Sample development',  body: 'On PI we tool a sample, share photos & video, and ship for your physical approval.' },
-  { n: 4, title: 'Production & ship',   body: 'On sample sign-off we run bulk production with QC at every stage. We ship and you receive.' },
-];
-
-const OFFICES = [
-  {
-    tag: 'Sales & Export Office',
-    city: 'Xiamen, Fujian',
-    address: 'Siming District, Xiamen, Fujian, China',
-    image: '/sales%20office.jpg',
-    contact: { email: 'sales@xmchichomeware.com', phone: '+86 189 6009 8762' },
-  },
-  {
-    tag: 'Production Base',
-    city: 'Cao County, Shandong',
-    address: 'Cao County, Heze, Shandong, China',
-    image: '/CHIC%20Factory.jpg',
-    contact: { email: 'factory@xmchichomeware.com', phone: '+86 189 6009 8762' },
-  },
-];
-
-const FAQ = [
-  {
-    q: 'How quickly do you reply to inquiries?',
-    a: 'Within 24 hours on weekdays. WhatsApp messages during our office hours (Mon–Sat, 09:00–18:00 UTC+8) usually get a reply in under 30 minutes.',
-  },
-  {
-    q: 'What information should I include in my first message?',
-    a: 'Product type, reference photo or sketch, target quantity (MOQ), wood material preference (if any), target market, and your timeline. The more detail you share upfront, the more useful our first reply will be.',
-  },
-  {
-    q: 'Do I need a finished design to get a quote?',
-    a: 'No. We can quote off a rough sketch, a competitor product photo, or even a written description. If you don\'t have a design yet, our team can suggest 2–3 directions based on your market and target price.',
-  },
-  {
-    q: 'Are your samples free?',
-    a: 'Standard samples are paid (refundable on bulk order). Custom-tooled samples are paid and the cost depends on complexity. We share an exact sample fee in the first quote.',
-  },
-  {
-    q: 'What languages does your team work in?',
-    a: 'English, Mandarin Chinese, and Japanese (for Japanese clients). Our project managers are bilingual EN/CN — no translator middleman.',
-  },
-];
-
 export default function ContactPage({ params: { locale } }) {
   unstable_setRequestLocale(locale);
+  const t = useTranslations('contact');
+  const tCta = useTranslations('cta');
+  const tNav = useTranslations('nav');
 
   // localePrefix: 'as-needed' — English has NO prefix, others get /<locale>/.
   // Schema URLs must match the canonical (or they 301-redirect, which Google flags).
   const localePrefix = locale === routing.defaultLocale ? '' : `/${locale}`;
+
+  const CHANNELS = [
+    {
+      label: t('ch1Label'),
+      value: 'sales@xmchichomeware.com',
+      href:  'mailto:sales@xmchichomeware.com',
+      note:  t('ch1Note'),
+      icon:  'mail',
+    },
+    {
+      label: t('ch2Label'),
+      value: '+86 189 6009 8762',
+      href:  'https://wa.me/8618960098762',
+      note:  t('ch2Note'),
+      icon:  'whatsapp',
+    },
+    {
+      label: t('ch3Label'),
+      value: '18960098762',
+      href:  '#wechat',
+      note:  t('ch3Note'),
+      icon:  'wechat',
+    },
+    {
+      label: t('ch4Label'),
+      value: '+86 189 6009 8762',
+      href:  'tel:+8618960098762',
+      note:  t('ch4Note'),
+      icon:  'phone',
+    },
+  ];
+  const STEPS = [
+    { n: 1, title: t('step1Title'), body: t('step1Body') },
+    { n: 2, title: t('step2Title'), body: t('step2Body') },
+    { n: 3, title: t('step3Title'), body: t('step3Body') },
+    { n: 4, title: t('step4Title'), body: t('step4Body') },
+  ];
+  const OFFICES = [
+    {
+      tag: t('office1Tag'),
+      city: t('office1City'),
+      address: t('office1Address'),
+      image: '/sales%20office.jpg',
+      contact: { email: 'sales@xmchichomeware.com', phone: '+86 189 6009 8762' },
+    },
+    {
+      tag: t('office2Tag'),
+      city: t('office2City'),
+      address: t('office2Address'),
+      image: '/CHIC%20Factory.jpg',
+      contact: { email: 'factory@xmchichomeware.com', phone: '+86 189 6009 8762' },
+    },
+  ];
+  const FAQ = [
+    { q: t('faq1Q'), a: t('faq1A') },
+    { q: t('faq2Q'), a: t('faq2A') },
+    { q: t('faq3Q'), a: t('faq3A') },
+    { q: t('faq4Q'), a: t('faq4A') },
+    { q: t('faq5Q'), a: t('faq5A') },
+  ];
+  const HELPFUL = [
+    t('helpful1'), t('helpful2'), t('helpful3'),
+    t('helpful4'), t('helpful5'), t('helpful6'),
+  ];
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.siteUrl}${localePrefix || '/'}` },
-      { '@type': 'ListItem', position: 2, name: 'Contact' },
+      { '@type': 'ListItem', position: 2, name: t('breadcrumb') },
     ],
   };
   const contactLd = {
@@ -123,21 +114,17 @@ export default function ContactPage({ params: { locale } }) {
     '@type': 'ContactPage',
     '@id': `${SITE.siteUrl}${localePrefix}/contact#page`,
     url: `${SITE.siteUrl}${localePrefix}/contact`,
-    name: 'Contact CHIC',
-    description: 'Contact Xiamen Chic Homeware for custom wooden product quotes — email, WhatsApp, WeChat or contact form. Reply within 24 hours.',
+    name: t('schemaName'),
+    description: t('schemaDesc'),
     inLanguage: schemaLang(locale),
     isPartOf: { '@id': `${SITE.siteUrl}/#website` },
     about: { '@id': `${SITE.siteUrl}/#organization` },
     mainEntity: { '@id': `${SITE.siteUrl}/#organization` },
-    // FAQPage schema enables FAQ rich result — the contact page has 5+ FAQs
-    // and Google rewards content that pre-answers common pre-sales questions.
     significantLink: [
       `${SITE.siteUrl}${localePrefix}/about`,
       `${SITE.siteUrl}${localePrefix}/products`,
     ],
   };
-
-  // FAQ schema for the on-page FAQs (real pre-sales objections)
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -157,22 +144,20 @@ export default function ContactPage({ params: { locale } }) {
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
           <nav className="text-xs text-brand-mute mb-4">
-            <Link href="/" className="hover:text-brand-green">Home</Link>
+            <Link href="/" className="hover:text-brand-green">{tNav('home')}</Link>
             {' / '}
-            <span className="text-brand-ink">Contact</span>
+            <span className="text-brand-ink">{t('breadcrumb')}</span>
           </nav>
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-            Get In Touch
+            {t('heroEyebrow')}
           </p>
           <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10 lg:gap-16 items-end">
             <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-              Let&apos;s build your next{' '}
-              <span className="text-brand-green">wooden product together</span>.
+              {t('heroH1Pre')}{' '}
+              <span className="text-brand-green">{t('heroH1Highlight')}</span>.
             </h1>
             <p className="text-brand-mute leading-relaxed lg:pb-3">
-              Share your specs, sketches or reference samples. Our team typically replies
-              within 24 hours with a quote and a sample timeline — and we always ask the
-              questions a real factory should ask.
+              {t('heroSubtitle')}
             </p>
           </div>
 
@@ -180,19 +165,19 @@ export default function ContactPage({ params: { locale } }) {
           <div className="mt-9 flex flex-wrap gap-3 text-sm">
             <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
               <span className="font-extrabold text-brand-ink mr-2">≤ 24h</span>
-              <span className="text-brand-mute">Quote turnaround</span>
+              <span className="text-brand-mute">{t('statQuote')}</span>
             </span>
             <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
               <span className="font-extrabold text-brand-ink mr-2">EN · CN · JP</span>
-              <span className="text-brand-mute">Languages</span>
+              <span className="text-brand-mute">{t('statLangs')}</span>
             </span>
             <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
               <span className="font-extrabold text-brand-ink mr-2">60+</span>
-              <span className="text-brand-mute">Export markets</span>
+              <span className="text-brand-mute">{t('statMarkets')}</span>
             </span>
             <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
               <span className="font-extrabold text-brand-ink mr-2">Mon–Sat</span>
-              <span className="text-brand-mute">09:00 – 18:00 UTC+8</span>
+              <span className="text-brand-mute">{t('statHours')}</span>
             </span>
           </div>
         </div>
@@ -216,7 +201,7 @@ export default function ContactPage({ params: { locale } }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-brand-mute mb-0.5">{c.label}</p>
                   <p className="font-bold text-brand-ink truncate group-hover:text-brand-green transition">{c.value}</p>
-                  <p className="mt-1 text-[12px] text-brand-mute leading-snug" dangerouslySetInnerHTML={{__html: c.note}} />
+                  <p className="mt-1 text-[12px] text-brand-mute leading-snug">{c.note}</p>
                 </div>
               </a>
             ))}
@@ -230,16 +215,14 @@ export default function ContactPage({ params: { locale } }) {
           <div className="grid lg:grid-cols-[1.5fr_1fr] gap-10 lg:gap-14">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-                Send a Detailed Inquiry
+                {t('formEyebrow')}
               </p>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15] mb-6">
-                Tell us what you need.{' '}
-                <span className="text-brand-green">We&apos;ll do the rest.</span>
+                {t('formTitlePre')}{' '}
+                <span className="text-brand-green">{t('formTitleHighlight')}</span>
               </h2>
               <p className="text-brand-mute leading-relaxed mb-8">
-                The more you share — quantity, materials, target price, deadline — the more
-                actionable our first reply will be. Attach sketches or reference photos by
-                email if you have them.
+                {t('formIntro')}
               </p>
               <ContactClient />
             </div>
@@ -249,21 +232,14 @@ export default function ContactPage({ params: { locale } }) {
               {/* What we'll ask */}
               <div className="bg-brand-cream rounded-2xl border border-brand-line p-6 lg:p-7">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-3">
-                  Helpful to include
+                  {t('helpfulEyebrow')}
                 </p>
-                <h3 className="font-extrabold text-brand-ink mb-3">A good first inquiry has:</h3>
+                <h3 className="font-extrabold text-brand-ink mb-3">{t('helpfulTitle')}</h3>
                 <ul className="space-y-2">
-                  {[
-                    'Product type or reference photo',
-                    'Target quantity (MOQ)',
-                    'Wood material preference (if any)',
-                    'Target market &amp; price level',
-                    'Timeline / launch date',
-                    'Custom branding / packaging needs',
-                  ].map((line) => (
+                  {HELPFUL.map((line) => (
                     <li key={line} className="flex items-start gap-2 text-sm text-brand-ink/85">
                       <CheckBadge />
-                      <span dangerouslySetInnerHTML={{__html: line}} />
+                      <span>{line}</span>
                     </li>
                   ))}
                 </ul>
@@ -272,12 +248,11 @@ export default function ContactPage({ params: { locale } }) {
               {/* Reassurance */}
               <div className="bg-brand-greenDeep text-white rounded-2xl p-6 lg:p-7">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-yellowSoft mb-3">
-                  Privacy &amp; Trust
+                  {t('privacyEyebrow')}
                 </p>
-                <h3 className="text-lg font-extrabold mb-3 leading-snug">We don&apos;t share your designs.</h3>
+                <h3 className="text-lg font-extrabold mb-3 leading-snug">{t('privacyTitle')}</h3>
                 <p className="text-sm text-white/75 leading-relaxed">
-                  Briefs, sketches and reference samples stay confidential. We can sign an NDA before
-                  the first quote — just let us know in your message.
+                  {t('privacyBody')}
                 </p>
               </div>
             </aside>
@@ -290,11 +265,11 @@ export default function ContactPage({ params: { locale } }) {
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              What Happens Next
+              {t('nextEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Four steps from{' '}
-              <span className="text-brand-green">first message to delivered order</span>.
+              {t('nextTitlePre')}{' '}
+              <span className="text-brand-green">{t('nextTitleHighlight')}</span>.
             </h2>
           </div>
 
@@ -306,7 +281,7 @@ export default function ContactPage({ params: { locale } }) {
                     {String(s.n).padStart(2, '0')}
                   </span>
                   <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green">
-                    Step {s.n}
+                    {t('stepLabel')} {s.n}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>
@@ -322,14 +297,14 @@ export default function ContactPage({ params: { locale } }) {
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              Our Locations
+              {t('officesEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Two bases.{' '}
-              <span className="text-brand-green">One supply chain</span>.
+              {t('officesTitlePre')}{' '}
+              <span className="text-brand-green">{t('officesTitleHighlight')}</span>.
             </h2>
             <p className="mt-4 text-brand-mute leading-relaxed">
-              Visit us in person or over a video call — both bases are open to factory tours.
+              {t('officesIntro')}
             </p>
           </div>
 
@@ -380,11 +355,11 @@ export default function ContactPage({ params: { locale } }) {
         <div className="max-w-[900px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              FAQ
+              {t('faqEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Common questions about{' '}
-              <span className="text-brand-green">contacting us</span>.
+              {t('faqTitlePre')}{' '}
+              <span className="text-brand-green">{t('faqTitleHighlight')}</span>.
             </h2>
           </div>
 
@@ -421,21 +396,20 @@ export default function ContactPage({ params: { locale } }) {
       <section className="py-20 lg:py-24">
         <div className="max-w-[900px] mx-auto px-6 lg:px-8 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-            Why Buyers Pick CHIC
+            {t('finalEyebrow')}
           </p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-brand-ink mb-4 leading-tight">
-            A real factory, not another middleman in your inbox.
+            {t('finalTitle')}
           </h2>
           <p className="text-brand-mute leading-relaxed mb-8 max-w-2xl mx-auto">
-            We answer every inquiry from our own team in Xiamen — no agents, no resellers.
-            If the project fits our factory, you get a quote that stands. If it doesn&apos;t, we say so.
+            {t('finalBody')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <a
               href="mailto:sales@xmchichomeware.com"
               className="inline-flex items-center rounded-full bg-brand-green px-8 py-3.5 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
             >
-              Email Sales
+              {t('finalCtaEmail')}
             </a>
             <a
               href="https://wa.me/8618960098762"
@@ -443,7 +417,7 @@ export default function ContactPage({ params: { locale } }) {
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-8 py-3.5 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
             >
-              WhatsApp Now
+              {t('finalCtaWhatsapp')}
             </a>
           </div>
         </div>

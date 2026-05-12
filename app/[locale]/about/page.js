@@ -1,8 +1,9 @@
 // /about — fully redesigned About / Factory page.
-// Structure: Hero · Stats · Story · Process · Capabilities · QC · Gallery · FAQ · CTA
+// Structure: Hero · Stats · Video · Story · Process · Capabilities · QC · Gallery · FAQ · CTA
 // Content sourced from the WP "wooden-products-factory-in-china" page.
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -10,8 +11,9 @@ import { hreflangFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 
 export async function generateMetadata({ params: { locale } = {} }) {
-  const title = 'About CHIC — Custom Wooden Products Factory in Xiamen, China';
-  const description = 'Xiamen Chic Homeware Co.,Ltd. — wooden products factory in China, OEM & ODM manufacturer for global brands. Learn about our factory, process, capabilities and quality system.';
+  const t = await getTranslations({ locale, namespace: 'about' });
+  const title = t('metaTitle');
+  const description = t('metaDesc');
   return {
     title, description,
     alternates: { canonical: `/about`, languages: hreflangFor(SITE.siteUrl, '/about') },
@@ -19,248 +21,163 @@ export async function generateMetadata({ params: { locale } = {} }) {
       type: 'website',
       url: `${SITE.siteUrl}/about`,
       title, description, siteName: SITE.company.brand,
-      images: [{ url: '/CHIC%20Factory.jpg', width: 1200, height: 800, alt: 'CHIC factory exterior' }],
+      images: [{ url: '/CHIC%20Factory.jpg', width: 1200, height: 800, alt: t('heroImageAlt') }],
     },
   };
 }
 
-const ABOUT_BREADCRUMB = (locale) => ({
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home',     item: `${SITE.siteUrl}` },
-    { '@type': 'ListItem', position: 2, name: 'About Us' },
-  ],
-});
-
-const ABOUT_PAGE_LD = (locale) => ({
-  '@context': 'https://schema.org',
-  '@type': 'AboutPage',
-  '@id': `${SITE.siteUrl}/about#page`,
-  url: `${SITE.siteUrl}/about`,
-  name: 'About CHIC — Wooden Products Factory in China',
-  description: 'Xiamen Chic Homeware Co.,Ltd. — wooden products factory in China, OEM & ODM manufacturer for global brands. 15+ years export experience, 20,000m² factory floor.',
-  inLanguage: schemaLang(locale),
-  isPartOf: { '@id': `${SITE.siteUrl}/#website` },
-  about: { '@id': `${SITE.siteUrl}/#organization` },
-  mainEntity: { '@id': `${SITE.siteUrl}/#organization` },
-  primaryImageOfPage: `${SITE.siteUrl}/CHIC%20Factory.jpg`,
-  // Gallery — gives the AboutPage entity visual richness in knowledge panel
-  image: [
-    `${SITE.siteUrl}/CHIC%20Factory.jpg`,
-    `${SITE.siteUrl}/wp-images/2026/01/raw-material-warehouse.jpg`,
-    `${SITE.siteUrl}/wp-images/2026/01/production.jpg`,
-    `${SITE.siteUrl}/wp-images/2026/01/machine-4.jpg`,
-  ],
-  significantLink: [
-    `${SITE.siteUrl}/products`,
-    `${SITE.siteUrl}/contact`,
-    `${SITE.siteUrl}/material-guide`,
-  ],
-});
-
-// ─────────────────────────────────────────────────────────────────
-// Stats — quick credibility strip (placeholder values, edit to match)
-// ─────────────────────────────────────────────────────────────────
-const STATS = [
-  { n: '15+',     label: 'Years OEM' },
-  { n: '60+',     label: 'Export Countries' },
-  { n: '500+',    label: 'SKUs Manufactured' },
-  { n: '20,000㎡', label: 'Factory Floor' },
-  { n: '100',     label: 'Pcs MOQ from' },
-  { n: '24h',     label: 'Quote Reply' },
-];
-
-// ─────────────────────────────────────────────────────────────────
-// Manufacturing process — 6 steps from WP
-// ─────────────────────────────────────────────────────────────────
-const PROCESS = [
-  { title: 'Inquiry & Requirement Review', body: 'We review your brief, product references and target spec. Initial questions and reference samples are exchanged.' },
-  { title: 'Sample Development & Approval', body: 'Functional sample produced in-house, photographed and shipped. Iterations until you sign off on the spec sheet.' },
-  { title: 'Material Selection & Preparation', body: 'Wood is sourced, dried to target moisture content, cut and pre-conditioned. FSC documents prepared if required.' },
-  { title: 'Mass Production', body: 'Production runs in our own factory under ISO-style procedures. Daily progress photos shared if you want.' },
-  { title: 'Quality Inspection', body: 'In-process and final QC: dimensions, finish, structure, packaging integrity. Third-party AQL audit available on request.' },
-  { title: 'Packing & Export Shipping', body: 'Drop-test certified packaging. Sea, air, express or Amazon FBA — your choice. EXW / FOB / DDP terms.' },
-];
-
-// ─────────────────────────────────────────────────────────────────
-// Capabilities — content adapted from WP "Why Choose Us" subsections
-// ─────────────────────────────────────────────────────────────────
-const CAPABILITIES = [
-  {
-    icon: 'badge',
-    title: 'Experienced OEM & Private Label',
-    body: 'Years of practical experience manufacturing for brands, importers, wholesalers and distributors — from product development to export packaging.',
-  },
-  {
-    icon: 'grid',
-    title: 'Wide Product Range',
-    body: 'Wooden homeware, storage products, desk organizers, gift boxes, retail packaging — different categories, different price levels, one supply chain.',
-  },
-  {
-    icon: 'sliders',
-    title: 'Flexible Customization',
-    body: 'Custom size, structure, color, logo, insert and packaging — sized for your brand positioning, from simple wholesale to premium private label.',
-  },
-  {
-    icon: 'tree',
-    title: 'Material & Finish Choices',
-    body: '12+ wood materials, multiple engineered options, food-safe lacquer or oil finishes, custom color matching, hardware details to spec.',
-  },
-  {
-    icon: 'shield',
-    title: 'Multi-Stage Quality Control',
-    body: 'QC integrated at every step — material inspection, semi-finished checking, assembly review, packing audit. Stable export-grade quality.',
-  },
-  {
-    icon: 'box',
-    title: 'Export Packaging Support',
-    body: 'Inner protection, color cartons, shelf-ready packs, FBA-prepped master cartons, palletization — packed for the actual journey.',
-  },
-  {
-    icon: 'speed',
-    title: 'Efficient Sampling & Follow-Up',
-    body: 'Practical B2B workflow for sampling, order follow-up and production communication. Clearer, faster, easier for overseas buyers.',
-  },
-  {
-    icon: 'handshake',
-    title: 'Long-Term Wholesale Supply',
-    body: 'Built for repeat orders. Stable production management and clear communication for long-term OEM relationships, not one-off transactions.',
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────
-// FAQ — from WP about page (Q1) + additional sourcing-specific
-// questions buyers commonly ask our team
-// ─────────────────────────────────────────────────────────────────
-const FAQ = [
-  {
-    q: 'What kind of products do you manufacture?',
-    a: 'We specialize in designing and manufacturing high-quality wooden organizers and premium packaging. Our main product lines include: wooden desk & office organizers (pen holders, monitor stands, document trays), wooden beauty & cosmetic organizers (jewelry boxes, vanity trays, brush holders), kitchen & dining wooden storage (knife blocks, utensil caddies, spice boxes, bread boxes), home storage organizers (countertop, pantry, entryway, sofa trays), and gift / retail packaging (watch boxes, tea & coffee boxes, wine boxes, custom presentation cases).',
-  },
-  {
-    q: 'Are you a real factory or a trading company?',
-    a: 'We are a real wooden products manufacturer. Our production base is in Cao County, Shandong Province — one of China\'s most established wooden homeware hubs. Our sales and design office is in Xiamen, Fujian. You are welcome to visit either site, or take a virtual factory tour over video call.',
-  },
-  {
-    q: 'What is your typical MOQ and lead time?',
-    a: 'MOQ varies by product complexity. As a guide: 100 pcs for simple designs and samples, 500 pcs for production runs. Sample lead time: 7–10 days for standard samples, 15–25 days for custom-tooled samples. Production lead time: 25–45 days after sample confirmation, depending on order quantity, materials and surface treatment.',
-  },
-  {
-    q: 'Which countries do you export to?',
-    a: 'Our wooden products are exported to 60+ countries, with the largest customer bases in the United States, Canada, the United Kingdom, Germany, France, Italy, Japan, South Korea and Australia. We have hands-on experience with Amazon FBA logistics, retail-chain compliance and door-to-door delivery (DDP).',
-  },
-  {
-    q: 'What customization options do you support?',
-    a: 'Material (12+ wood types), size, structure, surface finish, color, logo (laser, foil, deboss, screen print, UV print), inserts (foam, velvet, microfiber), packaging (color box, kraft, gift, FBA-ready cartons), and hardware (hinges, locks, handles, magnetic closure). Send us a sketch or reference photo and we\'ll suggest a configuration.',
-  },
-  {
-    q: 'Do you offer FSC, REACH or food-safety certifications?',
-    a: 'Yes. We can source FSC-certified wood, use REACH-compliant finishes, supply CARB P2 / TSCA Title VI compliant engineered panels, and provide LFGB / FDA food-contact safety reports. Compliance documents are issued per order with the shipment.',
-  },
-  {
-    q: 'How does the sampling and ordering process work?',
-    a: 'Send us your brief → we quote within 24 hours → on PI confirmation we develop a sample (paid, refundable on bulk) → photos and physical sample shipped for approval → on sample sign-off we receive the deposit and start production → final QC and pre-shipment inspection → balance payment and shipment. Each stage has a clear timeline and contact point.',
-  },
-  {
-    q: 'What payment terms do you accept?',
-    a: 'Standard terms are 30% T/T deposit, 70% balance before shipment. For repeat customers and larger orders we also work with L/C at sight, OA terms, and via Alibaba Trade Assurance. We accept USD, EUR and CNY.',
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────
-// Photo gallery — real WP factory photos
-// ─────────────────────────────────────────────────────────────────
-const GALLERY = [
-  { url: '/wp-images/2026/02/CHIC-Factory.jpg', alt: 'CHIC factory exterior' },
-  { url: '/wp-images/2026/01/1-4.jpg',  alt: 'Production area' },
-  { url: '/wp-images/2026/01/1-13.jpg', alt: 'Sample development' },
-  { url: '/wp-images/2026/01/1-3.jpg',  alt: 'Wood machining' },
-  { url: '/wp-images/2026/01/1-7.jpg',  alt: 'Wooden kitchenware production' },
-  { url: '/wp-images/2026/01/1-6.jpg',  alt: 'Quality inspection' },
-  { url: '/wp-images/2026/01/1-8.jpg',  alt: 'Assembly line' },
-  { url: '/wp-images/2026/01/gift-box-3.png', alt: 'Gift packaging' },
-  { url: '/wp-images/2026/01/3.jpg',    alt: 'Finished products' },
-  { url: '/wp-images/2026/01/bulk-packaging.jpg', alt: 'Bulk packaging' },
-  { url: '/wp-images/2026/01/brown-box-19.jpg',  alt: 'Master cartons' },
-  { url: '/wp-images/2026/01/1-14.jpg', alt: 'Factory floor' },
-];
-
-// ─────────────────────────────────────────────────────────────────
-// Factory tour video — YouTube embed + VideoObject schema
-// ─────────────────────────────────────────────────────────────────
-// NOTE: uploadDate is a placeholder. Update to the real publish date
-// (visible on the YouTube watch page) so Google's freshness signal is honest.
-const VIDEO = {
-  id: '_HKxrZ_p5-4',
-  title: 'Inside Our Wooden Products Factory — Xiamen Chic Homeware',
-  description:
-    'A walk through the Xiamen Chic Homeware factory in Cao County, Shandong — raw material warehouse, CNC machining, sanding, finishing, QC and packing for OEM & ODM wooden product orders.',
-  uploadDate: '2026-03-15',
-};
-const VIDEO_LD = (locale) => ({
-  '@context': 'https://schema.org',
-  '@type': 'VideoObject',
-  '@id': `${SITE.siteUrl}/about#video`,
-  name: VIDEO.title,
-  description: VIDEO.description,
-  thumbnailUrl: [
-    `https://img.youtube.com/vi/${VIDEO.id}/maxresdefault.jpg`,
-    `https://img.youtube.com/vi/${VIDEO.id}/hqdefault.jpg`,
-  ],
-  uploadDate: VIDEO.uploadDate,
-  contentUrl: `https://www.youtube.com/watch?v=${VIDEO.id}`,
-  embedUrl: `https://www.youtube-nocookie.com/embed/${VIDEO.id}`,
-  publisher: { '@id': `${SITE.siteUrl}/#organization` },
-  inLanguage: 'en',
-});
+// Factory tour video — id stays locale-neutral; name/description from i18n
+const VIDEO_ID = '_HKxrZ_p5-4';
+const VIDEO_UPLOAD_DATE = '2026-03-15';
 
 // ─────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────
 export default function AboutPage({ params: { locale } }) {
   unstable_setRequestLocale(locale);
+  const t = useTranslations('about');
+  const tCta = useTranslations('cta');
+  const tNav = useTranslations('nav');
+
+  const STATS = [
+    { n: '15+',     label: t('stat1Label') },
+    { n: '60+',     label: t('stat2Label') },
+    { n: '500+',    label: t('stat3Label') },
+    { n: '20,000㎡', label: t('stat4Label') },
+    { n: '100',     label: t('stat5Label') },
+    { n: '24h',     label: t('stat6Label') },
+  ];
+  const PROCESS = [
+    { title: t('step1Title'), body: t('step1Body') },
+    { title: t('step2Title'), body: t('step2Body') },
+    { title: t('step3Title'), body: t('step3Body') },
+    { title: t('step4Title'), body: t('step4Body') },
+    { title: t('step5Title'), body: t('step5Body') },
+    { title: t('step6Title'), body: t('step6Body') },
+  ];
+  const CAPABILITIES = [
+    { icon: 'badge',     title: t('cap1Title'), body: t('cap1Body') },
+    { icon: 'grid',      title: t('cap2Title'), body: t('cap2Body') },
+    { icon: 'sliders',   title: t('cap3Title'), body: t('cap3Body') },
+    { icon: 'tree',      title: t('cap4Title'), body: t('cap4Body') },
+    { icon: 'shield',    title: t('cap5Title'), body: t('cap5Body') },
+    { icon: 'box',       title: t('cap6Title'), body: t('cap6Body') },
+    { icon: 'speed',     title: t('cap7Title'), body: t('cap7Body') },
+    { icon: 'handshake', title: t('cap8Title'), body: t('cap8Body') },
+  ];
+  const FAQ = [
+    { q: t('faq1Q'), a: t('faq1A') },
+    { q: t('faq2Q'), a: t('faq2A') },
+    { q: t('faq3Q'), a: t('faq3A') },
+    { q: t('faq4Q'), a: t('faq4A') },
+    { q: t('faq5Q'), a: t('faq5A') },
+    { q: t('faq6Q'), a: t('faq6A') },
+    { q: t('faq7Q'), a: t('faq7A') },
+    { q: t('faq8Q'), a: t('faq8A') },
+  ];
+  const QC_LINES = [t('qc1'), t('qc2'), t('qc3'), t('qc4'), t('qc5'), t('qc6')];
+  const GALLERY = [
+    { url: '/wp-images/2026/02/CHIC-Factory.jpg', alt: t('galleryAlt1') },
+    { url: '/wp-images/2026/01/1-4.jpg',  alt: t('galleryAlt2') },
+    { url: '/wp-images/2026/01/1-13.jpg', alt: t('galleryAlt3') },
+    { url: '/wp-images/2026/01/1-3.jpg',  alt: t('galleryAlt4') },
+    { url: '/wp-images/2026/01/1-7.jpg',  alt: t('galleryAlt5') },
+    { url: '/wp-images/2026/01/1-6.jpg',  alt: t('galleryAlt6') },
+    { url: '/wp-images/2026/01/1-8.jpg',  alt: t('galleryAlt7') },
+    { url: '/wp-images/2026/01/gift-box-3.png', alt: t('galleryAlt8') },
+    { url: '/wp-images/2026/01/3.jpg',    alt: t('galleryAlt9') },
+    { url: '/wp-images/2026/01/bulk-packaging.jpg', alt: t('galleryAlt10') },
+    { url: '/wp-images/2026/01/brown-box-19.jpg',  alt: t('galleryAlt11') },
+    { url: '/wp-images/2026/01/1-14.jpg', alt: t('galleryAlt12') },
+  ];
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.siteUrl}` },
+      { '@type': 'ListItem', position: 2, name: t('breadcrumb') },
+    ],
+  };
+  const aboutPageLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${SITE.siteUrl}/about#page`,
+    url: `${SITE.siteUrl}/about`,
+    name: t('schemaName'),
+    description: t('schemaDesc'),
+    inLanguage: schemaLang(locale),
+    isPartOf: { '@id': `${SITE.siteUrl}/#website` },
+    about: { '@id': `${SITE.siteUrl}/#organization` },
+    mainEntity: { '@id': `${SITE.siteUrl}/#organization` },
+    primaryImageOfPage: `${SITE.siteUrl}/CHIC%20Factory.jpg`,
+    image: [
+      `${SITE.siteUrl}/CHIC%20Factory.jpg`,
+      `${SITE.siteUrl}/wp-images/2026/01/raw-material-warehouse.jpg`,
+      `${SITE.siteUrl}/wp-images/2026/01/production.jpg`,
+      `${SITE.siteUrl}/wp-images/2026/01/machine-4.jpg`,
+    ],
+    significantLink: [
+      `${SITE.siteUrl}/products`,
+      `${SITE.siteUrl}/contact`,
+      `${SITE.siteUrl}/material-guide`,
+    ],
+  };
+  const videoLd = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    '@id': `${SITE.siteUrl}/about#video`,
+    name: t('videoTitle'),
+    description: t('videoDesc'),
+    thumbnailUrl: [
+      `https://img.youtube.com/vi/${VIDEO_ID}/maxresdefault.jpg`,
+      `https://img.youtube.com/vi/${VIDEO_ID}/hqdefault.jpg`,
+    ],
+    uploadDate: VIDEO_UPLOAD_DATE,
+    contentUrl: `https://www.youtube.com/watch?v=${VIDEO_ID}`,
+    embedUrl: `https://www.youtube-nocookie.com/embed/${VIDEO_ID}`,
+    publisher: { '@id': `${SITE.siteUrl}/#organization` },
+    inLanguage: schemaLang(locale),
+  };
 
   return (
     <article className="bg-white">
-      <JsonLd data={ABOUT_BREADCRUMB(locale)} />
-      <JsonLd data={ABOUT_PAGE_LD(locale)} />
-      <JsonLd data={VIDEO_LD(locale)} />
+      <JsonLd data={breadcrumbLd} />
+      <JsonLd data={aboutPageLd} />
+      <JsonLd data={videoLd} />
       {/* ── Hero ── */}
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
           <nav className="text-xs text-brand-mute mb-4">
-            <Link href="/" className="hover:text-brand-green">Home</Link>
+            <Link href="/" className="hover:text-brand-green">{tNav('home')}</Link>
             {' / '}
-            <span className="text-brand-ink">About Us</span>
+            <span className="text-brand-ink">{t('breadcrumb')}</span>
           </nav>
 
           <div className="grid lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-14 items-center">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-                Our Factory &amp; Manufacturing Capabilities
+                {t('heroEyebrow')}
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-                A real wooden products factory{' '}
-                <span className="text-brand-green">built for global brands.</span>
+                {t('heroH1Pre')}{' '}
+                <span className="text-brand-green">{t('heroH1Highlight')}</span>
               </h1>
               <p className="mt-5 text-brand-mute leading-relaxed max-w-xl">
-                Xiamen Chic Homeware Co.,Ltd. operates dedicated production lines for cutting,
-                assembly, sanding, finishing and packaging — every step handled by experienced
-                workers under one roof, in our own facility in Cao County, Shandong.
+                {t('heroLead')}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
                   href="/contact"
                   className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
                 >
-                  Talk to Our Team
+                  {t('ctaTalk')}
                 </Link>
                 <Link
                   href="/products"
                   className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
                 >
-                  Browse Products
+                  {t('ctaBrowse')}
                 </Link>
               </div>
             </div>
@@ -268,7 +185,7 @@ export default function AboutPage({ params: { locale } }) {
             <div className="rounded-2xl overflow-hidden shadow-xl bg-white aspect-[5/4]">
               <img
                 src="/wp-images/2026/02/CHIC-Factory.jpg"
-                alt="CHIC factory exterior — Xiamen Chic Homeware Co., Ltd."
+                alt={t('heroImageAlt')}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -295,25 +212,21 @@ export default function AboutPage({ params: { locale } }) {
         <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              Factory Tour
+              {t('videoEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              See the factory{' '}
-              <span className="text-brand-green">for yourself</span>.
+              {t('videoTitlePre')}{' '}
+              <span className="text-brand-green">{t('videoTitleHighlight')}</span>.
             </h2>
             <p className="mt-4 text-brand-mute leading-relaxed">
-              A short walk through our wooden products factory — production lines,
-              finishing area, and quality control in action.
+              {t('videoIntro')}
             </p>
           </div>
 
           <div className="relative aspect-video rounded-2xl overflow-hidden border border-brand-line shadow-lg bg-brand-cream">
-            {/* youtube-nocookie variant — no tracking until user interacts.
-                loading="lazy" defers iframe creation until near viewport,
-                keeping LCP unaffected on the above-the-fold content. */}
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${VIDEO.id}?rel=0`}
-              title={VIDEO.title}
+              src={`https://www.youtube-nocookie.com/embed/${VIDEO_ID}?rel=0`}
+              title={t('videoTitle')}
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -323,23 +236,23 @@ export default function AboutPage({ params: { locale } }) {
           </div>
 
           <p className="mt-5 text-center text-sm text-brand-mute">
-            Watch on{' '}
+            {t('videoWatchOn')}{' '}
             <a
-              href={`https://www.youtube.com/watch?v=${VIDEO.id}`}
+              href={`https://www.youtube.com/watch?v=${VIDEO_ID}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold text-brand-green hover:text-brand-greenDark"
             >
               YouTube
             </a>{' '}
-            · More videos on our{' '}
+            · {t('videoMoreOn')}{' '}
             <a
               href={SITE.social.youtube}
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold text-brand-green hover:text-brand-greenDark"
             >
-              channel
+              {t('videoChannelLink')}
             </a>
           </p>
         </div>
@@ -350,31 +263,30 @@ export default function AboutPage({ params: { locale } }) {
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              Where We Operate
+              {t('basesEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Two bases.{' '}
-              <span className="text-brand-green">One supply chain.</span>
+              {t('basesTitlePre')}{' '}
+              <span className="text-brand-green">{t('basesTitleHighlight')}</span>
             </h2>
             <p className="mt-4 text-brand-mute leading-relaxed">
-              Factory-direct manufacturing in Caoxian + professional export service in Xiamen —
-              this structure lets us combine the lowest production cost with smooth international delivery.
+              {t('basesIntro')}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
             <BaseCard
-              tag="Production Base"
-              city="Caoxian, Shandong"
-              text="One of China's most established hubs for wooden homeware, storage boxes and custom packaging. Strong woodworking supply chain, skilled labor, cost-efficient mass production."
-              bullets={['Solid wood & bamboo supply chain', 'In-house CNC, finishing & assembly', 'Volume capacity 100 → 100k+ pcs']}
+              tag={t('base1Tag')}
+              city={t('base1City')}
+              text={t('base1Text')}
+              bullets={[t('base1Bullet1'), t('base1Bullet2'), t('base1Bullet3')]}
               image="/CHIC%20Factory.jpg"
             />
             <BaseCard
-              tag="Sales & Export Office"
-              city="Xiamen, Fujian"
-              text="Major international port city in southern China. Our Xiamen team handles design, sampling, quality control follow-up and end-to-end global logistics."
-              bullets={['Bilingual project managers', 'On-site QC & pre-shipment audits', 'Sea / air / Amazon FBA logistics']}
+              tag={t('base2Tag')}
+              city={t('base2City')}
+              text={t('base2Text')}
+              bullets={[t('base2Bullet1'), t('base2Bullet2'), t('base2Bullet3')]}
               image="/sales%20office.jpg"
             />
           </div>
@@ -386,14 +298,14 @@ export default function AboutPage({ params: { locale } }) {
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              Manufacturing Process
+              {t('processEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Six steps from{' '}
-              <span className="text-brand-green">brief to shipment</span>.
+              {t('processTitlePre')}{' '}
+              <span className="text-brand-green">{t('processTitleHighlight')}</span>.
             </h2>
             <p className="mt-4 text-brand-mute leading-relaxed">
-              Our standard OEM workflow, with clear owner and timeline at each stage.
+              {t('processIntro')}
             </p>
           </div>
 
@@ -408,7 +320,7 @@ export default function AboutPage({ params: { locale } }) {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green">
-                    Step {i + 1}
+                    {t('processStepLabel')} {i + 1}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>
@@ -425,15 +337,14 @@ export default function AboutPage({ params: { locale } }) {
           <div className="grid lg:grid-cols-[5fr_7fr] gap-12 lg:gap-16">
             <div className="lg:sticky lg:top-28 lg:self-start">
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-                Why Choose Us
+                {t('capsEyebrow')}
               </p>
               <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-                Eight capabilities{' '}
-                <span className="text-brand-green">brands rely on us for</span>.
+                {t('capsTitlePre')}{' '}
+                <span className="text-brand-green">{t('capsTitleHighlight')}</span>.
               </h2>
               <p className="mt-5 text-brand-mute leading-relaxed max-w-md">
-                A real factory, real product range, and a real workflow built for repeat
-                B2B business — not one-off transactions.
+                {t('capsIntro')}
               </p>
             </div>
 
@@ -462,33 +373,23 @@ export default function AboutPage({ params: { locale } }) {
             <div className="rounded-2xl overflow-hidden shadow-xl aspect-[5/4]">
               <img
                 src="/inspection.jpg"
-                alt="Quality inspection"
+                alt={t('qcImageAlt')}
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-                Quality Control
+                {t('qcEyebrow')}
               </p>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.1] mb-5">
-                QC integrated{' '}
-                <span className="text-brand-green">at every stage</span>, not bolted on at the end.
+                {t('qcTitlePre')}{' '}
+                <span className="text-brand-green">{t('qcTitleHighlight')}</span>{t('qcTitlePost')}
               </h2>
               <p className="text-brand-mute leading-relaxed mb-6">
-                Each order is checked for dimensions, surface finishing, structure stability and
-                packaging integrity to meet export standards required by international markets.
-                We follow international export standards and operate our own factory under
-                consistent QC procedures — supporting OEM and private label projects for global brands.
+                {t('qcBody')}
               </p>
               <ul className="space-y-2.5">
-                {[
-                  'Incoming material inspection (moisture content, defects, FSC docs)',
-                  'In-process check at machining and pre-finishing',
-                  'Sub-assembly review for dimension and structural fit',
-                  'Final visual & functional QC before packing',
-                  'AQL pre-shipment inspection (third-party available)',
-                  'Drop-test verification for FBA and retail-shelf orders',
-                ].map((line) => (
+                {QC_LINES.map((line) => (
                   <li key={line} className="flex items-start gap-2 text-sm text-brand-ink/85">
                     <CheckBadge />
                     <span>{line}</span>
@@ -505,11 +406,11 @@ export default function AboutPage({ params: { locale } }) {
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              Inside the Factory
+              {t('galleryEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Production floor,{' '}
-              <span className="text-brand-green">in real photos</span>.
+              {t('galleryTitlePre')}{' '}
+              <span className="text-brand-green">{t('galleryTitleHighlight')}</span>.
             </h2>
           </div>
 
@@ -528,11 +429,11 @@ export default function AboutPage({ params: { locale } }) {
         <div className="max-w-[1000px] mx-auto px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-              FAQ
+              {t('faqEyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-              Common questions about{' '}
-              <span className="text-brand-green">our factory &amp; OEM service</span>.
+              {t('faqTitlePre')}{' '}
+              <span className="text-brand-green">{t('faqTitleHighlight')}</span>.
             </h2>
           </div>
 
@@ -569,27 +470,26 @@ export default function AboutPage({ params: { locale } }) {
       <section className="py-20 lg:py-24">
         <div className="max-w-[900px] mx-auto px-6 lg:px-8 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-            Ready to Talk?
+            {t('bottomCtaEyebrow')}
           </p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-brand-ink mb-4 leading-tight">
-            Have a brief? Let&apos;s build it together.
+            {t('bottomCtaTitle')}
           </h2>
           <p className="text-brand-mute leading-relaxed mb-8 max-w-2xl mx-auto">
-            Send your specs, sketches or reference samples — we typically reply within 24 hours
-            with a quote and a sample timeline.
+            {t('bottomCtaBody')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/contact"
               className="inline-flex items-center rounded-full bg-brand-green px-8 py-3.5 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
             >
-              Get a Free Quote
+              {tCta('getFreeQuote')}
             </Link>
             <Link
               href="/material-guide"
               className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-8 py-3.5 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
             >
-              Material Guide
+              {t('bottomCtaMaterial')}
             </Link>
           </div>
         </div>
@@ -655,4 +555,3 @@ function CapIcon({ name }) {
     default: return null;
   }
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
