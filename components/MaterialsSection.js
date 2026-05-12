@@ -1,19 +1,19 @@
 // Materials section — split out from WhoWeServe.
 // 2-col layout: title/intro/CTA on left, wood swatch grid on right.
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
-const WOODS = [
-  { name: 'Acacia Wood',    swatch: '#7B4A2A', desc: 'Hard & rich grain' },
-  { name: 'Walnut Wood',    swatch: '#4E3624', desc: 'Premium dark tone' },
-  { name: 'Bamboo',         swatch: '#D4B280', desc: 'Light & sustainable' },
-  { name: 'Pine Wood',      swatch: '#C9A66B', desc: 'Soft & cost-efficient' },
-  { name: 'Paulownia Wood', swatch: '#E5CFA0', desc: 'Ultra-light & stable' },
-  { name: 'Rubber Wood',    swatch: '#B58E5A', desc: 'Even tone, easy stain' },
-  { name: 'Beech Wood',     swatch: '#C9966C', desc: 'Tight grain, strong' },
-  { name: 'MDF & Plywood',  swatch: '#8E7050', desc: 'Engineered options' },
-];
+// Swatch colors are locale-neutral visual data; name/desc come from i18n.
+const SWATCHES = ['#7B4A2A', '#4E3624', '#D4B280', '#C9A66B', '#E5CFA0', '#B58E5A', '#C9966C', '#8E7050'];
 
 export default function MaterialsSection() {
+  const t = useTranslations('home.materials');
+  const WOODS = SWATCHES.map((swatch, i) => ({
+    name: t(`wood${i + 1}Name`),
+    swatch,
+    desc: t(`wood${i + 1}Desc`),
+  }));
+
   return (
     <section className="bg-brand-cream py-20 lg:py-28">
       <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
@@ -21,29 +21,27 @@ export default function MaterialsSection() {
           {/* LEFT — title block */}
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-              Wood Materials
+              {t('eyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-              Choose the right wood for your{' '}
-              <span className="text-brand-green">market &amp; price point</span>
+              {t('titlePre')}{' '}
+              <span className="text-brand-green">{t('titleHighlight')}</span>
             </h2>
             <p className="mt-5 text-brand-mute leading-relaxed max-w-md">
-              We work with a wide range of solid wood and engineered wood materials.
-              Our team helps brands match wood choice to product function, durability,
-              appearance, cost target, and export market requirements.
+              {t('intro')}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/material-guide"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
-                Explore Material Guide →
+                {t('exploreGuide')} →
               </Link>
               <Link
                 href="/contact"
                 className="inline-flex items-center text-[15px] font-semibold text-brand-green hover:text-brand-greenDark px-2 py-3"
               >
-                Ask Our Engineers
+                {t('askEngineers')}
               </Link>
             </div>
           </div>
@@ -78,7 +76,7 @@ export default function MaterialsSection() {
             <div className="rounded-xl border border-dashed border-brand-line/80 bg-white/60 flex flex-col items-center justify-center text-center p-4 min-h-[140px]">
               <span className="text-2xl text-brand-green/60">+</span>
               <span className="mt-1 text-xs uppercase tracking-wider font-semibold text-brand-mute">
-                More on request
+                {t('moreOnRequest')}
               </span>
             </div>
           </div>

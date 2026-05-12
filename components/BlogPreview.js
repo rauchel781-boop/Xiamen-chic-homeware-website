@@ -1,9 +1,11 @@
 // Latest blog posts — bento layout: 1 large featured + 2 smaller stacked.
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { wpPosts, stripHtml } from '@/lib/wp-data';
 
 export default function BlogPreview() {
+  const t = useTranslations('home.blogPreview');
   const posts = wpPosts().slice(0, 3);
   if (posts.length === 0) return null;
   const [featured, second, third] = posts;
@@ -14,27 +16,30 @@ export default function BlogPreview() {
         {/* Centered header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-            From the Workshop
+            {t('eyebrow')}
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-            Wood manufacturing &amp;{' '}
-            <span className="text-brand-green">product guides</span>
+            {t('titlePre')}{' '}
+            <span className="text-brand-green">{t('titleHighlight')}</span>
           </h2>
           <p className="mt-4 text-brand-mute leading-relaxed">
-            Sourcing tips, material selection, and OEM workflow guides — written by our factory
-            team from real production experience.
+            {t('intro')}
           </p>
         </div>
 
         {/* Bento — 1 big featured + 2 smaller stacked */}
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Featured (large) */}
-          <FeaturedCard post={featured} />
+          <FeaturedCard
+            post={featured}
+            featuredLabel={t('featured')}
+            readArticleLabel={t('readArticle')}
+          />
 
           {/* Right column — 2 stacked */}
           <div className="grid gap-6">
             {[second, third].filter(Boolean).map((p) => (
-              <SmallCard key={p.id} post={p} />
+              <SmallCard key={p.id} post={p} readArticleLabel={t('readArticle')} />
             ))}
           </div>
         </div>
@@ -44,7 +49,7 @@ export default function BlogPreview() {
             href="/blog"
             className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
           >
-            All Articles →
+            {t('allArticles')} →
           </Link>
         </div>
       </div>
@@ -52,7 +57,7 @@ export default function BlogPreview() {
   );
 }
 
-function FeaturedCard({ post: p }) {
+function FeaturedCard({ post: p, featuredLabel, readArticleLabel }) {
   return (
     <Link
       href={`/blog/${p.slug}`}
@@ -71,7 +76,7 @@ function FeaturedCard({ post: p }) {
       )}
       <div className="p-7 lg:p-8 flex-1 flex flex-col">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-brand-mute mb-3">
-          <span className="font-bold text-brand-green">Featured</span>
+          <span className="font-bold text-brand-green">{featuredLabel}</span>
           <span>·</span>
           <span>{new Date(p.date).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'})}</span>
         </div>
@@ -85,14 +90,14 @@ function FeaturedCard({ post: p }) {
           </p>
         )}
         <span className="mt-5 inline-flex items-center text-sm font-semibold text-brand-green group-hover:text-brand-greenDark">
-          Read article →
+          {readArticleLabel} →
         </span>
       </div>
     </Link>
   );
 }
 
-function SmallCard({ post: p }) {
+function SmallCard({ post: p, readArticleLabel }) {
   return (
     <Link
       href={`/blog/${p.slug}`}
@@ -119,7 +124,7 @@ function SmallCard({ post: p }) {
           dangerouslySetInnerHTML={{__html: p.title}}
         />
         <span className="mt-3 inline-flex items-center text-sm font-semibold text-brand-green group-hover:text-brand-greenDark">
-          Read article →
+          {readArticleLabel} →
         </span>
       </div>
     </Link>

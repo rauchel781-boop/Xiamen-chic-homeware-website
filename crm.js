@@ -294,6 +294,7 @@ function loadDB() {
     DB.meta.counters = DB.meta.counters || {};
     DB.meta.tags = DB.meta.tags || [];
     DB.meta.myName = DB.meta.myName || '';
+    DB.meta.autoBackup = DB.meta.autoBackup || { enabled: false, intervalDays: 7, lastBackupAt: null };
     // 注入默认模板
     if (DB.templates.length === 0) {
       DB.templates = DEFAULT_TEMPLATES.map(t => ({ ...t, id: uid() }));
@@ -5150,6 +5151,46 @@ function renderBackup() {
     </div>
 
     <div class="panel" style="margin-bottom:12px;">
+      <div class="panel-header">⚙ 自动备份（推荐）</div>
+      <div class="panel-body">
+        ${(() => {
+          const cfg = (DB.meta && DB.meta.autoBackup) || { enabled: false, intervalDays: 7, lastBackupAt: null };
+          const lastStr = cfg.lastBackupAt ? new Date(cfg.lastBackupAt).toLocaleString('zh-CN') : '从未';
+          return `
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
+                <input type="checkbox" ${cfg.enabled ? 'checked' : ''} onchange="toggleAutoBackup()">
+                <strong>${cfg.enabled ? '✓ 已开启自动备份' : '开启自动备份'}</strong>
+              </label>
+              <span class="muted" style="font-size:11px;">上次备份：${lastStr}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <span style="font-size:12px;color:#4b5563;">频率：每</span>
+              <select onchange="setAutoBackupInterval(this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:3px;">
+                <option value="1" ${cfg.intervalDays==1?'selected':''}>1</option>
+                <option value="3" ${cfg.intervalDays==3?'selected':''}>3</option>
+                <option value="7" ${cfg.intervalDays==7?'selected':''}>7</option>
+                <option value="14" ${cfg.intervalDays==14?'selected':''}>14</option>
+                <option value="30" ${cfg.intervalDays==30?'selected':''}>30</option>
+              </select>
+              <span style="font-size:12px;color:#4b5563;">天自动备份一次</span>
+              <button class="btn btn-sm" onclick="doAutoBackup()" style="margin-left:10px;">立即备份一次</button>
+            </div>
+            <div class="info-box" style="font-size:12px;line-height:1.7;">
+              <strong>使用步骤（一次性设置）：</strong><br>
+              <strong>1.</strong> 开启上方"自动备份"复选框<br>
+              <strong>2.</strong> 在浏览器里把"下载文件夹"改成 OneDrive 或百度网盘 的同步文件夹<br>
+              　　・<strong>Chrome / Edge</strong>：右上角 ⋮ → 设置 → 下载 → 位置 → 更改 → 选 <code>OneDrive\\CRM备份</code> 或 <code>百度网盘\\我的应用数据\\CRM备份</code><br>
+              　　・关闭"下载前询问每个文件保存位置"<br>
+              <strong>3.</strong> 完成。以后每次打开本系统，超过设定天数会自动下载备份到云盘文件夹，自动同步上云。<br>
+              <span style="color:#ef4444;">⚠ 不熟悉上述操作可以先选"立即备份一次"测试，看下载到哪个文件夹，确认那个文件夹是云盘同步范围。</span>
+            </div>
+          `;
+        })()}
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px;">
       <div class="panel-header">导入备份</div>
       <div class="panel-body">
         <p class="muted" style="margin-bottom:10px;">从 JSON 文件恢复。<strong style="color:#ef4444;">导入会覆盖当前所有数据！</strong></p>
@@ -5166,6 +5207,53 @@ function renderBackup() {
       </div>
     </div>
   `;
+}
+
+function checkAutoBackup() {
+  const cfg = (DB.meta && DB.meta.autoBackup) || {};
+  if (!cfg.enabled) return;
+  const days = Number(cfg.intervalDays) || 7;
+  const last = cfg.lastBackupAt ? new Date(cfg.lastBackupAt).getTime() : 0;
+  const now = Date.now();
+  const interval = days * 24 * 60 * 60 * 1000;
+  if (now - last >= interval) {
+    // 延迟 3 秒以免影响首屏
+    setTimeout(() => doAutoBackup(), 3000);
+  }
+}
+
+function doAutoBackup() {
+  try {
+    const data = JSON.stringify(DB, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '外贸CRM_自动备份_' + todayStr() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    DB.meta.autoBackup.lastBackupAt = new Date().toISOString();
+    saveDB();
+    toast('已自动备份数据', 'success');
+  } catch (e) {
+    console.warn('自动备份失败', e);
+  }
+}
+
+function toggleAutoBackup() {
+  if (!DB.meta.autoBackup) DB.meta.autoBackup = { enabled: false, intervalDays: 7, lastBackupAt: null };
+  DB.meta.autoBackup.enabled = !DB.meta.autoBackup.enabled;
+  saveDB();
+  renderBackup();
+  if (DB.meta.autoBackup.enabled) toast('自动备份已开启', 'success');
+  else toast('自动备份已关闭');
+}
+
+function setAutoBackupInterval(days) {
+  if (!DB.meta.autoBackup) DB.meta.autoBackup = { enabled: false, intervalDays: 7, lastBackupAt: null };
+  DB.meta.autoBackup.intervalDays = Number(days) || 7;
+  saveDB();
+  toast('已设置备份频率：每 ' + days + ' 天', 'success');
 }
 
 function exportData() {
@@ -5593,5 +5681,6 @@ function closeProductPicker() {
 loadDB();
 renderNav();
 render();
+checkAutoBackup();
 
 window.addEventListener('beforeunload', saveDB);
