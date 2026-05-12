@@ -1,22 +1,30 @@
 // Visual grid of top product categories.
 // Each card uses the first product's featured image as the cover.
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { wpProducts, wpProductCategories } from '@/lib/wp-data';
 
-// Curated top categories shown on home (slugs match wp_product_cat).
-const TOP_CATS = [
-  { slug: 'wooden-kitchen-dining',     label: 'Kitchen & Dining',     blurb: 'Cutting boards, spice racks, bread boxes, cutlery organizers.' },
-  { slug: 'storage-home-organization', label: 'Storage & Organization', blurb: 'Bathroom, pantry, keepsake and countertop organizers.' },
-  { slug: 'gift-boxes-retail-packaging', label: 'Gift & Retail Packaging', blurb: 'Watch, jewelry, tea, coffee, wine and gift presentation boxes.' },
-  { slug: 'desk-office-organizers',    label: 'Desk & Office',        blurb: 'Drawer organizers, pen holders, document trays, valet trays.' },
-  { slug: 'pet-products',              label: 'Pet Products',         blurb: 'Pet bowl stands, toy storage, feeding stations.' },
-  { slug: 'hospitality-commercial',    label: 'Hospitality & Commercial', blurb: 'Hotel amenity trays, restaurant caddies, Airbnb welcome kits.' },
+// Slugs are locale-neutral (URL identifiers). label/blurb come from i18n.
+const TOP_CAT_SLUGS = [
+  'wooden-kitchen-dining',
+  'storage-home-organization',
+  'gift-boxes-retail-packaging',
+  'desk-office-organizers',
+  'pet-products',
+  'hospitality-commercial',
 ];
 
 export default function CategoriesGrid() {
+  const t = useTranslations('home.categoriesGrid');
   const products = wpProducts();
   const cats = wpProductCategories();
+
+  const TOP_CATS = TOP_CAT_SLUGS.map((slug, i) => ({
+    slug,
+    label: t(`cat${i + 1}Label`),
+    blurb: t(`cat${i + 1}Blurb`),
+  }));
 
   // Build category → first available product image
   const coverFor = (slug) => {
@@ -36,10 +44,10 @@ export default function CategoriesGrid() {
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-wide text-brand-ink uppercase">
-            Explore Our Product Categories
+            {t('title')}
           </h2>
           <p className="mt-3 text-brand-mute max-w-2xl mx-auto">
-            Discover our range of wooden products for kitchen, home, office, hospitality and gifting.
+            {t('intro')}
           </p>
         </div>
 
@@ -62,7 +70,7 @@ export default function CategoriesGrid() {
                       className="object-cover group-hover:scale-105 transition duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-brand-mute text-sm">No image yet</div>
+                    <div className="w-full h-full flex items-center justify-center text-brand-mute text-sm">{t('noImage')}</div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   <div className="absolute bottom-4 left-5 right-5 text-white">
@@ -72,7 +80,7 @@ export default function CategoriesGrid() {
                 <div className="p-6">
                   <p className="text-sm text-brand-mute leading-relaxed">{cat.blurb}</p>
                   <span className="mt-4 inline-flex items-center text-sm font-semibold text-brand-green group-hover:text-brand-greenDark">
-                    View Category →
+                    {t('viewCategory')} →
                   </span>
                 </div>
               </Link>

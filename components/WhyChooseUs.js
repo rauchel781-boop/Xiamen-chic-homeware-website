@@ -1,32 +1,19 @@
 // "Why Choose Us" — editorial 2-column layout.
 // Left: section title + intro + CTA (sticky on lg+).
 // Right: 4 horizontal numbered rows with icon, title, body — separated by hairlines.
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
-const REASONS = [
-  {
-    icon: 'factory',
-    title: 'Factory Direct Manufacturing',
-    body: 'Direct production in our own factory — stable quality, competitive pricing and reliable delivery without middlemen.',
-  },
-  {
-    icon: 'gears',
-    title: 'OEM & ODM Custom Service',
-    body: 'Logo branding, size adjustments, material selection and custom packaging built for your retail or marketplace requirements.',
-  },
-  {
-    icon: 'shield',
-    title: 'Strict Quality Control',
-    body: 'Every order goes through multi-step QC — material inspection, in-process check and final pre-shipment AQL audit.',
-  },
-  {
-    icon: 'globe',
-    title: 'Global Export Experience',
-    body: 'Exporting to 60+ countries with hands-on Amazon FBA, retail-chain compliance, EU REACH and door-to-door logistics.',
-  },
-];
-
 export default function WhyChooseUs() {
+  const t = useTranslations('home.whyChooseUs');
+  const tCta = useTranslations('cta');
+  const REASONS = [
+    { icon: 'factory', title: t('reason1Title'), body: t('reason1Body') },
+    { icon: 'gears',   title: t('reason2Title'), body: t('reason2Body') },
+    { icon: 'shield',  title: t('reason3Title'), body: t('reason3Body') },
+    { icon: 'globe',   title: t('reason4Title'), body: t('reason4Body') },
+  ];
+
   return (
     <section className="bg-brand-cream py-20 lg:py-28">
       <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
@@ -34,27 +21,26 @@ export default function WhyChooseUs() {
           {/* LEFT — title block */}
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-              Why Choose Us
+              {t('eyebrow')}
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-              Why brands choose our wooden products factory
+              {t('title')}
             </h2>
             <p className="mt-5 text-brand-mute leading-relaxed max-w-md">
-              We help brands and distributors source reliable, well-made wooden products
-              with factory-direct pricing and flexible customization — at every order size.
+              {t('intro')}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/contact"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
-                Get a Free Quote
+                {tCta('getFreeQuote')}
               </Link>
               <Link
                 href="/about"
                 className="inline-flex items-center text-[15px] font-semibold text-brand-green hover:text-brand-greenDark px-2 py-3"
               >
-                Learn About Our Factory →
+                {t('learnAboutFactory')} →
               </Link>
             </div>
           </div>

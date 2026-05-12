@@ -2,52 +2,37 @@
 // Each step: real WP photo on top, number badge overlapping the image,
 // title and description below. Connected with a horizontal flow line on lg+.
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
-const STEPS = [
-  {
-    n: 1,
-    title: 'Quotation & Sample Development',
-    body: 'Share your quantity, product details and requirements. We prepare a clear quotation and produce samples for your approval.',
-    img: '/wp-images/2026/02/ScreenShot_2026-02-07_220235_556.png',
-    alt: 'Quotation and sample development discussion',
-  },
-  {
-    n: 2,
-    title: 'Sample Confirmation',
-    body: 'After approval we finalize materials, structure, finishes and production details — locked-in spec sheet for the bulk run.',
-    img: '/wp-images/2026/02/holder-6.jpg',
-    alt: 'Wooden product sample on the production bench',
-  },
-  {
-    n: 3,
-    title: 'Custom Packaging',
-    body: 'Color labels, gift boxes, kraft cartons, or Amazon drop-test packaging — we prep your goods for retail or FBA.',
-    img: '/wp-images/2026/02/holder-7.jpg',
-    alt: 'Amazon FBA ready packaging',
-  },
-  {
-    n: 4,
-    title: 'Shipping & Delivery',
-    body: 'Sea freight, express, or Amazon FBA shipping — arranged based on your destination, timeline and budget.',
-    img: '/wp-images/2026/02/holder-8.jpg',
-    alt: 'Pallets ready for global dispatch',
-  },
+// Step images stay outside the component since they're locale-neutral assets.
+const STEP_IMGS = [
+  '/wp-images/2026/02/ScreenShot_2026-02-07_220235_556.png',
+  '/wp-images/2026/02/holder-6.jpg',
+  '/wp-images/2026/02/holder-7.jpg',
+  '/wp-images/2026/02/holder-8.jpg',
 ];
 
 export default function Process() {
+  const t = useTranslations('home.process');
+  const STEPS = [
+    { n: 1, title: t('step1Title'), body: t('step1Body'), img: STEP_IMGS[0], alt: t('step1Alt') },
+    { n: 2, title: t('step2Title'), body: t('step2Body'), img: STEP_IMGS[1], alt: t('step2Alt') },
+    { n: 3, title: t('step3Title'), body: t('step3Body'), img: STEP_IMGS[2], alt: t('step3Alt') },
+    { n: 4, title: t('step4Title'), body: t('step4Body'), img: STEP_IMGS[3], alt: t('step4Alt') },
+  ];
+
   return (
     <section className="bg-white py-20 lg:py-28">
       <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
         <div className="text-center mb-14 lg:mb-16">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-            Our Workflow
+            {t('eyebrow')}
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight text-brand-ink leading-[1.1] uppercase">
-            OEM &amp; ODM Manufacturing Process
+            {t('title')}
           </h2>
           <p className="mt-4 text-brand-mute max-w-3xl mx-auto leading-relaxed">
-            From quotation and sampling to custom packaging and global shipping —
-            a clear, reliable workflow for every order, large or small.
+            {t('intro')}
           </p>
         </div>
 
@@ -59,7 +44,7 @@ export default function Process() {
           />
 
           {STEPS.map((s) => (
-            <Card key={s.n} step={s} />
+            <Card key={s.n} step={s} stepLabel={t('stepLabel')} />
           ))}
         </div>
       </div>
@@ -67,7 +52,7 @@ export default function Process() {
   );
 }
 
-function Card({ step: s }) {
+function Card({ step: s, stepLabel }) {
   return (
     <article className="group relative z-10">
       {/* Image */}
@@ -92,7 +77,7 @@ function Card({ step: s }) {
           {String(s.n).padStart(2, '0')}
         </span>
         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green">
-          Step {s.n}
+          {stepLabel} {s.n}
         </span>
       </div>
 

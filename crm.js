@@ -2369,26 +2369,44 @@ function convertQtToOrder(id) {
   const q = DB.quotations.find(x => x.id === id);
   if (!q) return;
   if (!confirm('转为正式订单？')) return;
+  const newItems = (q.items || []).map(it => {
+    const p = it.productId && it.productId !== '__custom' ? productById(it.productId) : null;
+    return {
+      id: uid(),
+      productId: (it.productId && it.productId !== '__custom') ? it.productId : '',
+      productName: it.productId === '__custom' ? it.customName : (p ? (p.nameEn || p.nameZh) : '') || '',
+      specs: (p && p.specs) || '',
+      descriptionZh: (p && (p.descriptionZh || p.description)) || '',
+      descriptionEn: (p && p.descriptionEn) || '',
+      packingZh: (p && (p.packingZh || p.packing)) || '',
+      packingEn: (p && p.packingEn) || '',
+      qty: Number(it.qty) || 0,
+      unitPrice: Number(it.price) || 0,
+    };
+  });
   const order = {
-    id: uid(), createdAt: new Date().toISOString(),
+    id: uid(),
+    createdAt: new Date().toISOString(),
     orderNo: nextCode('SO'),
     customerId: q.customerId,
     orderDate: todayStr(),
-    amount: q.totalAmount,
-    currency: q.currency,
+    deliveryDate: '',
+    currency: q.currency || 'USD',
     paymentStatus: '未付款',
     productionStatus: '未开始',
-    items: (q.items || []).map(it => {
-      const p = productById(it.productId);
-      const name = it.productId === '__custom' ? it.customName : (p ? (p.nameEn || p.nameZh) : '');
-      return name + ' x ' + it.qty + ' @ ' + it.price;
-    }).join('\n'),
+    paymentTerms: q.paymentTerms || '',
+    incoterms: 'FOB',
+    destinationPort: '',
+    marks: { mainText: '', mainImage: '', sideText: '', sideImage: '', notes: '' },
+    notes: q.notes || ('基于报价单 ' + (q.code || '') + ' 创建'),
+    items: newItems,
     quotationId: q.id,
-    notes: q.notes || '',
+    amount: q.totalAmount,
   };
   DB.orders.push(order);
   q.status = '已转订单';
-  saveDB(); renderQuotations();
+  saveDB();
+  renderQuotations();
   toast('已转为订单：' + order.orderNo, 'success');
 }
 
@@ -2570,6 +2588,7 @@ function renderSamples() {
             <td><span class="tag ${getStatus(SAMPLE_STATUSES, s.status).tag}">${escapeHtml(s.status || '-')}</span></td>
             <td class="text-right no-wrap">
               <button class="btn-link" onclick="editSample('${s.id}')">编辑</button>
+              <button class="btn-link" onclick="convertSampleToOrder('${s.id}')" title="基于此样品创建订单">→订单</button>
               <button class="btn-link" onclick="exportSampleListZh('${s.id}')" title="导出中文工厂样品单">↓中</button>
               <button class="btn-link" onclick="exportSampleListEn('${s.id}')" title="导出英文 Sample Invoice">↓EN</button>
               <button class="btn-link danger" onclick="deleteSample('${s.id}')">删除</button>
@@ -2783,6 +2802,55 @@ function deleteSample(id) {
   if (!confirm('确定删除该样品单？')) return;
   DB.samples = (DB.samples || []).filter(x => x.id !== id);
   saveDB(); renderSamples(); toast('已删除');
+}
+
+function convertSampleToOrder(id) {
+  const s = (DB.samples || []).find(x => x.id === id);
+  if (!s) return;
+  if (!confirm('基于此样品单创建订单？\n（数量和单价需重新填写）')) return;
+  const newItems = (s.items || []).map(it => {
+    const p = it.productId ? productById(it.productId) : null;
+    return {
+      id: uid(),
+      productId: it.productId || '',
+      productName: it.productName || (p ? (p.nameEn || p.nameZh) : '') || '',
+      specs: it.specs || (p && p.specs) || '',
+      descriptionZh: (p && (p.descriptionZh || p.description)) || '',
+      descriptionEn: (p && p.descriptionEn) || '',
+      packingZh: (p && (p.packingZh || p.packing)) || '',
+      packingEn: (p && p.packingEn) || '',
+      qty: '',
+      unitPrice: '',
+    };
+  });
+  currentPage = 'orders';
+  renderNav();
+  render();
+  setTimeout(() => {
+    _editingOrder = {
+      id: uid(),
+      orderNo: nextCode('SO'),
+      customerId: s.customerId,
+      orderDate: todayStr(),
+      deliveryDate: '',
+      currency: s.currency || 'USD',
+      paymentStatus: '未付款',
+      productionStatus: '未开始',
+      paymentTerms: '',
+      incoterms: 'FOB',
+      destinationPort: '',
+      marks: { mainText: '', mainImage: '', sideText: '', sideImage: '', notes: '' },
+      notes: '基于样品单 ' + (s.code || '') + ' 创建',
+      items: newItems,
+      createdAt: new Date().toISOString(),
+    };
+    openModal('新建订单 ' + _editingOrder.orderNo,
+      renderOrderForm(),
+      '<button class="btn" onclick="closeModal()">取消</button>' +
+      '<button class="btn btn-primary" onclick="saveOrderForm(\'\')">保存</button>',
+      'xl');
+    toast('已从样品单 ' + (s.code || '') + ' 创建订单（请填数量和价格）', 'success');
+  }, 100);
 }
 
 // === Excel 导出（单个样品单）===
@@ -3183,6 +3251,12 @@ function migrateOrders() {
       if (!o.marks) o.marks = '';
       changed++;
     }
+    // 唛头：字符串 → 对象
+    if (typeof o.marks === 'string') {
+      o.marks = { mainText: o.marks, mainImage: '', sideText: '', sideImage: '', notes: '' };
+    } else if (!o.marks || typeof o.marks !== 'object') {
+      o.marks = { mainText: '', mainImage: '', sideText: '', sideImage: '', notes: '' };
+    }
   });
   if (changed > 0) { saveDB(); console.log('Migrated', changed, 'orders'); }
 }
@@ -3334,7 +3408,7 @@ function editOrder(id, customerId, presetItems) {
       paymentTerms: '',
       incoterms: 'FOB',
       destinationPort: '',
-      marks: '',
+      marks: { mainText: '', mainImage: '', sideText: '', sideImage: '', notes: '' },
       notes: '',
       items: presetItems || [],
       createdAt: new Date().toISOString(),
@@ -3373,7 +3447,8 @@ function renderOrderForm() {
       <div class="field full"><label>付款条款</label>
         <input value="${escapeHtml(o.paymentTerms||'')}" oninput="_editingOrder.paymentTerms=this.value" placeholder="如 TT 30% deposit, 70% before shipment"></div>
       <div class="field full"><label>唛头</label>
-        <input value="${escapeHtml(o.marks||'')}" oninput="_editingOrder.marks=this.value"></div>
+        ${orderMarksHtml()}
+      </div>
       <div class="field full"><label>备注</label>
         <textarea oninput="_editingOrder.notes=this.value">${escapeHtml(o.notes||'')}</textarea></div>
     </div>
@@ -3535,6 +3610,575 @@ function saveOrderForm(id) {
   toast('已保存', 'success');
 }
 
+// === 订单 PI 导出（中英文）===
+
+async function exportOrderPIZh(id) {
+  if (typeof ExcelJS === 'undefined') { toast('Excel 库未加载', 'error'); return; }
+  const o = (DB.orders || []).find(x => x.id === id);
+  if (!o) { toast('订单不存在', 'error'); return; }
+  const c = customerById(o.customerId);
+  if (!c) { toast('客户不存在', 'error'); return; }
+  const items = o.items || [];
+  if (items.length === 0) { toast('订单没有产品', 'error'); return; }
+  const cur = o.currency || 'USD';
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('订单确认书', {
+    pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true },
+    pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
+  });
+
+  // 列宽 10 列
+  [6, 14, 14, 22, 26, 14, 18, 8, 12, 14].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+
+  // 大标题（无 LOGO 无抬头）
+  ws.mergeCells('A1:J1');
+  const t = ws.getCell('A1');
+  t.value = '订  单  确  认  书';
+  t.font = { name: 'Microsoft YaHei', bold: true, size: 24, color: { argb: 'FF1F2937' } };
+  t.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(1).height = 42;
+
+  const info = [
+    ['客      户', c.company, '订单号', o.orderNo || '-'],
+    ['下单日期', o.orderDate || '-', '交货日期', o.deliveryDate || '-'],
+    ['币      种', cur, 'INCO Terms', o.incoterms || '-'],
+    ['目  的  港', o.destinationPort || '-', '唛      头', (o.marks && typeof o.marks === 'object' ? o.marks.mainText : o.marks) || '-'],
+    ['付款条款', o.paymentTerms || '-', '付款状态', o.paymentStatus || '-'],
+  ];
+  const infoStart = 3;
+  info.forEach((row, i) => {
+    const r = infoStart + i;
+    ws.getRow(r).height = 22;
+    const [l1, v1, l2, v2] = row;
+    ws.getCell(r, 1).value = l1;
+    ws.getCell(r, 1).font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(r, 1).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(r, 2, r, 5);
+    ws.getCell(r, 2).value = v1;
+    ws.getCell(r, 2).font = { name: 'Microsoft YaHei', size: 11 };
+    ws.getCell(r, 2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.getCell(r, 6).value = l2;
+    ws.getCell(r, 6).font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(r, 6).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(r, 7, r, 10);
+    ws.getCell(r, 7).value = v2;
+    ws.getCell(r, 7).font = { name: 'Microsoft YaHei', size: 11 };
+    ws.getCell(r, 7).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  });
+
+  const tableStart = infoStart + info.length + 2;
+  const headers = ['序号', '产品图', '产品编号', '产品名', '中文描述', '规格', '中文包装', '数量', '单价(' + cur + ')', '金额(' + cur + ')'];
+  ws.getRow(tableStart).height = 36;
+  headers.forEach((h, i) => {
+    const cell = ws.getCell(tableStart, i + 1);
+    cell.value = h;
+    cell.font = { name: 'Microsoft YaHei', bold: true, size: 10, color: { argb: 'FF1F2937' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EFF7' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = thinBorderS();
+  });
+
+  let total = 0;
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const p = it.productId ? productById(it.productId) : null;
+    const r = tableStart + i + 1;
+    ws.getRow(r).height = 80;
+    ws.getCell(r, 1).value = i + 1;
+    if (p && p.image) await addProductImage(wb, ws, 'B' + r, p.image, 70, 70);
+    ws.getCell(r, 2).value = '';
+    ws.getCell(r, 3).value = (p && p.code) || '-';
+    ws.getCell(r, 4).value = (p && p.nameZh) || it.productName || (p && p.nameEn) || '';
+    ws.getCell(r, 5).value = it.descriptionZh || (p && (p.descriptionZh || p.description)) || '';
+    ws.getCell(r, 6).value = it.specs || (p && p.specs) || '';
+    ws.getCell(r, 7).value = it.packingZh || (p && (p.packingZh || p.packing)) || '';
+    const qty = Number(it.qty) || 0;
+    const up = Number(it.unitPrice) || 0;
+    ws.getCell(r, 8).value = qty;
+    ws.getCell(r, 9).value = up;
+    const amt = qty * up;
+    ws.getCell(r, 10).value = amt;
+    total += amt;
+
+    for (let col = 1; col <= 10; col++) {
+      const cell = ws.getCell(r, col);
+      cell.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FF1F2937' } };
+      cell.border = thinBorderS();
+      if ([1, 2, 3, 8].includes(col)) cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      else if (col === 9 || col === 10) {
+        cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+        cell.numFmt = '0.00';
+      } else cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    }
+  }
+
+  // 合计
+  const totalRow = tableStart + items.length + 1;
+  ws.getRow(totalRow).height = 30;
+  ws.mergeCells(totalRow, 1, totalRow, 9);
+  const tc = ws.getCell(totalRow, 1);
+  tc.value = '总  金  额  TOTAL (' + cur + ')';
+  tc.font = { name: 'Microsoft YaHei', bold: true, size: 13, color: { argb: 'FF1F2937' } };
+  tc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
+  tc.border = thinBorderS();
+  const tv = ws.getCell(totalRow, 10);
+  tv.value = total;
+  tv.font = { name: 'Microsoft YaHei', bold: true, size: 13, color: { argb: 'FF1F2937' } };
+  tv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  tv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
+  tv.border = thinBorderS();
+  tv.numFmt = '#,##0.00';
+
+  // 备注 + 唛头详情
+  let lastRow = totalRow;
+  if (o.notes) {
+    lastRow = totalRow + 2;
+    ws.mergeCells(lastRow, 1, lastRow, 10);
+    const nc = ws.getCell(lastRow, 1);
+    nc.value = '备注：' + o.notes;
+    nc.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FF6B7280' } };
+    nc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+  }
+  const m = (o.marks && typeof o.marks === 'object') ? o.marks : {};
+  if (m.mainText || m.mainImage || m.sideText || m.sideImage || m.notes) {
+    const mhr = lastRow + 2;
+    ws.mergeCells(mhr, 1, mhr, 10);
+    const mh = ws.getCell(mhr, 1);
+    mh.value = '唛头详情 SHIPPING MARKS';
+    mh.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1E40AF' } };
+    mh.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    mh.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EFF7' } };
+    ws.getRow(mhr).height = 26;
+    const txtR = mhr + 1;
+    ws.getRow(txtR).height = 22;
+    ws.getCell(txtR, 1).value = '正唛';
+    ws.getCell(txtR, 1).font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(txtR, 1).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(txtR, 2, txtR, 5);
+    ws.getCell(txtR, 2).value = m.mainText || '-';
+    ws.getCell(txtR, 2).font = { name: 'Microsoft YaHei', size: 11 };
+    ws.getCell(txtR, 2).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    ws.getCell(txtR, 6).value = '侧唛';
+    ws.getCell(txtR, 6).font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(txtR, 6).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(txtR, 7, txtR, 10);
+    ws.getCell(txtR, 7).value = m.sideText || '-';
+    ws.getCell(txtR, 7).font = { name: 'Microsoft YaHei', size: 11 };
+    ws.getCell(txtR, 7).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    let bottomR = txtR;
+    if (m.mainImage || m.sideImage) {
+      const imgR = txtR + 1;
+      ws.getRow(imgR).height = 130;
+      if (m.mainImage) await addProductImage(wb, ws, 'B' + imgR, m.mainImage, 200, 120);
+      if (m.sideImage) await addProductImage(wb, ws, 'G' + imgR, m.sideImage, 200, 120);
+      bottomR = imgR;
+    }
+    if (m.notes) {
+      const nnr = bottomR + 1;
+      ws.mergeCells(nnr, 1, nnr, 10);
+      const nnc = ws.getCell(nnr, 1);
+      nnc.value = '唛头备注：' + m.notes;
+      nnc.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FF6B7280' }, italic: true };
+      nnc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    }
+  }
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const safeName = c.company.replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
+  const filename = '订单确认书_' + safeName + '_' + (o.orderNo || todayStr()) + '.xlsx';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出 ' + filename, 'success');
+}
+
+async function exportOrderPIEn(id) {
+  if (typeof ExcelJS === 'undefined') { toast('Excel 库未加载', 'error'); return; }
+  const o = (DB.orders || []).find(x => x.id === id);
+  if (!o) { toast('订单不存在', 'error'); return; }
+  const c = customerById(o.customerId);
+  if (!c) { toast('客户不存在', 'error'); return; }
+  const items = o.items || [];
+  if (items.length === 0) { toast('订单没有产品', 'error'); return; }
+  const cur = o.currency || 'USD';
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Proforma Invoice', {
+    pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true },
+    pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
+  });
+
+  // 10 列宽
+  [6, 14, 14, 22, 26, 14, 18, 8, 14, 14].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+  ws.getColumn(2).width = 18;
+
+  // 抬头 - LOGO + 公司信息
+  for (let r = 1; r <= 5; r++) ws.getRow(r).height = 20;
+  if (typeof COMPANY_LOGO_BASE64 !== 'undefined' && COMPANY_LOGO_BASE64) {
+    try {
+      const imgId = wb.addImage({ base64: 'data:image/png;base64,' + COMPANY_LOGO_BASE64, extension: 'png' });
+      ws.addImage(imgId, { tl: { col: 0.2, row: 0.2 }, ext: { width: 210, height: 95 } });
+    } catch (err) {}
+  }
+
+  ws.mergeCells('D1:J1');
+  ws.getCell('D1').value = COMPANY_INFO.name;
+  ws.getCell('D1').font = { name: 'Cambria', bold: true, size: 18, color: { argb: 'FF1F2937' } };
+  ws.getCell('D1').alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+
+  ws.mergeCells('D2:J2');
+  ws.getCell('D2').value = COMPANY_INFO.salesEn;
+  ws.getCell('D2').font = { name: 'Calibri', size: 9.5, color: { argb: 'FF6B7280' } };
+  ws.getCell('D2').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+
+  ws.mergeCells('D3:J3');
+  ws.getCell('D3').value = COMPANY_INFO.factoryEn;
+  ws.getCell('D3').font = { name: 'Calibri', size: 9.5, color: { argb: 'FF6B7280' } };
+  ws.getCell('D3').alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+
+  ws.mergeCells('D4:J4');
+  ws.getCell('D4').value = 'Website: ' + COMPANY_INFO.website;
+  ws.getCell('D4').font = { name: 'Calibri', size: 9.5, italic: true, color: { argb: 'FF6B7280' } };
+  ws.getCell('D4').alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+
+  for (let col = 1; col <= 10; col++) {
+    ws.getCell(5, col).border = { bottom: { style: 'thin', color: { argb: 'FF2D5C3F' } } };
+  }
+
+  // 大标题
+  ws.mergeCells('A7:J7');
+  const t = ws.getCell('A7');
+  t.value = 'PROFORMA INVOICE';
+  t.font = { name: 'Cambria', bold: true, size: 22, color: { argb: 'FF1F2937' } };
+  t.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(7).height = 36;
+
+  // 订单信息
+  const info = [
+    ['To:', c.company, 'PI No.:', o.orderNo || '-'],
+    ['Date:', o.orderDate || '-', 'Delivery:', o.deliveryDate || '-'],
+    ['Currency:', cur, 'INCO Terms:', o.incoterms || '-'],
+    ['Destination:', o.destinationPort || '-', 'Marks:', (o.marks && typeof o.marks === 'object' ? o.marks.mainText : o.marks) || '-'],
+    ['Payment Terms:', o.paymentTerms || '-', 'Status:', o.paymentStatus || '-'],
+  ];
+  const infoStart = 9;
+  info.forEach((row, i) => {
+    const r = infoStart + i;
+    ws.getRow(r).height = 22;
+    const [l1, v1, l2, v2] = row;
+    ws.getCell(r, 1).value = l1;
+    ws.getCell(r, 1).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(r, 1).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(r, 2, r, 5);
+    ws.getCell(r, 2).value = v1;
+    ws.getCell(r, 2).font = { name: 'Calibri', size: 11 };
+    ws.getCell(r, 2).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.getCell(r, 6).value = l2;
+    ws.getCell(r, 6).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(r, 6).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(r, 7, r, 10);
+    ws.getCell(r, 7).value = v2;
+    ws.getCell(r, 7).font = { name: 'Calibri', size: 11 };
+    ws.getCell(r, 7).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  });
+
+  const tableStart = infoStart + info.length + 1;
+  const headers = ['No.', 'Picture', 'Item Code', 'Product Name', 'Description', 'Spec.', 'Packing', 'Qty', 'Unit Price (' + cur + ')', 'Amount (' + cur + ')'];
+  ws.getRow(tableStart).height = 36;
+  headers.forEach((h, i) => {
+    const cell = ws.getCell(tableStart, i + 1);
+    cell.value = h;
+    cell.font = { name: 'Cambria', bold: true, size: 10, color: { argb: 'FF1F2937' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EFF7' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border = thinBorderS();
+  });
+
+  let total = 0;
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const p = it.productId ? productById(it.productId) : null;
+    const r = tableStart + i + 1;
+    ws.getRow(r).height = 80;
+    ws.getCell(r, 1).value = i + 1;
+    if (p && p.image) await addProductImage(wb, ws, 'B' + r, p.image, 70, 70);
+    ws.getCell(r, 2).value = '';
+    ws.getCell(r, 3).value = (p && p.code) || '-';
+    ws.getCell(r, 4).value = (p && p.nameEn) || it.productName || (p && p.nameZh) || '';
+    ws.getCell(r, 5).value = it.descriptionEn || (p && p.descriptionEn) || '';
+    ws.getCell(r, 6).value = it.specs || (p && p.specs) || '';
+    ws.getCell(r, 7).value = it.packingEn || (p && p.packingEn) || '';
+    const qty = Number(it.qty) || 0;
+    const up = Number(it.unitPrice) || 0;
+    ws.getCell(r, 8).value = qty;
+    ws.getCell(r, 9).value = up;
+    const amt = qty * up;
+    ws.getCell(r, 10).value = amt;
+    total += amt;
+
+    for (let col = 1; col <= 10; col++) {
+      const cell = ws.getCell(r, col);
+      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1F2937' } };
+      cell.border = thinBorderS();
+      if ([1, 2, 3, 8].includes(col)) cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      else if (col === 9 || col === 10) {
+        cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+        cell.numFmt = '#,##0.00';
+      } else cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    }
+  }
+
+  // TOTAL DUE
+  const totalRow = tableStart + items.length + 1;
+  ws.getRow(totalRow).height = 30;
+  ws.mergeCells(totalRow, 1, totalRow, 9);
+  const tc = ws.getCell(totalRow, 1);
+  tc.value = 'TOTAL DUE (' + cur + ')';
+  tc.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  tc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  tc.border = thinBorderS();
+  const tv = ws.getCell(totalRow, 10);
+  tv.value = total;
+  tv.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  tv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  tv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  tv.border = thinBorderS();
+  tv.numFmt = '#,##0.00';
+
+  // PAYMENT INFORMATION
+  const payStart = totalRow + 3;
+  ws.mergeCells(payStart, 1, payStart, 10);
+  const ph = ws.getCell(payStart, 1);
+  ph.value = 'PAYMENT INFORMATION';
+  ph.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  ph.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  ph.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  ws.getRow(payStart).height = 28;
+
+  const bankInfo = [
+    ['Account Name', COMPANY_INFO.name],
+    ['Account Number', '9988001320867'],
+    ['Account Type', 'Business Account'],
+    ['Bank Name', 'Deutsche Bank AG, Hong Kong'],
+    ['Bank Address', '57/F, International Commerce Centre, 1 Austin Road West, Kowloon, Hong Kong'],
+    ['SWIFT/BIC Code', 'DEUTHKHHXXX'],
+    ['Bank Code', '054'],
+    ['Branch Code', '895'],
+    ['Country/Region', 'Hong Kong (China)'],
+    ['Payment Method', 'For the payment of goods, please make a SWIFT/CHATS Payment'],
+  ];
+  bankInfo.forEach((row, i) => {
+    const r = payStart + 1 + i;
+    ws.getRow(r).height = 22;
+    ws.mergeCells(r, 1, r, 3);
+    const lc = ws.getCell(r, 1);
+    lc.value = row[0];
+    lc.font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    lc.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    lc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFB' } };
+    lc.border = thinBorderS();
+    ws.mergeCells(r, 4, r, 10);
+    const vc = ws.getCell(r, 4);
+    vc.value = row[1];
+    vc.font = { name: 'Calibri', size: 11, color: { argb: 'FF1F2937' } };
+    vc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    vc.border = thinBorderS();
+  });
+
+  // 唛头详情 (在签字栏之前)
+  const m = (o.marks && typeof o.marks === 'object') ? o.marks : {};
+  let preSigRow = payStart + bankInfo.length + 1;
+  if (m.mainText || m.mainImage || m.sideText || m.sideImage || m.notes) {
+    const mhr = preSigRow + 2;
+    ws.mergeCells(mhr, 1, mhr, 10);
+    const mh = ws.getCell(mhr, 1);
+    mh.value = 'SHIPPING MARKS';
+    mh.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+    mh.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    mh.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+    ws.getRow(mhr).height = 28;
+    const txtR = mhr + 1;
+    ws.getRow(txtR).height = 22;
+    ws.getCell(txtR, 1).value = 'Main Mark';
+    ws.getCell(txtR, 1).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(txtR, 1).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(txtR, 2, txtR, 5);
+    ws.getCell(txtR, 2).value = m.mainText || '-';
+    ws.getCell(txtR, 2).font = { name: 'Calibri', size: 11 };
+    ws.getCell(txtR, 2).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    ws.getCell(txtR, 6).value = 'Side Mark';
+    ws.getCell(txtR, 6).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+    ws.getCell(txtR, 6).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+    ws.mergeCells(txtR, 7, txtR, 10);
+    ws.getCell(txtR, 7).value = m.sideText || '-';
+    ws.getCell(txtR, 7).font = { name: 'Calibri', size: 11 };
+    ws.getCell(txtR, 7).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+    let bottomR = txtR;
+    if (m.mainImage || m.sideImage) {
+      const imgR = txtR + 1;
+      ws.getRow(imgR).height = 130;
+      if (m.mainImage) await addProductImage(wb, ws, 'B' + imgR, m.mainImage, 200, 120);
+      if (m.sideImage) await addProductImage(wb, ws, 'G' + imgR, m.sideImage, 200, 120);
+      bottomR = imgR;
+    }
+    if (m.notes) {
+      const nnr = bottomR + 1;
+      ws.mergeCells(nnr, 1, nnr, 10);
+      const nnc = ws.getCell(nnr, 1);
+      nnc.value = 'Note: ' + m.notes;
+      nnc.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF6B7280' } };
+      nnc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+      bottomR = nnr;
+    }
+    preSigRow = bottomR;
+  }
+  // 签字栏
+  const sigRow = preSigRow + 2;
+  ws.getRow(sigRow).height = 22;
+  ws.getCell(sigRow, 1).value = 'Buyer Signature:';
+  ws.getCell(sigRow, 1).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+  ws.getCell(sigRow, 1).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  ws.getCell(sigRow, 6).value = 'Vendor Signature:';
+  ws.getCell(sigRow, 6).font = { name: 'Cambria', bold: true, size: 11, color: { argb: 'FF4B5563' } };
+  ws.getCell(sigRow, 6).alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
+  for (let col = 2; col <= 5; col++) ws.getCell(sigRow + 2, col).border = { bottom: { style: 'thin', color: { argb: 'FF9CA3AF' } } };
+  for (let col = 7; col <= 10; col++) ws.getCell(sigRow + 2, col).border = { bottom: { style: 'thin', color: { argb: 'FF9CA3AF' } } };
+
+  // Thank you
+  const thankRow = sigRow + 4;
+  ws.mergeCells(thankRow, 1, thankRow, 10);
+  const tc2 = ws.getCell(thankRow, 1);
+  tc2.value = 'Thank you for your business!';
+  tc2.font = { name: 'Cambria', bold: true, italic: true, size: 13, color: { argb: 'FF1E3A8A' } };
+  tc2.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.getRow(thankRow).height = 28;
+
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const safeName = c.company.replace(/[\\/:*?"<>|]/g, '_').substring(0, 40);
+  const filename = 'PI_' + safeName + '_' + (o.orderNo || todayStr()) + '.xlsx';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出 ' + filename, 'success');
+}
+
+// === 唛头扩展（正唛/侧唛文字+图片 + 唛头备注）===
+
+function orderMarksObj() {
+  if (!_editingOrder.marks || typeof _editingOrder.marks !== 'object') {
+    _editingOrder.marks = { mainText: '', mainImage: '', sideText: '', sideImage: '', notes: '' };
+  }
+  return _editingOrder.marks;
+}
+
+function orderMarksHtml() {
+  const m = orderMarksObj();
+  return `
+    <div id="orderMarksBlock" style="border:1px solid #e5e7eb;border-radius:4px;padding:10px;background:#fafbfc;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="font-size:11px;color:#4b5563;font-weight:600;">正唛 (Main Mark)</label>
+          <textarea rows="2" placeholder="输入正唛文字..." style="margin-top:4px;width:100%;" oninput="orderMarksChange('mainText',this.value)">${escapeHtml(m.mainText||'')}</textarea>
+          <label style="font-size:11px;color:#6b7280;margin-top:6px;display:block;">正唛图片</label>
+          <div tabindex="0" class="product-img-drop" style="margin-top:4px;"
+               onpaste="orderMarksPaste(event,'main')"
+               ondrop="orderMarksDrop(event,'main')"
+               ondragover="event.preventDefault();this.classList.add('dragging')"
+               ondragleave="this.classList.remove('dragging')">
+            ${m.mainImage
+              ? '<img src="' + m.mainImage + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'main\')">'
+              : '<div class="image-uploader" style="padding:18px;" onclick="orderMarksUpload(\'main\')">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V</span></div>'}
+          </div>
+          ${m.mainImage ? '<button type="button" class="btn btn-sm" onclick="orderMarksClear(\'main\')" style="margin-top:4px;">移除图片</button>' : ''}
+        </div>
+        <div>
+          <label style="font-size:11px;color:#4b5563;font-weight:600;">侧唛 (Side Mark)</label>
+          <textarea rows="2" placeholder="输入侧唛文字..." style="margin-top:4px;width:100%;" oninput="orderMarksChange('sideText',this.value)">${escapeHtml(m.sideText||'')}</textarea>
+          <label style="font-size:11px;color:#6b7280;margin-top:6px;display:block;">侧唛图片</label>
+          <div tabindex="0" class="product-img-drop" style="margin-top:4px;"
+               onpaste="orderMarksPaste(event,'side')"
+               ondrop="orderMarksDrop(event,'side')"
+               ondragover="event.preventDefault();this.classList.add('dragging')"
+               ondragleave="this.classList.remove('dragging')">
+            ${m.sideImage
+              ? '<img src="' + m.sideImage + '" style="max-width:100%;max-height:140px;display:block;cursor:pointer;border-radius:3px;" onclick="orderMarksUpload(\'side\')">'
+              : '<div class="image-uploader" style="padding:18px;" onclick="orderMarksUpload(\'side\')">点击上传图片<br><span style="font-size:10px;color:#6b7280;">或拖入 / Ctrl+V</span></div>'}
+          </div>
+          ${m.sideImage ? '<button type="button" class="btn btn-sm" onclick="orderMarksClear(\'side\')" style="margin-top:4px;">移除图片</button>' : ''}
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label style="font-size:11px;color:#4b5563;font-weight:600;">唛头备注</label>
+        <textarea rows="2" placeholder="补充说明..." style="margin-top:4px;width:100%;" oninput="orderMarksChange('notes',this.value)">${escapeHtml(m.notes||'')}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function orderMarksChange(field, value) {
+  const m = orderMarksObj();
+  m[field] = value;
+}
+
+function orderMarksUpload(which) {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    if (file) processOrderMarksImage(file, which);
+  };
+  inp.click();
+}
+
+function orderMarksPaste(e, which) {
+  const cd = e.clipboardData || window.clipboardData;
+  if (!cd) return;
+  for (let i = 0; i < cd.items.length; i++) {
+    if (cd.items[i].type && cd.items[i].type.startsWith('image/')) {
+      e.preventDefault();
+      processOrderMarksImage(cd.items[i].getAsFile(), which);
+      return;
+    }
+  }
+}
+
+function orderMarksDrop(e, which) {
+  e.preventDefault();
+  if (e.currentTarget) e.currentTarget.classList.remove('dragging');
+  if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+    processOrderMarksImage(e.dataTransfer.files[0], which);
+  }
+}
+
+function processOrderMarksImage(file, which) {
+  if (!file || !file.type.startsWith('image/')) { toast('请选择图片', 'error'); return; }
+  compressImgFile(file, dataUrl => {
+    orderMarksChange(which + 'Image', dataUrl);
+    refreshOrderMarks();
+    toast('图片已加载', 'success');
+  });
+}
+
+function orderMarksClear(which) {
+  orderMarksChange(which + 'Image', '');
+  refreshOrderMarks();
+}
+
+function refreshOrderMarks() {
+  const el = document.getElementById('orderMarksBlock');
+  if (el) el.outerHTML = orderMarksHtml();
+}
+
 function deleteOrder(id) {
   if (!confirm('确定删除该订单？')) return;
   DB.orders = (DB.orders || []).filter(x => x.id !== id);
@@ -3542,9 +4186,41 @@ function deleteOrder(id) {
 }
 
 // 占位 - 阶段 2/3 实现
-function exportOrderPIZh(id) { toast('订单导出功能将在下一阶段实现', 'info'); }
-function exportOrderPIEn(id) { toast('订单导出功能将在下一阶段实现', 'info'); }
-function createShipmentFromOrder(id) { toast('订单→出货功能将在下一阶段实现', 'info'); }
+function createShipmentFromOrder(id) {
+  const o = (DB.orders || []).find(x => x.id === id);
+  if (!o) { toast('订单不存在', 'error'); return; }
+  if (!confirm('基于此订单创建出货单？产品和数量会自动带入。')) return;
+  const shipItems = (o.items || []).map(it => ({
+    id: uid(),
+    productId: it.productId || '',
+    qty: Number(it.qty) || 0,
+    tailMode: 'whole',
+  }));
+  currentPage = 'shipments';
+  renderNav();
+  render();
+  setTimeout(() => {
+    _editingShipment = {
+      id: uid(),
+      code: nextCode('SHP'),
+      customerId: o.customerId,
+      date: todayStr(),
+      status: '草稿',
+      orderNo: o.orderNo || '',
+      marks: (o.marks && typeof o.marks === 'object' ? o.marks.mainText : o.marks) || '',
+      port: o.destinationPort || '',
+      notes: '基于订单 ' + (o.orderNo || '') + ' 创建',
+      items: shipItems,
+      createdAt: new Date().toISOString()
+    };
+    openModal('新建出货单 ' + _editingShipment.code,
+      renderShipmentForm(),
+      '<button class="btn" onclick="closeModal()">取消</button>' +
+      '<button class="btn btn-primary" onclick="saveShipmentForm(\'\')">保存</button>',
+      'xl');
+    toast('已从订单 ' + (o.orderNo || '') + ' 创建出货单', 'success');
+  }, 100);
+}
 
 /* ============================================================
  * 出货单 (Shipments)

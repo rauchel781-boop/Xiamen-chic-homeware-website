@@ -1,47 +1,33 @@
 // Who We Serve — clean centered intro + 4 equal-height segment cards.
 // Materials block has been split out into its own component (MaterialsSection.js).
 import Image from 'next/image';
-
-const SEGMENTS = [
-  {
-    title: 'Amazon FBA Sellers',
-    icon: 'cart',
-    body: 'Drop-test certified packaging, FNSKU labelling and Amazon-ready master cartons.',
-  },
-  {
-    title: 'Home & Kitchen Brands',
-    icon: 'home',
-    body: 'Branded wooden kitchenware, organizers and storage products with custom finishes.',
-  },
-  {
-    title: 'Gift & Promotional Companies',
-    icon: 'gift',
-    body: 'Corporate gift boxes, presentation cases and branded promotional items in low MOQ.',
-  },
-  {
-    title: 'Importers, Wholesalers & Retailers',
-    icon: 'truck',
-    body: 'Reliable bulk supply for partners across North America, Europe, Australia and Japan.',
-  },
-];
+import { useTranslations } from 'next-intl';
 
 const MARKETS_PHOTO = '/wp-images/2025/12/3ee060b0-b0ef-458f-a2df-2994aee5d953.png';
 
 export default function WhoWeServe() {
+  const t = useTranslations('home.whoWeServe');
+  const SEGMENTS = [
+    { icon: 'cart',  title: t('seg1Title'), body: t('seg1Body') },
+    { icon: 'home',  title: t('seg2Title'), body: t('seg2Body') },
+    { icon: 'gift',  title: t('seg3Title'), body: t('seg3Body') },
+    { icon: 'truck', title: t('seg4Title'), body: t('seg4Body') },
+  ];
+
   return (
     <section className="bg-white py-20 lg:py-28">
       <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-            Who We Serve
+            {t('eyebrow')}
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight text-brand-ink leading-[1.15]">
-            From launching Amazon sellers to{' '}
-            <span className="text-brand-green">multi-store retail chains</span>
+            {t('titlePre')}{' '}
+            <span className="text-brand-green">{t('titleHighlight')}</span>
           </h2>
           <p className="mt-4 text-brand-mute leading-relaxed">
-            We supply wooden products to brands and importers across North America, Europe and Australia.
+            {t('intro')}
           </p>
         </div>
 
@@ -69,7 +55,7 @@ export default function WhoWeServe() {
         <div className="relative rounded-2xl overflow-hidden aspect-[16/6] bg-brand-cream">
           <Image
             src={MARKETS_PHOTO}
-            alt="Global markets we serve — North America, Europe, Australia, Japan"
+            alt={t('marketsAlt')}
             fill
             sizes="(max-width: 1320px) 100vw, 1320px"
             className="object-cover"
@@ -78,10 +64,10 @@ export default function WhoWeServe() {
           <div className="absolute inset-0 flex items-center px-8 lg:px-14 max-w-2xl">
             <div className="text-white">
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-yellowSoft mb-2">
-                Global Reach
+                {t('marketsEyebrow')}
               </p>
               <h3 className="text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight">
-                Shipping to 60+ countries — US, EU, UK, Australia, Japan and beyond
+                {t('marketsTitle')}
               </h3>
             </div>
           </div>

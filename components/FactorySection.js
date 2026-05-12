@@ -1,47 +1,54 @@
 // Factory section — editorial layout with balanced 2x2 photo grid (left)
 // and two location cards (right). Less wall-of-text, less bold spam.
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
-const PHOTOS = [
-  { url: '/wp-images/2026/01/raw-material-warehouse.jpg', alt: 'Raw material warehouse' },
-  { url: '/wp-images/2026/01/production.jpg', alt: 'Wooden product production line' },
-  { url: '/wp-images/2026/01/machine-4.jpg', alt: 'CNC woodworking machinery' },
-  { url: '/wp-images/2026/02/CHIC-Factory.jpg', alt: 'CHIC factory exterior' },
-];
-
-const LOCATIONS = [
-  {
-    label: 'Production Base',
-    city: 'Caoxian, Shandong',
-    body: 'One of China\'s most established hubs for wooden homeware and packaging. Strong supply chain, skilled labor and cost-efficient mass production for OEM & ODM orders.',
-    bullets: ['Solid wood &amp; bamboo supply chain', 'In-house CNC, finishing &amp; assembly', 'Volume capacity from 100 → 100k+ pcs'],
-  },
-  {
-    label: 'Sales & Export Office',
-    city: 'Xiamen, Fujian',
-    body: 'Major international port city. Our Xiamen team handles design, sampling, QC follow-up and global logistics — your single point of contact end to end.',
-    bullets: ['Bilingual project managers', 'On-site QC &amp; pre-shipment audits', 'Sea / air / Amazon FBA logistics'],
-  },
+// Photo URLs stay outside i18n (locale-neutral asset paths)
+const PHOTO_URLS = [
+  '/wp-images/2026/01/raw-material-warehouse.jpg',
+  '/wp-images/2026/01/production.jpg',
+  '/wp-images/2026/01/machine-4.jpg',
+  '/wp-images/2026/02/CHIC-Factory.jpg',
 ];
 
 export default function FactorySection() {
+  const t = useTranslations('home.factory');
+  const PHOTOS = [
+    { url: PHOTO_URLS[0], alt: t('photoAlt1') },
+    { url: PHOTO_URLS[1], alt: t('photoAlt2') },
+    { url: PHOTO_URLS[2], alt: t('photoAlt3') },
+    { url: PHOTO_URLS[3], alt: t('photoAlt4') },
+  ];
+  const LOCATIONS = [
+    {
+      label: t('prodLabel'),
+      city: t('prodCity'),
+      body: t('prodBody'),
+      bullets: [t('prodBullet1'), t('prodBullet2'), t('prodBullet3')],
+    },
+    {
+      label: t('salesLabel'),
+      city: t('salesCity'),
+      body: t('salesBody'),
+      bullets: [t('salesBullet1'), t('salesBullet2'), t('salesBullet3')],
+    },
+  ];
+
   return (
     <section className="bg-brand-cream py-20 lg:py-28">
       <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
         {/* Top intro */}
         <div className="max-w-3xl mb-12 lg:mb-16">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-            Our Factory
+            {t('eyebrow')}
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-            Built in China,{' '}
-            <span className="text-brand-green">trusted by global brands.</span>
+            {t('titlePre')}{' '}
+            <span className="text-brand-green">{t('titleHighlight')}</span>
           </h2>
           <p className="mt-5 text-brand-mute leading-relaxed">
-            Factory-direct manufacturing in Caoxian + professional export service in Xiamen —
-            two bases working together to deliver consistent quality, competitive pricing and
-            smooth international shipping.
+            {t('intro')}
           </p>
         </div>
 
@@ -86,7 +93,7 @@ export default function FactorySection() {
                   {loc.bullets.map((b) => (
                     <li key={b} className="flex items-start gap-2 text-sm text-brand-ink/85">
                       <CheckBadge />
-                      <span dangerouslySetInnerHTML={{__html: b}} />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -98,13 +105,13 @@ export default function FactorySection() {
                 href="/about"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
-                Learn More About CHIC
+                {t('learnMore')}
               </Link>
               <Link
                 href="/contact"
                 className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
               >
-                Talk to Our Team
+                {t('talkToTeam')}
               </Link>
             </div>
           </div>
