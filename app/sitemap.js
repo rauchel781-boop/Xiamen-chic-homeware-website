@@ -128,6 +128,10 @@ export default function sitemap() {
     // WP still has page records with these slugs (legacy from import),
     // but the real source of truth is app/[locale]/<slug>/page.js now.
     ...LANDING_PAGES,
+    // ── Orphans 301-redirected in next.config.js ──
+    // Keep them out of the sitemap so Google stops crawling the old URL.
+    'wooden-sofa-tray',  // → /wooden-sofa-tray-manufacturer (keyword cannibalization fix)
+    '心愿单',             // → / (legacy WooCommerce wishlist page, Chinese slug)
   ]);
   for (const wp of wpPages()) {
     if (ALIAS_SLUGS.has(wp.slug)) continue;
