@@ -114,12 +114,20 @@ export default function sitemap() {
   }
 
   // ── Long-tail WP pages handled by the [slug] catch-all ─────────────
+  // ALIAS_SLUGS = WP page slugs we DON'T want to emit via the catch-all,
+  // either because they're aliases of real routes (home, contact, etc.)
+  // OR because they're handled elsewhere in this sitemap with a higher
+  // priority (the 8 hand-coded SEO landing pages above).
   const ALIAS_SLUGS = new Set([
     'home', 'products', 'cart', 'thank-you',
     'contact', 'about', 'material-guide', 'blog',
     'wooden-products-factory-in-china',
     'complete-guide-wood-materials-for-kitchenware',
     'blog-wooden-homeware-sourcing-blog',
+    // ── Hand-coded SEO landing pages — emitted above at priority 0.9 ──
+    // WP still has page records with these slugs (legacy from import),
+    // but the real source of truth is app/[locale]/<slug>/page.js now.
+    ...LANDING_PAGES,
   ]);
   for (const wp of wpPages()) {
     if (ALIAS_SLUGS.has(wp.slug)) continue;
