@@ -54,13 +54,17 @@ const nextConfig = {
       // ── Cannibalization fix: orphan WP page → the real landing page ──
       // /wooden-sofa-tray was a legacy WP page competing with /wooden-sofa-tray-manufacturer
       // and /products/wooden-sofa-tray for the same keyword cluster. 301 to the
-      // strongest (hand-coded SEO landing page).
-      { source: '/wooden-sofa-tray', destination: '/wooden-sofa-tray-manufacturer', permanent: true },
+      // strongest (hand-coded SEO landing page). Also cover locale-prefixed variants.
+      { source: '/wooden-sofa-tray',                            destination: '/wooden-sofa-tray-manufacturer',        permanent: true },
+      { source: '/:locale(de|es|fr|ja)/wooden-sofa-tray',       destination: '/:locale/wooden-sofa-tray-manufacturer', permanent: true },
 
       // ── Wishlist orphan from WP/WooCommerce import → home ──
       // Chinese-slug page (心愿单 = "wishlist") leftover from the old WP store.
       // Has no business on the English B2B site; 301 to / to consolidate any link equity.
-      { source: '/心愿单', destination: '/', permanent: true },
+      // Needs to cover both encoded + decoded forms, and all locale-prefixed variants
+      // (just /心愿单 wasn't catching /de/心愿单, /es/心愿单 etc.).
+      { source: '/心愿单',                            destination: '/',         permanent: true },
+      { source: '/:locale(de|es|fr|ja)/心愿单',       destination: '/:locale',  permanent: true },
 
       // ── Locale clean-up redirects ──────────────────────────────────
       // /en → / (English is the no-prefix canonical, localePrefix: 'as-needed')

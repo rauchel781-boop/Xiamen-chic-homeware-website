@@ -131,7 +131,9 @@ export default function sitemap() {
     // ── Orphans 301-redirected in next.config.js ──
     // Keep them out of the sitemap so Google stops crawling the old URL.
     'wooden-sofa-tray',  // → /wooden-sofa-tray-manufacturer (keyword cannibalization fix)
-    '心愿单',             // → / (legacy WooCommerce wishlist page, Chinese slug)
+    // Legacy WooCommerce wishlist page — WP stores it URL-encoded, not as raw Chinese
+    '%e5%bf%83%e6%84%bf%e5%8d%95',  // /心愿单 → / (legacy wishlist)
+    '心愿单',                         // belt-and-suspenders: catch the decoded form too
   ]);
   for (const wp of wpPages()) {
     if (ALIAS_SLUGS.has(wp.slug)) continue;

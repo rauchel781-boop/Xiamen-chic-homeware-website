@@ -288,6 +288,33 @@
       "wood8Desc": "Entwickelte Optionen"
     }
   },
+  "productDetail": {
+    "getQuote": "Erhalten Sie ein Angebot",
+    "emailInquiry": "E-Mail-Anfrage",
+    "inquirySubjectPrefix": "Anfrage:",
+    "moreAboutProduct": "Mehr über dieses Produkt",
+    "relatedProducts": "Verwandte Produkte",
+    "ctaEyebrow": "Bereit zu bestellen",
+    "ctaTitle": "Holen Sie sich ein Großhandels angebot für {title}",
+    "ctaBody": "Senden Sie Ihre Zielgröße, Menge, Branding-und Verpackungs anforderungen-ein vollständiges Angebot innerhalb eines Geschäftstages.",
+    "ctaAboutFactory": "Über unsere Fabrik",
+    "overviewEyebrow": "Überblick",
+    "keyFeaturesTitle": "Hauptmerkmale",
+    "materialEyebrow": "Material",
+    "materialBestFor": "Am besten für:",
+    "oemTitle": "OEM & Private Label Anpassung",
+    "oemIntro": "CHIC unterstützt die vollständige Anpassung für Großhandels-und Handelsmarke programme. Sagen Sie uns Ihre Spezifikation und wir liefern nach Ihrem Marken standard.",
+    "applicationsTitle": "Anwendungen & Märkte",
+    "whyChicEyebrow": "Warum CHIC",
+    "whyChicTitle": "Fabrik-direkt aus China",
+    "faqEyebrow": "FAQ",
+    "faqTitle": "Häufig gefragt",
+    "categoryWholesaleManufacturer": "Großhandel Hersteller",
+    "categoryNoProducts": "Noch keine Produkte in dieser Kategorie.",
+    "categoryBrowseAll": "Alle Produkte durchsuchen",
+    "categoryProductCount": "{Count} Produkte in dieser Kategorie",
+    "categoryFallbackDesc": "Custom {category} -Großhandel aus Holz und Bambus für Einzel händler und Marken."
+  },
   "capabilities": {
     "metaTitle": "Fähigkeiten-CHIC Holzprodukte Fabrik",
     "metaDesc": "CNC-Routing, Laser gravur, Heiß folie, Siebdruck, Ofen trocknung, Veredelung und Verpackung-moderne Geräte und ein strenges QC-System für Großhandels-und OEM-Holzkisten programme.",

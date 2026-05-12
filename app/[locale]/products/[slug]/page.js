@@ -3,7 +3,8 @@
 //   2. PRODUCT detail (rich content) when slug matches a wp product
 // Both use the original WP slugs so old links keep working.
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -45,21 +46,23 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const path = `/products/${params.slug}`;
+  const t = await getTranslations({ locale: params.locale, namespace: 'productDetail' });
   const cat  = wpCategoryBySlug(params.slug);
   if (cat) {
-    const desc = stripHtml(cat.description).slice(0, 160) || `Custom ${cat.name.toLowerCase()} — wholesale wooden & bamboo manufacturing for retailers and brands.`;
+    const desc = stripHtml(cat.description).slice(0, 160)
+      || t('categoryFallbackDesc', { category: cat.name.toLowerCase() });
     return {
-      title: `${cat.name} — Wholesale Manufacturer`,
+      title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`,
       description: desc,
       alternates: { canonical: path, languages: buildAlternates(path) },
       openGraph: {
         type: 'website',
         url: `${SITE.siteUrl}${path}`,
-        title: `${cat.name} — Wholesale Manufacturer`,
+        title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`,
         description: desc,
         siteName: SITE.company.brand,
       },
-      twitter: { card: 'summary_large_image', title: `${cat.name} — Wholesale Manufacturer`, description: desc },
+      twitter: { card: 'summary_large_image', title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`, description: desc },
     };
   }
   const rawP = wpProductBySlug(params.slug);
@@ -113,6 +116,7 @@ function breadcrumbLd(crumbs) {
 }
 
 function CategoryView({ cat, locale }) {
+  const t = useTranslations('productDetail');
   const items = wpProductsByCategory(cat.slug).map((p) => localizeProduct(p, locale));
   const subCats = wpProductCategories().filter(c => String(c.parent) === String(cat.id));
 
@@ -153,7 +157,7 @@ function CategoryView({ cat, locale }) {
           {cat.description ? (
             <div className="mt-4 text-brand-ink/85 wp-content" dangerouslySetInnerHTML={{__html: cat.description}} />
           ) : (
-            <p className="mt-3 text-brand-mute">{items.length} products in this category</p>
+            <p className="mt-3 text-brand-mute">{t('categoryProductCount', { count: items.length })}</p>
           )}
         </header>
 
@@ -172,7 +176,7 @@ function CategoryView({ cat, locale }) {
         )}
 
         {items.length === 0 ? (
-          <p className="text-brand-mute">No products in this category yet. <Link href="/products" className="underline">Browse all products</Link>.</p>
+          <p className="text-brand-mute">{t('categoryNoProducts')} <Link href="/products" className="underline">{t('categoryBrowseAll')}</Link>.</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {items.map(p => (
@@ -205,6 +209,8 @@ function CategoryView({ cat, locale }) {
 }
 
 function ProductView({ p, locale }) {
+  const t = useTranslations('productDetail');
+  const tCta = useTranslations('cta');
   const related = wpProducts()
     .filter(x => x.id !== p.id && x.categories?.some(c => p.categories?.some(pc => pc.slug === c.slug)))
     .slice(0, 4);
@@ -336,13 +342,13 @@ function ProductView({ p, locale }) {
                 href="/contact"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
-                Get a Quote
+                {t('getQuote')}
               </Link>
               <a
-                href={`mailto:?subject=${encodeURIComponent('Inquiry: ' + p.title)}`}
+                href={`mailto:?subject=${encodeURIComponent(t('inquirySubjectPrefix') + ' ' + p.title)}`}
                 className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
               >
-                Email Inquiry
+                {t('emailInquiry')}
               </a>
             </div>
           </div>
@@ -362,7 +368,7 @@ function ProductView({ p, locale }) {
           if (cleaned && cleaned.length > 200) {
             return (
               <section className="mt-12 border-t border-brand-line pt-10">
-                <h2 className="text-2xl font-bold text-brand-ink mb-6">More about this product</h2>
+                <h2 className="text-2xl font-bold text-brand-ink mb-6">{t('moreAboutProduct')}</h2>
                 <div className="wp-content max-w-4xl" dangerouslySetInnerHTML={{__html: cleaned}} />
               </section>
             );
@@ -372,7 +378,7 @@ function ProductView({ p, locale }) {
 
         {related.length > 0 && (
           <section className="mt-16 border-t border-brand-line pt-12">
-            <h2 className="text-2xl font-bold text-brand-ink mb-8">Related Products</h2>
+            <h2 className="text-2xl font-bold text-brand-ink mb-8">{t('relatedProducts')}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {related.map(r => (
                 <Link
@@ -404,17 +410,17 @@ function ProductView({ p, locale }) {
         <section className="mt-16 bg-brand-green text-white rounded-2xl px-6 py-10 lg:px-12 lg:py-14">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">Ready to order</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">{t('ctaEyebrow')}</p>
               <h2 className="text-2xl md:text-3xl font-extrabold leading-tight">
-                Get a wholesale quote for {stripHtml(p.title).slice(0, 60)}{stripHtml(p.title).length > 60 ? '…' : ''}
+                {t('ctaTitle', { title: stripHtml(p.title).slice(0, 60) + (stripHtml(p.title).length > 60 ? '…' : '') })}
               </h2>
               <p className="mt-3 text-white/85 leading-relaxed">
-                Send your target size, quantity, branding and packaging needs — full quote within one business day.
+                {t('ctaBody')}
               </p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">Get a Free Quote</Link>
-              <Link href="/about" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">About Our Factory</Link>
+              <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">{tCta('getFreeQuote')}</Link>
+              <Link href="/about" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">{t('ctaAboutFactory')}</Link>
             </div>
           </div>
         </section>
@@ -425,6 +431,7 @@ function ProductView({ p, locale }) {
 
 // ─── SEO-enriched product content sections ──────────────────────────────
 function ProductSEOSections({ product }) {
+  const t = useTranslations('productDetail');
   const c = generateProductContent(product);
 
   // Emit a FAQPage JSON-LD so Google can show the FAQ accordion in results
@@ -445,7 +452,7 @@ function ProductSEOSections({ product }) {
       {/* ── Overview ─────────────────────────────────────── */}
       <section className="mt-2 border-t border-brand-line pt-10">
         <div className="max-w-4xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Overview</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('overviewEyebrow')}</p>
           <p className="text-lg text-brand-ink leading-relaxed">
             {c.overview}
           </p>
@@ -457,7 +464,7 @@ function ProductSEOSections({ product }) {
         <section className="mt-12">
           <div className="max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-6">
-              Key Features
+              {t('keyFeaturesTitle')}
             </h2>
             <ul className="grid sm:grid-cols-2 gap-3">
               {c.features.map((f, i) => (
@@ -478,7 +485,7 @@ function ProductSEOSections({ product }) {
       {c.materialSection && (
         <section className="mt-12 bg-brand-cream rounded-2xl px-6 py-8 lg:px-10 lg:py-10">
           <div className="max-w-3xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Material</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('materialEyebrow')}</p>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-4">
               {c.materialSection.title}
             </h2>
@@ -486,7 +493,7 @@ function ProductSEOSections({ product }) {
               {c.materialSection.body}
             </p>
             <p className="text-sm text-brand-mute">
-              <span className="font-semibold text-brand-green">Best for:</span> {c.materialSection.bestFor}
+              <span className="font-semibold text-brand-green">{t('materialBestFor')}</span> {c.materialSection.bestFor}
             </p>
           </div>
         </section>
@@ -496,11 +503,10 @@ function ProductSEOSections({ product }) {
       <section className="mt-12">
         <div className="max-w-4xl">
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-6">
-            OEM & Private Label Customization
+            {t('oemTitle')}
           </h2>
           <p className="text-brand-mute mb-6 leading-relaxed">
-            CHIC supports full customization for wholesale and private label programs.
-            Tell us your spec and we'll deliver to your brand standard.
+            {t('oemIntro')}
           </p>
           <ul className="space-y-3">
             {c.customization.map((item, i) => (
@@ -519,7 +525,7 @@ function ProductSEOSections({ product }) {
       <section className="mt-12">
         <div className="max-w-4xl">
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-6">
-            Applications & Markets
+            {t('applicationsTitle')}
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {c.applications.map((a, i) => (
@@ -537,9 +543,9 @@ function ProductSEOSections({ product }) {
       {/* ── Why CHIC ───────────────────────────────────── */}
       <section className="mt-12 bg-brand-cream rounded-2xl px-6 py-8 lg:px-10 lg:py-10">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">Why CHIC</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('whyChicEyebrow')}</p>
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-4">
-            Factory-direct from China
+            {t('whyChicTitle')}
           </h2>
           <p className="text-brand-ink/85 leading-relaxed">{c.whyChic}</p>
         </div>
@@ -548,9 +554,9 @@ function ProductSEOSections({ product }) {
       {/* ── FAQ ────────────────────────────────────────── */}
       <section className="mt-12">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">FAQ</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('faqEyebrow')}</p>
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-6">
-            Frequently asked
+            {t('faqTitle')}
           </h2>
           <div className="space-y-3">
             {c.faqs.map((f, i) => (

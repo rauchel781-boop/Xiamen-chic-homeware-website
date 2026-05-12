@@ -2931,7 +2931,7 @@ async function exportQuotationEn(id) {
     '4. MOQ: As per discussed item by item.',
     '5. Quality: Same as approved sample.',
     '6. Packing: As per discussed (export carton with master mark).',
-    '7. Price Terms: EXW (Ex Works) price unless otherwise stated.',
+    '7. Price Terms: FOB China port unless otherwise stated.',
     '8. Bank charges outside China to be borne by the buyer.',
   ];
   remarks.forEach((r, i) => {

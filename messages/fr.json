@@ -288,6 +288,33 @@
       "wood8Desc": "Options machinés"
     }
   },
+  "productDetail": {
+    "getQuote": "Obtenir un devis",
+    "emailInquiry": "Enquête par courriel",
+    "inquirySubjectPrefix": "Enquête:",
+    "moreAboutProduct": "Plus sur ce produit",
+    "relatedProducts": "Produits connexes",
+    "ctaEyebrow": "Prêt à commander",
+    "ctaTitle": "Obtenez un devis en gros pour {titre}",
+    "ctaBody": "Envoyez votre taille cible, la quantité, l'image de marque et les besoins d'emballage-devis complet dans un délai d'un jour ouvrable.",
+    "ctaAboutFactory": "Au sujet de notre usine",
+    "overviewEyebrow": "Aperçu",
+    "keyFeaturesTitle": "Caractéristiques principales",
+    "materialEyebrow": "Matériel",
+    "materialBestFor": "Meilleur pour:",
+    "oemTitle": "OEM et personnalisation de marque privée",
+    "oemIntro": "CHIC prend en charge la personnalisation complète des programmes de vente en gros et de marque privée. Dites-nous votre Spéc. et nous livrerons à votre norme de marque.",
+    "applicationsTitle": "Applications et marchés",
+    "whyChicEyebrow": "Pourquoi Chic",
+    "whyChicTitle": "Usine-direct de Chine",
+    "faqEyebrow": "FAQ",
+    "faqTitle": "Fréquemment demandé",
+    "categoryWholesaleManufacturer": "Fabricant en gros",
+    "categoryNoProducts": "Aucun produit dans cette catégorie pour le moment.",
+    "categoryBrowseAll": "Parcourir tous les produits",
+    "categoryProductCount": "{Count} produits dans cette catégorie",
+    "categoryFallbackDesc": "Custom {category} -fabrication en gros en bois et en bambou pour les détaillants et les marques."
+  },
   "capabilities": {
     "metaTitle": "Capacités-Usine de produits en bois CHIC",
     "metaDesc": "Routage CNC, gravure laser, feuille à chaud, sérigraphie, séchage au four, finition et emballage-équipement moderne et un système de QC strict pour les programmes de vente en gros et de boîte en bois OEM.",

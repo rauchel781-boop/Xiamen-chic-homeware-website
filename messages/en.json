@@ -288,6 +288,33 @@
       "wood8Desc": "Engineered options"
     }
   },
+  "productDetail": {
+    "getQuote": "Get a Quote",
+    "emailInquiry": "Email Inquiry",
+    "inquirySubjectPrefix": "Inquiry:",
+    "moreAboutProduct": "More about this product",
+    "relatedProducts": "Related Products",
+    "ctaEyebrow": "Ready to order",
+    "ctaTitle": "Get a wholesale quote for {title}",
+    "ctaBody": "Send your target size, quantity, branding and packaging needs — full quote within one business day.",
+    "ctaAboutFactory": "About Our Factory",
+    "overviewEyebrow": "Overview",
+    "keyFeaturesTitle": "Key Features",
+    "materialEyebrow": "Material",
+    "materialBestFor": "Best for:",
+    "oemTitle": "OEM & Private Label Customization",
+    "oemIntro": "CHIC supports full customization for wholesale and private label programs. Tell us your spec and we'll deliver to your brand standard.",
+    "applicationsTitle": "Applications & Markets",
+    "whyChicEyebrow": "Why CHIC",
+    "whyChicTitle": "Factory-direct from China",
+    "faqEyebrow": "FAQ",
+    "faqTitle": "Frequently asked",
+    "categoryWholesaleManufacturer": "Wholesale Manufacturer",
+    "categoryNoProducts": "No products in this category yet.",
+    "categoryBrowseAll": "Browse all products",
+    "categoryProductCount": "{count} products in this category",
+    "categoryFallbackDesc": "Custom {category} — wholesale wooden & bamboo manufacturing for retailers and brands."
+  },
   "capabilities": {
     "metaTitle": "Capabilities — CHIC Wooden Products Factory",
     "metaDesc": "CNC routing, laser engraving, hot foil, screen print, kiln drying, finishing and packing — modern equipment and a strict QC system for wholesale and OEM wooden box programs.",

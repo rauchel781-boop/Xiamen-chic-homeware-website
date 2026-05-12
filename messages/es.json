@@ -288,6 +288,33 @@
       "wood8Desc": "Opciones de ingeniería"
     }
   },
+  "productDetail": {
+    "getQuote": "Obtener una cotización",
+    "emailInquiry": "Consulta por correo electrónico",
+    "inquirySubjectPrefix": "Investigación:",
+    "moreAboutProduct": "Más sobre este producto",
+    "relatedProducts": "Productos relacionados",
+    "ctaEyebrow": "Listo para ordenar",
+    "ctaTitle": "Obtener una cotización al por mayor para {title}",
+    "ctaBody": "Envíe su tamaño objetivo, cantidad, marca y necesidades de empaque-presupuesto completo dentro de un día hábil.",
+    "ctaAboutFactory": "Acerca de nuestra fábrica",
+    "overviewEyebrow": "Descripción general",
+    "keyFeaturesTitle": "Características principales",
+    "materialEyebrow": "Material",
+    "materialBestFor": "Mejor para:",
+    "oemTitle": "Personalización de OEM y etiqueta privada",
+    "oemIntro": "CHIC admite la personalización completa para programas mayoristas y de etiqueta privada. Díganos su especificación y lo entregaremos a su estándar de marca.",
+    "applicationsTitle": "Aplicaciones & Mercados",
+    "whyChicEyebrow": "¿Por qué CHIC",
+    "whyChicTitle": "Fábrica-directo de China",
+    "faqEyebrow": "Preguntas frecuentes",
+    "faqTitle": "Frecuentemente preguntado",
+    "categoryWholesaleManufacturer": "Venta al por mayor Fabricante",
+    "categoryNoProducts": "No hay productos en esta categoría todavía.",
+    "categoryBrowseAll": "Examinar todos los productos",
+    "categoryProductCount": "{Count} productos de esta categoría",
+    "categoryFallbackDesc": "Custom {category} -fabricación al por mayor de madera y bambú para minoristas y marcas."
+  },
   "capabilities": {
     "metaTitle": "Capacidades-fábrica de productos de madera CHIC",
     "metaDesc": "Enrutamiento CNC, grabado láser, lámina caliente, serigrafía, secado en horno, acabado y embalaje-equipo moderno y un estricto sistema de control de calidad para programas de caja de madera al por mayor y OEM.",

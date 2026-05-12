@@ -288,6 +288,33 @@
       "wood8Desc": "設計されたオプション"
     }
   },
+  "productDetail": {
+    "getQuote": "見積もりを取得する",
+    "emailInquiry": "メールの問い合わせ",
+    "inquirySubjectPrefix": "お問い合わせ:",
+    "moreAboutProduct": "この制品についてもっと见る",
+    "relatedProducts": "関連製品",
+    "ctaEyebrow": "注文準備完了",
+    "ctaTitle": "{Title} の卸売り見積もりを取得",
+    "ctaBody": "ターゲットサイズ、数量、ブランディング、パッケージングのニーズを1営業日以内に完全に見積もります。",
+    "ctaAboutFactory": "私達の工場について",
+    "overviewEyebrow": "概要",
+    "keyFeaturesTitle": "主な特徴",
+    "materialEyebrow": "材料",
+    "materialBestFor": "最も適しているもの:",
+    "oemTitle": "OEM & プライベートラベルのカスタマイズ",
+    "oemIntro": "CHICは、卸売およびプライベートラベルプログラムの完全なカスタマイズをサポートしています。あなたの仕様を教えてください、そして私たちはあなたのブランド標準に届けます。",
+    "applicationsTitle": "アプリケーション & マーケット",
+    "whyChicEyebrow": "なぜシック",
+    "whyChicTitle": "工場-中国から直接",
+    "faqEyebrow": "よくある質問",
+    "faqTitle": "よくある質問",
+    "categoryWholesaleManufacturer": "卸売メーカー",
+    "categoryNoProducts": "このカテゴリの制品はまだありません。",
+    "categoryBrowseAll": "すべての商品を見る",
+    "categoryProductCount": "このカテゴリの {count} 個の商品",
+    "categoryFallbackDesc": "カスタム {category} -小売店やブランド向けの卸売木と竹の製造。"
+  },
   "capabilities": {
     "metaTitle": "機能-シック木製品工場",
     "metaDesc": "CNCルーティング、レーザー彫刻、ホットフォイル、スクリーン印刷、窯乾燥、仕上げ、梱包-最新の機器と、卸売およびOEM木製ボックスプログラム用の厳格なQCシステム。",
