@@ -2831,7 +2831,7 @@ function renderSamples() {
             <td class="text-center" style="cursor:pointer;user-select:none;" onclick="toggleSampleExpand('${s.id}')" title="${expanded?'收起':'展开'}产品明细">
               <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
             </td>
-            <td>${firstP && firstP.image ? '<img src="' + firstP.image + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+            <td>${firstP && firstP.image ? '<img src="' + imgUrl(firstP.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
             <td class="code no-wrap">${escapeHtml(s.code || '-')}</td>
             <td>${customerNameWithFlag(s.customerId)}</td>
             <td>${escapeHtml(truncate(productNames, 40))}</td>
@@ -3614,7 +3614,7 @@ function renderOrders() {
             <td class="text-center" style="cursor:pointer;user-select:none;" onclick="toggleOrderExpand('${o.id}')" title="${expanded?'收起':'展开'}产品明细">
               <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
             </td>
-            <td>${firstP && firstP.image ? '<img src="' + firstP.image + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+            <td>${firstP && firstP.image ? '<img src="' + imgUrl(firstP.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
             <td class="code"><strong>${escapeHtml(o.orderNo || '-')}</strong>
               <div class="muted" style="font-size:10px;">${fmtDate(o.orderDate)}</div></td>
             <td>${customerNameWithFlag(o.customerId)}</td>
