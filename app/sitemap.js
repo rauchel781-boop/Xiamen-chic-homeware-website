@@ -66,6 +66,24 @@ export default function sitemap() {
   push('/contact',         { priority: 0.6, changeFrequency: 'yearly'  });
   push('/blog',            { priority: 0.7, changeFrequency: 'weekly'  });
 
+  // ── Hand-coded SEO landing pages (8 pages × 5 locales = 40 URLs) ───
+  // These live under app/[locale]/<slug>/page.js — NOT in WP data, so
+  // they don't get picked up by the wpPages() catch-all below.
+  // High commercial intent — keyword-targeted manufacturer landing pages.
+  const LANDING_PAGES = [
+    'custom-wooden-spice-rack',
+    'wooden-box-factory-in-china',
+    'custom-wooden-boxes',
+    'wholesale-wooden-spice-racks',
+    'wholesale-wooden-serving-trays',
+    'wooden-sofa-tray-manufacturer',
+    'custom-wooden-storage-boxes-wholesale',
+    'custom-wooden-products-manufacturer',
+  ];
+  for (const slug of LANDING_PAGES) {
+    push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });
+  }
+
   // ── Product category pages (45 categories) ─────────────────────────
   const products = wpProducts();
   const cats = wpProductCategories().filter((c) => c.slug !== 'uncategorized');

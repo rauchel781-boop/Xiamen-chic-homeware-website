@@ -1,0 +1,3138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>外贸业务管理系统</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: #f4f6f9; color: #2c3e50; font-size: 13px;
+  height: 100vh; overflow: hidden;
+}
+.app { display: flex; height: 100vh; }
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 200px; background: #1f2937; color: #fff;
+  flex-shrink: 0; display: flex; flex-direction: column;
+}
+.logo {
+  padding: 18px 18px; font-size: 15px; font-weight: 600;
+  border-bottom: 1px solid #374151; letter-spacing: 1px;
+}
+.logo .sub { font-size: 10px; color: #9ca3af; font-weight: normal; margin-top: 4px; letter-spacing: 0; }
+.nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+.nav-item {
+  padding: 9px 18px; cursor: pointer; display: flex;
+  align-items: center; gap: 10px; color: #d1d5db;
+  border-left: 3px solid transparent; transition: all 0.15s;
+  font-size: 13px;
+}
+.nav-item:hover { background: #2a3340; color: #fff; }
+.nav-item.active { background: #374151; color: #fff; border-left-color: #4a90e2; }
+.nav-icon { width: 14px; text-align: center; font-size: 13px; }
+.nav-badge {
+  margin-left: auto; background: #ef4444; color: #fff;
+  font-size: 10px; padding: 1px 6px; border-radius: 9px;
+}
+.sidebar-footer {
+  padding: 12px 18px; border-top: 1px solid #374151;
+  font-size: 10px; color: #9ca3af;
+}
+
+/* ===== Main ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar {
+  background: #fff; padding: 12px 22px;
+  border-bottom: 1px solid #e3e8ef;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.page-title { font-size: 17px; font-weight: 600; }
+.topbar-actions { display: flex; gap: 8px; }
+.tabs {
+  background: #fff; padding: 0 22px; border-bottom: 1px solid #e3e8ef;
+  display: flex; gap: 4px;
+}
+.tab {
+  padding: 11px 14px; cursor: pointer; font-size: 13px; color: #6b7280;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab:hover { color: #2c3e50; }
+.tab.active { color: #4a90e2; border-bottom-color: #4a90e2; font-weight: 500; }
+.content { flex: 1; overflow-y: auto; padding: 18px 22px; }
+
+/* ===== Buttons ===== */
+.btn {
+  padding: 6px 12px; border: 1px solid #d1d5db; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 12px; color: #374151;
+  transition: all 0.15s; white-space: nowrap; font-family: inherit;
+}
+.btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+.btn-primary { background: #4a90e2; color: #fff; border-color: #4a90e2; }
+.btn-primary:hover { background: #3a7fce; border-color: #3a7fce; }
+.btn-success { background: #10b981; color: #fff; border-color: #10b981; }
+.btn-success:hover { background: #059669; border-color: #059669; }
+.btn-danger { color: #ef4444; }
+.btn-danger:hover { background: #fef2f2; border-color: #ef4444; }
+.btn-sm { padding: 3px 9px; font-size: 11px; }
+.btn-link {
+  background: none; border: none; color: #4a90e2; cursor: pointer;
+  padding: 3px 6px; font-size: 12px; font-family: inherit;
+}
+.btn-link:hover { text-decoration: underline; }
+.btn-link.danger { color: #ef4444; }
+
+/* ===== Stats ===== */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px; margin-bottom: 16px;
+}
+.stat-card {
+  background: #fff; padding: 16px 18px; border-radius: 6px;
+  border: 1px solid #e3e8ef;
+}
+.stat-label { font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+.stat-value { font-size: 22px; font-weight: 600; color: #2c3e50; }
+.stat-value.green { color: #10b981; }
+.stat-value.orange { color: #f59e0b; }
+.stat-value.red { color: #ef4444; }
+.stat-value.blue { color: #4a90e2; }
+.stat-sub { font-size: 10px; color: #6b7280; margin-top: 3px; }
+.stat-card.alert { border-color: #fecaca; background: #fef2f2; }
+
+.dashboard-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;
+}
+.panel { background: #fff; border-radius: 6px; border: 1px solid #e3e8ef; }
+.panel-header {
+  padding: 12px 16px; border-bottom: 1px solid #e3e8ef;
+  font-weight: 600; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.panel-body { padding: 12px 16px; max-height: 360px; overflow-y: auto; }
+.panel-body.no-pad { padding: 0; }
+
+/* ===== Table ===== */
+.table-wrap {
+  background: #fff; border-radius: 6px; border: 1px solid #e3e8ef; overflow: hidden;
+}
+.table-toolbar {
+  padding: 10px 12px; display: flex; gap: 8px;
+  align-items: center; border-bottom: 1px solid #e3e8ef; flex-wrap: wrap;
+}
+.search-box {
+  flex: 1; min-width: 200px; padding: 6px 10px;
+  border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;
+  font-family: inherit;
+}
+.search-box:focus { outline: none; border-color: #4a90e2; }
+
+.tbl-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  text-align: left; padding: 9px 12px;
+  border-bottom: 1px solid #edf0f4; font-size: 12px;
+  vertical-align: middle;
+}
+th {
+  background: #f8fafb; color: #6b7280; font-weight: 600;
+  font-size: 11px; white-space: nowrap;
+}
+tbody tr:hover { background: #fafbfc; }
+.empty {
+  padding: 60px 20px; text-align: center;
+  color: #9ca3af; font-size: 13px;
+}
+
+/* ===== Tags ===== */
+.tag {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 11px; font-size: 10px; font-weight: 500;
+  white-space: nowrap;
+}
+.tag-blue   { background: #dbeafe; color: #1e40af; }
+.tag-green  { background: #d1fae5; color: #065f46; }
+.tag-orange { background: #fef3c7; color: #92400e; }
+.tag-red    { background: #fee2e2; color: #991b1b; }
+.tag-gray   { background: #e5e7eb; color: #374151; }
+.tag-purple { background: #ede9fe; color: #5b21b6; }
+.tag-pink   { background: #fce7f3; color: #9d174d; }
+.tag-cyan   { background: #cffafe; color: #155e75; }
+
+/* ===== Stars ===== */
+.stars { color: #f59e0b; letter-spacing: 1px; font-size: 13px; }
+.stars-empty { color: #d1d5db; }
+.star-input { cursor: pointer; font-size: 18px; user-select: none; }
+
+/* ===== Flag ===== */
+.flag { font-size: 14px; margin-right: 4px; vertical-align: -1px; }
+
+/* ===== Modal ===== */
+.modal-mask {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-mask.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 8px; width: 600px;
+  max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column;
+}
+.modal.modal-lg { width: 800px; }
+.modal.modal-xl { width: 1000px; }
+.modal-header {
+  padding: 14px 20px; border-bottom: 1px solid #e3e8ef;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; color: #9ca3af; line-height: 1;
+}
+.modal-body { padding: 18px 20px; overflow-y: auto; flex: 1; }
+.modal-footer {
+  padding: 12px 20px; border-top: 1px solid #e3e8ef;
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+
+/* ===== Form ===== */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid.cols-1 { grid-template-columns: 1fr; }
+.form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; color: #6b7280; font-weight: 500; }
+.field label .req { color: #ef4444; }
+.field input, .field select, .field textarea {
+  padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 4px;
+  font-size: 12px; font-family: inherit; background: #fff;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: #4a90e2;
+}
+.field textarea { resize: vertical; min-height: 70px; }
+
+/* ===== Detail ===== */
+.detail-grid { display: grid; grid-template-columns: 110px 1fr; gap: 8px 14px; margin-bottom: 14px; }
+.detail-grid dt { color: #6b7280; font-size: 11px; }
+.detail-grid dd { color: #2c3e50; font-size: 12px; }
+.detail-section { border-top: 1px solid #e5e7eb; padding-top: 14px; margin-top: 14px; }
+.detail-section-title { font-weight: 600; font-size: 13px; margin-bottom: 10px; }
+
+/* ===== Timeline ===== */
+.timeline { position: relative; padding-left: 22px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 5px; bottom: 5px;
+  width: 2px; background: #e5e7eb;
+}
+.timeline-item { position: relative; padding-bottom: 14px; }
+.timeline-dot {
+  position: absolute; left: -22px; top: 4px; width: 16px; height: 16px;
+  border-radius: 50%; background: #fff; border: 2px solid #4a90e2;
+  font-size: 10px; text-align: center; line-height: 12px;
+}
+.timeline-dot.green { border-color: #10b981; }
+.timeline-dot.orange { border-color: #f59e0b; }
+.timeline-dot.purple { border-color: #8b5cf6; }
+.timeline-dot.red { border-color: #ef4444; }
+.timeline-dot.gray { border-color: #9ca3af; }
+.timeline-meta { font-size: 11px; color: #9ca3af; margin-bottom: 3px; }
+.timeline-title { font-weight: 500; font-size: 13px; margin-bottom: 3px; }
+.timeline-content { font-size: 12px; color: #4b5563; line-height: 1.5; }
+
+/* ===== Tag input ===== */
+.tag-input-wrap {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding: 5px; border: 1px solid #d1d5db; border-radius: 4px; min-height: 32px;
+}
+.tag-input-wrap input { border: none; outline: none; flex: 1; min-width: 80px; padding: 4px; font-size: 12px; }
+.tag-chip {
+  background: #e0e7ff; color: #3730a3;
+  padding: 2px 7px; border-radius: 11px; font-size: 11px;
+  display: flex; align-items: center; gap: 4px;
+}
+.tag-chip .x { cursor: pointer; opacity: 0.6; font-weight: bold; }
+.tag-chip .x:hover { opacity: 1; }
+
+/* ===== Product image ===== */
+.product-thumb {
+  width: 50px; height: 50px; object-fit: cover;
+  border-radius: 4px; border: 1px solid #e5e7eb; background: #f3f4f6;
+}
+.product-thumb-large {
+  width: 120px; height: 120px; object-fit: cover;
+  border-radius: 6px; border: 1px solid #e5e7eb; background: #f3f4f6;
+}
+.image-uploader {
+  width: 120px; height: 120px; border: 2px dashed #d1d5db;
+  border-radius: 6px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: #9ca3af;
+  font-size: 11px; text-align: center;
+}
+.image-uploader:hover { border-color: #4a90e2; color: #4a90e2; }
+
+/* ===== Category tree ===== */
+.tree {
+  background: #f8fafb; border-right: 1px solid #e3e8ef;
+  width: 200px; padding: 10px 0; overflow-y: auto;
+}
+.tree-item {
+  padding: 6px 14px; cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tree-item:hover { background: #e8eef5; }
+.tree-item.active { background: #dbeafe; color: #1e40af; font-weight: 500; }
+.tree-item .count { margin-left: auto; color: #9ca3af; font-size: 10px; }
+.tree-actions { padding: 8px 14px; border-bottom: 1px solid #e3e8ef; display: flex; gap: 4px; }
+
+.split { display: flex; height: 100%; }
+.split-main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ===== Quotation items ===== */
+.qt-items { width: 100%; border-collapse: collapse; }
+.qt-items th, .qt-items td { padding: 6px; font-size: 11px; border-bottom: 1px solid #e5e7eb; }
+.qt-items input, .qt-items select { padding: 4px 6px; font-size: 11px; width: 100%; border: 1px solid #d1d5db; border-radius: 3px; }
+.qt-items .num { text-align: right; }
+
+/* ===== Misc ===== */
+.warning-box {
+  background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+  padding: 10px 14px; border-radius: 4px; font-size: 12px; margin-bottom: 12px;
+}
+.info-box {
+  background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;
+  padding: 10px 14px; border-radius: 4px; font-size: 12px; margin-bottom: 12px;
+}
+.toast {
+  position: fixed; top: 22px; right: 22px; background: #1f2937; color: #fff;
+  padding: 10px 16px; border-radius: 4px; font-size: 12px; z-index: 200;
+  opacity: 0; transform: translateY(-10px); transition: all 0.25s; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #10b981; }
+.toast.error { background: #ef4444; }
+
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.muted { color: #9ca3af; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.no-wrap { white-space: nowrap; }
+.code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 11px; color: #6366f1; }
+.click { cursor: pointer; }
+.click:hover { color: #4a90e2; }
+.bold { font-weight: 600; }
+hr.div { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
+
+/* ===== 客户档案（类 Notion 块） ===== */
+.dossier { display: flex; flex-direction: column; gap: 8px; }
+.dossier-block {
+  border: 1px solid #e5e7eb; border-radius: 6px; background: #fff;
+  overflow: hidden; transition: border-color 0.15s;
+}
+.dossier-block:hover { border-color: #c7d2da; }
+.dossier-block-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px; background: #fafbfc; border-bottom: 1px solid #eef0f3;
+  cursor: pointer; user-select: none;
+}
+.dossier-block.collapsed .dossier-block-head { border-bottom: none; }
+.dossier-block.collapsed .dossier-block-body { display: none; }
+.dossier-caret {
+  font-size: 10px; color: #9ca3af; width: 12px; display: inline-block;
+  transition: transform 0.15s;
+}
+.dossier-block.collapsed .dossier-caret { transform: rotate(-90deg); }
+.dossier-type-icon {
+  width: 16px; text-align: center; font-size: 11px; color: #6b7280;
+}
+.dossier-title {
+  flex: 1; font-weight: 500; font-size: 12.5px; color: #2c3e50;
+  background: transparent; border: none; outline: none; padding: 2px 4px;
+}
+.dossier-title:focus { background: #fff; box-shadow: inset 0 0 0 1px #4a90e2; border-radius: 3px; }
+.dossier-actions { display: flex; gap: 2px; opacity: 0.5; transition: opacity 0.15s; }
+.dossier-block-head:hover .dossier-actions { opacity: 1; }
+.dossier-actions button {
+  background: transparent; border: none; cursor: pointer;
+  padding: 2px 6px; font-size: 11px; color: #6b7280; border-radius: 3px;
+}
+.dossier-actions button:hover { background: #e5e7eb; color: #2c3e50; }
+.dossier-actions button.danger:hover { background: #fee2e2; color: #dc2626; }
+.dossier-block-body { padding: 10px 12px; font-size: 12.5px; line-height: 1.6; }
+.dossier-text-view { color: #2c3e50; word-break: break-word; }
+.dossier-text-view p { margin: 0 0 6px; }
+.dossier-text-view p:last-child { margin-bottom: 0; }
+.dossier-text-view ul, .dossier-text-view ol { margin: 4px 0 6px 22px; }
+.dossier-text-view img { max-width: 100%; height: auto; border-radius: 3px; }
+.dossier-text-edit {
+  min-height: 64px; padding: 8px; border: 1px solid #d1d5db;
+  border-radius: 4px; outline: none; font-size: 12.5px; line-height: 1.6;
+}
+.dossier-text-edit:focus { border-color: #4a90e2; box-shadow: 0 0 0 2px rgba(74,144,226,0.15); }
+.dossier-toolbar {
+  display: flex; gap: 2px; flex-wrap: wrap;
+  margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #eef0f3;
+}
+.dossier-toolbar button {
+  background: #fff; border: 1px solid #e5e7eb; cursor: pointer;
+  padding: 3px 8px; font-size: 11px; border-radius: 3px; color: #4b5563;
+}
+.dossier-toolbar button:hover { background: #f3f4f6; }
+.dossier-image-wrap { text-align: center; }
+.dossier-image-wrap img { max-width: 100%; max-height: 380px; border-radius: 4px; }
+.dossier-image-caption { font-size: 11px; color: #6b7280; margin-top: 4px; font-style: italic; }
+.dossier-image-empty {
+  border: 2px dashed #d1d5db; border-radius: 6px; padding: 28px;
+  text-align: center; color: #9ca3af; cursor: pointer;
+}
+.dossier-image-empty:hover { border-color: #4a90e2; color: #4a90e2; }
+.dossier-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.dossier-table td {
+  border: 1px solid #e5e7eb; padding: 4px 6px; min-width: 60px;
+  vertical-align: top;
+}
+.dossier-table td:first-child { background: #fafbfc; font-weight: 500; }
+.dossier-table input {
+  width: 100%; border: none; outline: none; background: transparent;
+  font-size: 12px; padding: 2px;
+}
+.dossier-table input:focus { background: #fff; box-shadow: inset 0 0 0 1px #4a90e2; }
+.dossier-table-tools { display: flex; gap: 6px; margin-top: 6px; }
+.dossier-table-tools button {
+  background: #f3f4f6; border: 1px solid #e5e7eb; cursor: pointer;
+  padding: 2px 8px; font-size: 11px; border-radius: 3px; color: #4b5563;
+}
+.dossier-table-tools button:hover { background: #e5e7eb; }
+.dossier-add-bar {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-top: 10px; padding: 8px; background: #fafbfc;
+  border: 1px dashed #d1d5db; border-radius: 6px;
+}
+.dossier-add-bar button {
+  background: #fff; border: 1px solid #e5e7eb; cursor: pointer;
+  padding: 4px 10px; font-size: 11.5px; border-radius: 3px; color: #4b5563;
+}
+.dossier-add-bar button:hover { background: #4a90e2; color: #fff; border-color: #4a90e2; }
+.dossier-storage-info {
+  font-size: 10.5px; color: #9ca3af; margin-left: auto; align-self: center;
+}
+.dossier-storage-info.warn { color: #f59e0b; }
+.dossier-storage-info.danger { color: #ef4444; }
+.dossier-empty {
+  padding: 24px; text-align: center; color: #9ca3af;
+  border: 1px dashed #e5e7eb; border-radius: 6px;
+}
+
+/* ===== 富文本编辑器 (RTE) ===== */
+.rte-wrap { border: 1px solid #d1d5db; border-radius: 4px; overflow: hidden; background: #fff; }
+.rte-wrap:focus-within { border-color: #4a90e2; box-shadow: 0 0 0 2px rgba(74,144,226,0.15); }
+.rte-toolbar {
+  display: flex; flex-wrap: wrap; gap: 2px;
+  padding: 4px 6px; background: #fafbfc; border-bottom: 1px solid #eef0f3;
+  align-items: center;
+}
+.rte-toolbar button {
+  background: transparent; border: 1px solid transparent; cursor: pointer;
+  padding: 3px 7px; font-size: 12px; border-radius: 3px; color: #4b5563;
+  min-width: 22px; line-height: 1.3;
+}
+.rte-toolbar button:hover { background: #e5e7eb; border-color: #d1d5db; }
+.rte-toolbar select {
+  border: 1px solid #d1d5db; background: #fff; font-size: 11px;
+  padding: 2px 4px; border-radius: 3px; cursor: pointer;
+}
+.rte-toolbar .sep { width: 1px; background: #e5e7eb; align-self: stretch; margin: 2px 4px; }
+.rte-color-wrap {
+  display: inline-flex; align-items: center; gap: 3px; padding: 2px 5px;
+  font-size: 12px; color: #4b5563; border: 1px solid transparent; border-radius: 3px;
+  cursor: pointer; position: relative;
+}
+.rte-color-wrap:hover { background: #e5e7eb; }
+.rte-color-wrap input[type="color"] {
+  width: 14px; height: 14px; border: none; padding: 0; cursor: pointer;
+  background: transparent;
+}
+.rte-editor {
+  padding: 8px 10px; outline: none; font-size: 13px; line-height: 1.6;
+  background: #fff; word-break: break-word; min-height: 120px;
+  max-height: 420px; overflow-y: auto;
+}
+.rte-editor img {
+  max-width: 100%; height: auto; border-radius: 3px; margin: 4px 0;
+  display: inline-block;
+}
+.rte-editor p { margin: 0 0 6px; }
+.rte-editor ul, .rte-editor ol { margin: 4px 0 6px 22px; }
+.rte-editor:empty:before {
+  content: attr(data-placeholder); color: #9ca3af;
+  pointer-events: none;
+}
+.rte-hint { font-size: 10.5px; color: #9ca3af; padding: 3px 8px; background: #fafbfc; border-top: 1px solid #eef0f3; }
+/* 时间轴里的富文本内容 */
+.timeline-content img, .rte-readonly img {
+  max-width: 280px; max-height: 200px; border-radius: 3px;
+  vertical-align: middle; margin: 4px 0;
+}
+.rte-readonly { font-size: 12.5px; line-height: 1.6; word-break: break-word; }
+.rte-readonly p { margin: 0 0 6px; }
+.rte-readonly ul, .rte-readonly ol { margin: 4px 0 6px 22px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">外贸业务管理<div class="sub">FOREIGN TRADE CRM</div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-footer">数据存于浏览器本地<br>请定期导出 JSON 备份</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">工作台</div>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+    <div id="tabsBar"></div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">标题</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+ * 常量定义
+ * ============================================================ */
+
+const NAV_MENU = [
+  { id: 'dashboard',     name: '工作台',   icon: '▦' },
+  { id: 'leads',         name: '线索/询盘', icon: '◎' },
+  { id: 'customers',     name: '客户',     icon: '●' },
+  { id: 'opportunities', name: '商机',     icon: '◆' },
+  { id: 'products',      name: '产品库',   icon: '▣' },
+  { id: 'quotations',    name: '报价单',   icon: '$' },
+  { id: 'samples',       name: '样品',     icon: '⬢' },
+  { id: 'orders',        name: '订单',     icon: '▤' },
+  { id: 'followups',     name: '跟进',     icon: '◉' },
+  { id: 'templates',     name: '邮件模板', icon: '✉' },
+  { id: 'backup',        name: '数据备份', icon: '⇅' },
+];
+
+/* 国家列表（中文/英文/ISO代码） */
+const COUNTRIES = [
+  ['中国','China','CN'],['美国','United States','US'],['英国','United Kingdom','GB'],
+  ['德国','Germany','DE'],['法国','France','FR'],['意大利','Italy','IT'],
+  ['西班牙','Spain','ES'],['葡萄牙','Portugal','PT'],['荷兰','Netherlands','NL'],
+  ['比利时','Belgium','BE'],['瑞士','Switzerland','CH'],['奥地利','Austria','AT'],
+  ['瑞典','Sweden','SE'],['挪威','Norway','NO'],['丹麦','Denmark','DK'],
+  ['芬兰','Finland','FI'],['爱尔兰','Ireland','IE'],['希腊','Greece','GR'],
+  ['波兰','Poland','PL'],['捷克','Czechia','CZ'],['匈牙利','Hungary','HU'],
+  ['俄罗斯','Russia','RU'],['乌克兰','Ukraine','UA'],['土耳其','Turkey','TR'],
+  ['加拿大','Canada','CA'],['墨西哥','Mexico','MX'],['巴西','Brazil','BR'],
+  ['阿根廷','Argentina','AR'],['智利','Chile','CL'],['哥伦比亚','Colombia','CO'],
+  ['秘鲁','Peru','PE'],['哥斯达黎加','Costa Rica','CR'],['巴拿马','Panama','PA'],
+  ['澳大利亚','Australia','AU'],['新西兰','New Zealand','NZ'],
+  ['日本','Japan','JP'],['韩国','South Korea','KR'],['朝鲜','North Korea','KP'],
+  ['印度','India','IN'],['巴基斯坦','Pakistan','PK'],['孟加拉国','Bangladesh','BD'],
+  ['斯里兰卡','Sri Lanka','LK'],['尼泊尔','Nepal','NP'],
+  ['泰国','Thailand','TH'],['越南','Vietnam','VN'],['印度尼西亚','Indonesia','ID'],
+  ['马来西亚','Malaysia','MY'],['菲律宾','Philippines','PH'],['新加坡','Singapore','SG'],
+  ['缅甸','Myanmar','MM'],['柬埔寨','Cambodia','KH'],['老挝','Laos','LA'],
+  ['香港','Hong Kong','HK'],['台湾','Taiwan','TW'],['澳门','Macau','MO'],
+  ['沙特阿拉伯','Saudi Arabia','SA'],['阿联酋','United Arab Emirates','AE'],
+  ['伊朗','Iran','IR'],['伊拉克','Iraq','IQ'],['以色列','Israel','IL'],
+  ['约旦','Jordan','JO'],['科威特','Kuwait','KW'],['黎巴嫩','Lebanon','LB'],
+  ['卡塔尔','Qatar','QA'],['阿曼','Oman','OM'],['也门','Yemen','YE'],['叙利亚','Syria','SY'],
+  ['埃及','Egypt','EG'],['南非','South Africa','ZA'],['尼日利亚','Nigeria','NG'],
+  ['肯尼亚','Kenya','KE'],['坦桑尼亚','Tanzania','TZ'],['埃塞俄比亚','Ethiopia','ET'],
+  ['加纳','Ghana','GH'],['摩洛哥','Morocco','MA'],['阿尔及利亚','Algeria','DZ'],
+  ['突尼斯','Tunisia','TN'],['利比亚','Libya','LY'],['苏丹','Sudan','SD'],
+];
+
+/* 国旗 emoji 转换 */
+function flagEmoji(code) {
+  if (!code || code.length !== 2) return '';
+  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
+function countryByName(name) {
+  if (!name) return null;
+  const lower = name.toLowerCase().trim();
+  return COUNTRIES.find(([zh, en]) => zh === name || en.toLowerCase() === lower) || null;
+}
+function flagFor(name) {
+  const c = countryByName(name);
+  return c ? flagEmoji(c[2]) : '';
+}
+
+/* 客户来源 */
+const CUSTOMER_SOURCES = ['阿里巴巴', '环球资源', '中国制造', '展会', '官网询盘', '社交媒体', '客户介绍', '老客户复购', '其他'];
+
+/* 客户状态 */
+const CUSTOMER_STATUSES = [
+  { name: '重点客户',     tag: 'tag-red' },
+  { name: '普通意向客户', tag: 'tag-orange' },
+  { name: '已成交',       tag: 'tag-green' },
+  { name: '已打样',       tag: 'tag-blue' },
+  { name: '暂无需求',     tag: 'tag-gray' },
+  { name: '已搁置',       tag: 'tag-gray' },
+];
+
+/* 线索状态 */
+const LEAD_STATUSES = [
+  { name: '新询盘',     tag: 'tag-blue' },
+  { name: '跟进中',     tag: 'tag-orange' },
+  { name: '已转客户',   tag: 'tag-green' },
+  { name: '无效',       tag: 'tag-gray' },
+];
+
+/* 商机阶段 */
+const OPP_STAGES = [
+  { name: '新建',       prob: 10, tag: 'tag-gray' },
+  { name: '方案沟通',   prob: 30, tag: 'tag-blue' },
+  { name: '报价中',     prob: 50, tag: 'tag-cyan' },
+  { name: '谈判中',     prob: 70, tag: 'tag-orange' },
+  { name: '即将成交',   prob: 90, tag: 'tag-purple' },
+  { name: '已赢',       prob: 100, tag: 'tag-green' },
+  { name: '已输',       prob: 0, tag: 'tag-red' },
+];
+
+/* 样品状态 */
+const SAMPLE_STATUSES = [
+  { name: '筹备中', tag: 'tag-gray' },
+  { name: '已寄出', tag: 'tag-blue' },
+  { name: '待反馈', tag: 'tag-orange' },
+  { name: '已反馈', tag: 'tag-purple' },
+  { name: '已成交', tag: 'tag-green' },
+  { name: '已搁置', tag: 'tag-red' },
+];
+
+/* 订单付款状态 */
+const PAYMENT_STATUSES = [
+  { name: '未付款',     tag: 'tag-red' },
+  { name: '已付定金',   tag: 'tag-orange' },
+  { name: '部分付款',   tag: 'tag-orange' },
+  { name: '已结清',     tag: 'tag-green' },
+];
+
+/* 订单生产状态 */
+const PRODUCTION_STATUSES = [
+  { name: '未开始', tag: 'tag-gray' },
+  { name: '生产中', tag: 'tag-blue' },
+  { name: '已完工', tag: 'tag-purple' },
+  { name: '已发货', tag: 'tag-orange' },
+  { name: '已收货', tag: 'tag-green' },
+];
+
+/* 报价单状态 */
+const QT_STATUSES = [
+  { name: '草稿',     tag: 'tag-gray' },
+  { name: '已发出',   tag: 'tag-blue' },
+  { name: '客户接受', tag: 'tag-green' },
+  { name: '客户拒绝', tag: 'tag-red' },
+  { name: '已转订单', tag: 'tag-purple' },
+];
+
+/* 沟通方式 */
+const CHANNELS = ['邮件', 'WhatsApp', '微信', '电话', '视频会议', '当面拜访', '其他'];
+
+/* 币种 */
+const CURRENCIES = ['USD', 'CNY', 'EUR', 'GBP', 'JPY', 'HKD', 'AUD', 'CAD'];
+
+/* 默认邮件模板 */
+const DEFAULT_TEMPLATES = [
+  {
+    id: 'tpl_inquiry',
+    name: '询盘回复',
+    subject: 'Re: Your inquiry about {{productName}}',
+    body: `Dear {{contact}},
+
+Thank you very much for your inquiry from {{country}}. We are pleased to introduce our company and products.
+
+Regarding {{productName}}, please find our quotation as below:
+- Product: {{productName}}
+- MOQ:
+- Unit Price:
+- Lead Time:
+- Payment Terms: 30% T/T deposit, 70% before shipment
+- Validity: 30 days
+
+Please feel free to let me know if you need any further information.
+
+Best regards,
+{{myName}}`
+  },
+  {
+    id: 'tpl_quotation',
+    name: '正式报价',
+    subject: 'Quotation for {{productName}} - {{date}}',
+    body: `Dear {{contact}},
+
+As discussed, please find attached our official quotation for {{productName}}.
+
+Quote No.:
+Validity: 30 days
+Payment Terms: 30% T/T deposit, 70% balance against B/L copy
+Delivery Time:
+Trade Terms: FOB
+
+Looking forward to your kind feedback.
+
+Best regards,
+{{myName}}`
+  },
+  {
+    id: 'tpl_sample',
+    name: '样品发出通知',
+    subject: 'Sample Sent - {{productName}}',
+    body: `Dear {{contact}},
+
+This is to inform you that we have sent out the samples of {{productName}} today.
+
+Courier: DHL/FedEx/UPS
+Tracking No.:
+Estimated Delivery: 3-5 working days
+
+Please kindly check after receiving and let us know your feedback.
+
+Best regards,
+{{myName}}`
+  },
+  {
+    id: 'tpl_order',
+    name: '订单确认',
+    subject: 'Order Confirmation - {{orderNo}}',
+    body: `Dear {{contact}},
+
+Thank you for your order!
+
+Order No.: {{orderNo}}
+Order Date: {{date}}
+
+We have received your PO and will arrange production immediately. We will keep you updated with the production progress.
+
+Estimated shipping date:
+
+Best regards,
+{{myName}}`
+  },
+  {
+    id: 'tpl_followup',
+    name: '日常跟进',
+    subject: 'Following up - {{company}}',
+    body: `Dear {{contact}},
+
+Hope this email finds you well.
+
+I am writing to follow up on our previous discussion about {{productName}}. I would like to know your thoughts and if there is anything I can help with.
+
+Looking forward to your reply.
+
+Best regards,
+{{myName}}`
+  },
+  {
+    id: 'tpl_holiday',
+    name: '节日问候',
+    subject: 'Season Greetings from {{myName}}',
+    body: `Dear {{contact}},
+
+Wishing you and your family a wonderful holiday season!
+
+Thank you for your continued support and friendship throughout this year. We look forward to working with you in the year ahead.
+
+Best regards,
+{{myName}}`
+  },
+];
+
+/* ============================================================
+ * 数据存储
+ * ============================================================ */
+
+const STORAGE_KEY = 'foreign_trade_crm_v2';
+
+let DB = {
+  customers: [],
+  leads: [],
+  opportunities: [],
+  products: [],
+  productCategories: [],
+  quotations: [],
+  samples: [],
+  orders: [],
+  followups: [],
+  templates: [],
+  meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
+};
+
+function loadDB() {
+  try {
+    // 兼容旧版本数据
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('foreign_trade_crm_v1');
+    if (raw) {
+      const data = JSON.parse(raw);
+      DB = Object.assign(DB, data);
+    }
+    // 确保所有字段存在
+    DB.leads = DB.leads || [];
+    DB.opportunities = DB.opportunities || [];
+    DB.products = DB.products || [];
+    DB.productCategories = DB.productCategories || [];
+    DB.quotations = DB.quotations || [];
+    DB.templates = DB.templates || [];
+    DB.meta = DB.meta || {};
+    DB.meta.counters = DB.meta.counters || {};
+    DB.meta.tags = DB.meta.tags || [];
+    DB.meta.myName = DB.meta.myName || '';
+    // 注入默认模板
+    if (DB.templates.length === 0) {
+      DB.templates = DEFAULT_TEMPLATES.map(t => ({ ...t, id: uid() }));
+    }
+  } catch (e) { console.error('加载失败', e); }
+}
+
+function saveDB() {
+  DB.meta.updatedAt = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+      toast('存储空间已满！请删除部分图片或导出后清理', 'error');
+    }
+  }
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function nextCode(prefix) {
+  const ym = todayStr().substr(0, 7).replace('-', '');
+  DB.meta.counters[prefix] = (DB.meta.counters[prefix] || 0) + 1;
+  return prefix + ym + String(DB.meta.counters[prefix]).padStart(4, '0');
+}
+
+/* ============================================================
+ * 工具函数
+ * ============================================================ */
+
+function fmtDate(s) { if (!s) return ''; return s.length > 10 ? s.substr(0, 10) : s; }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function nl2br(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
+
+/* ===== 富文本工具函数 ===== */
+function isHtml(s) { return typeof s === 'string' && /<[a-z!][\s\S]*?>/i.test(s); }
+
+function htmlToText(s) {
+  if (!s) return '';
+  if (!isHtml(s)) return s;
+  const d = document.createElement('div');
+  d.innerHTML = s;
+  // 替换 <br> 和块级标签为换行
+  d.querySelectorAll('br').forEach(n => n.replaceWith('\n'));
+  d.querySelectorAll('p, div, li').forEach(n => { if (!n.textContent.endsWith('\n')) n.append('\n'); });
+  return (d.innerText || d.textContent || '').trim();
+}
+
+function sanitizeRichHtml(html) {
+  if (!html) return '';
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  // 移除危险节点
+  d.querySelectorAll('script, style, iframe, object, embed, link, meta').forEach(n => n.remove());
+  // 清理属性
+  d.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(attr => {
+      const n = attr.name.toLowerCase(), v = attr.value || '';
+      if (n.startsWith('on')) el.removeAttribute(attr.name);
+      else if (n === 'href' && /^\s*javascript:/i.test(v)) el.removeAttribute(attr.name);
+      else if (n === 'src' && !/^(https?:|data:image\/|\/|\.\/)/i.test(v)) el.removeAttribute(attr.name);
+    });
+  });
+  return d.innerHTML;
+}
+
+function renderRichText(s) {
+  if (!s) return '';
+  if (isHtml(s)) return sanitizeRichHtml(s);
+  return nl2br(s);
+}
+
+function compressImgFile(file, callback) {
+  if (!file || !file.type || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 1200;
+      const scale = Math.min(max / img.width, max / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      let data = canvas.toDataURL('image/jpeg', 0.75);
+      if (data.length > 685000) data = canvas.toDataURL('image/jpeg', 0.55);
+      callback(data);
+    };
+    img.onerror = () => toast('图片加载失败', 'error');
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ===== 富文本编辑器组件 ===== */
+function richTextEditor(name, raw, opts) {
+  opts = opts || {};
+  const id = 'rte_' + name + '_' + Math.random().toString(36).substr(2, 6);
+  const initial = isHtml(raw) ? sanitizeRichHtml(raw) : escapeHtml(raw || '').replace(/\n/g, '<br>');
+  const placeholder = opts.placeholder || '在此输入...支持粘贴图片 (Ctrl+V)、拖入图片';
+  const minH = opts.minHeight || 120;
+  return `
+    <div class="rte-wrap">
+      <div class="rte-toolbar">
+        <select onchange="rteFmt('fontSize',this.value);this.selectedIndex=0" title="字号">
+          <option value="">字号</option>
+          <option value="2">小</option>
+          <option value="3">正常</option>
+          <option value="4">中</option>
+          <option value="5">大</option>
+          <option value="6">特大</option>
+        </select>
+        <span class="sep"></span>
+        <button type="button" onclick="rteFmt('bold')" title="加粗"><b>B</b></button>
+        <button type="button" onclick="rteFmt('italic')" title="斜体"><i>I</i></button>
+        <button type="button" onclick="rteFmt('underline')" title="下划线"><u>U</u></button>
+        <button type="button" onclick="rteFmt('strikeThrough')" title="删除线"><s>S</s></button>
+        <span class="sep"></span>
+        <label class="rte-color-wrap" title="字色"><span style="font-weight:600;">A</span>
+          <input type="color" value="#2c3e50" onchange="rteFmt('foreColor',this.value)"></label>
+        <label class="rte-color-wrap" title="背景色"><span style="background:#fef08a;padding:0 3px;border-radius:2px;">A</span>
+          <input type="color" value="#fef08a" onchange="rteHilite(this.value)"></label>
+        <span class="sep"></span>
+        <button type="button" onclick="rteFmt('insertUnorderedList')" title="无序列表">• ≡</button>
+        <button type="button" onclick="rteFmt('insertOrderedList')" title="有序列表">1. ≡</button>
+        <span class="sep"></span>
+        <button type="button" onclick="rteFmt('justifyLeft')" title="左对齐">⫷</button>
+        <button type="button" onclick="rteFmt('justifyCenter')" title="居中">⫶</button>
+        <button type="button" onclick="rteFmt('justifyRight')" title="右对齐">⫸</button>
+        <span class="sep"></span>
+        <button type="button" onclick="rteLink()" title="链接">链接</button>
+        <button type="button" onclick="rteInsertImage('${id}')" title="插入图片">图片</button>
+        <button type="button" onclick="rteFmt('removeFormat')" title="清除格式">清</button>
+      </div>
+      <div id="${id}" class="rte-editor" contenteditable="true"
+        data-name="${name}" data-placeholder="${escapeHtml(placeholder)}"
+        style="min-height:${minH}px"
+        onpaste="rteHandlePaste(event,this)"
+        ondrop="rteHandleDrop(event,this)"
+        ondragover="event.preventDefault()">${initial}</div>
+      <div class="rte-hint">提示：可直接 Ctrl+V 粘贴截图、Word 文字；拖入图片自动压缩</div>
+    </div>
+  `;
+}
+
+function rteFmt(cmd, arg) {
+  // 保持选区
+  document.execCommand(cmd, false, arg || null);
+}
+
+function rteHilite(color) {
+  // Chrome 用 hiliteColor，Firefox 用 backColor
+  if (!document.execCommand('hiliteColor', false, color)) {
+    document.execCommand('backColor', false, color);
+  }
+}
+
+function rteLink() {
+  const sel = window.getSelection();
+  const txt = sel && sel.toString();
+  if (!txt) { toast('请先选中要加链接的文字', 'error'); return; }
+  const url = prompt('链接 URL：', 'https://');
+  if (url) document.execCommand('createLink', false, url);
+}
+
+function rteInsertImage(editorId) {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    compressImgFile(file, dataUrl => {
+      const editor = document.getElementById(editorId);
+      if (!editor) return;
+      editor.focus();
+      document.execCommand('insertHTML', false, '<img src="' + dataUrl + '"><br>');
+    });
+  };
+  inp.click();
+}
+
+function rteHandlePaste(e, editor) {
+  const cd = e.clipboardData || window.clipboardData;
+  if (!cd) return;
+  // 优先处理图片
+  const items = cd.items || [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type && items[i].type.startsWith('image/')) {
+      e.preventDefault();
+      const file = items[i].getAsFile();
+      compressImgFile(file, dataUrl => {
+        editor.focus();
+        document.execCommand('insertHTML', false, '<img src="' + dataUrl + '"><br>');
+      });
+      return;
+    }
+  }
+  // 文本/HTML：sanitize 后插入（避免粘进 Word 的复杂样式）
+  e.preventDefault();
+  const html = cd.getData('text/html');
+  const text = cd.getData('text/plain');
+  if (html) {
+    document.execCommand('insertHTML', false, sanitizeRichHtml(html));
+  } else if (text) {
+    document.execCommand('insertText', false, text);
+  }
+}
+
+function rteHandleDrop(e, editor) {
+  const files = e.dataTransfer && e.dataTransfer.files;
+  if (files && files.length > 0 && files[0].type && files[0].type.startsWith('image/')) {
+    e.preventDefault();
+    compressImgFile(files[0], dataUrl => {
+      editor.focus();
+      document.execCommand('insertHTML', false, '<img src="' + dataUrl + '"><br>');
+    });
+  }
+}
+
+function rteGetValue(formEl, name) {
+  const ed = formEl.querySelector('.rte-editor[data-name="' + name + '"]');
+  if (!ed) return '';
+  return sanitizeRichHtml(ed.innerHTML.trim());
+}
+
+function rteIsEmpty(formEl, name) {
+  const ed = formEl.querySelector('.rte-editor[data-name="' + name + '"]');
+  if (!ed) return true;
+  return !ed.innerText.trim() && !ed.querySelector('img');
+}
+function truncate(s, n) {
+  s = s || ''; return s.length > n ? s.substr(0, n) + '...' : s;
+}
+function getStatus(list, name) { return list.find(s => s.name === name) || { tag: 'tag-gray' }; }
+function customerById(id) { return DB.customers.find(c => c.id === id); }
+function customerName(id) {
+  const c = customerById(id);
+  return c ? escapeHtml(c.company) : '<span class="muted">[已删除]</span>';
+}
+function customerNameWithFlag(id) {
+  const c = customerById(id);
+  if (!c) return '<span class="muted">[已删除]</span>';
+  const flag = flagFor(c.country);
+  return (flag ? '<span class="flag">' + flag + '</span>' : '') + escapeHtml(c.company);
+}
+function productById(id) { return DB.products.find(p => p.id === id); }
+
+function starsHtml(n) {
+  n = Number(n) || 0;
+  let html = '<span class="stars">';
+  for (let i = 1; i <= 5; i++) {
+    html += i <= n ? '★' : '<span class="stars-empty">★</span>';
+  }
+  return html + '</span>';
+}
+
+function starInputHtml(n, name) {
+  n = Number(n) || 0;
+  let html = '<input type="hidden" name="' + name + '" value="' + n + '">';
+  html += '<div class="stars" data-stars="' + name + '">';
+  for (let i = 1; i <= 5; i++) {
+    html += '<span class="star-input" data-val="' + i + '" onclick="setStar(this)">' +
+            (i <= n ? '★' : '<span class="stars-empty">★</span>') + '</span>';
+  }
+  return html + '</div>';
+}
+
+function setStar(el) {
+  const val = Number(el.dataset.val);
+  const wrap = el.parentElement;
+  const name = wrap.dataset.stars;
+  wrap.parentElement.querySelector('input[name="' + name + '"]').value = val;
+  wrap.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const span = document.createElement('span');
+    span.className = 'star-input';
+    span.dataset.val = i;
+    span.onclick = function() { setStar(this); };
+    span.innerHTML = i <= val ? '★' : '<span class="stars-empty">★</span>';
+    wrap.appendChild(span);
+  }
+}
+
+/* 标签输入 */
+function tagsInputHtml(tags, name) {
+  tags = tags || [];
+  return '<div class="tag-input-wrap" data-tags="' + name + '">' +
+    '<input type="hidden" name="' + name + '" value="' + escapeHtml(tags.join(',')) + '">' +
+    tags.map(t => `<span class="tag-chip">${escapeHtml(t)}<span class="x" onclick="removeTag(this)">×</span></span>`).join('') +
+    '<input type="text" placeholder="输入标签后回车" onkeydown="addTag(event,this)">' +
+  '</div>';
+}
+
+function addTag(e, input) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  const val = input.value.trim();
+  if (!val) return;
+  const wrap = input.parentElement;
+  const hidden = wrap.querySelector('input[type="hidden"]');
+  const arr = (hidden.value || '').split(',').filter(Boolean);
+  if (!arr.includes(val)) arr.push(val);
+  hidden.value = arr.join(',');
+  // 添加到全局标签库
+  if (!DB.meta.tags.includes(val)) DB.meta.tags.push(val);
+  // 重渲染
+  input.value = '';
+  const chip = document.createElement('span');
+  chip.className = 'tag-chip';
+  chip.innerHTML = escapeHtml(val) + '<span class="x" onclick="removeTag(this)">×</span>';
+  wrap.insertBefore(chip, input);
+}
+
+function removeTag(x) {
+  const chip = x.parentElement;
+  const text = chip.firstChild.textContent;
+  const wrap = chip.parentElement;
+  const hidden = wrap.querySelector('input[type="hidden"]');
+  hidden.value = (hidden.value || '').split(',').filter(t => t && t !== text).join(',');
+  chip.remove();
+}
+
+/* 图片处理：压缩到 max 400x400 base64 */
+function handleImageFile(file, callback) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 400;
+      const scale = Math.min(max / img.width, max / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ============================================================
+ * Toast & Modal
+ * ============================================================ */
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.className = 'toast show ' + type;
+  el.textContent = msg;
+  setTimeout(() => { el.className = 'toast ' + type; }, 2200);
+}
+
+function openModal(title, bodyHtml, footerHtml, size) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalFooter').innerHTML = footerHtml || '';
+  const m = document.getElementById('modal');
+  m.className = 'modal' + (size === 'lg' ? ' modal-lg' : size === 'xl' ? ' modal-xl' : '');
+  document.getElementById('modalMask').classList.add('show');
+}
+function closeModal() { document.getElementById('modalMask').classList.remove('show'); }
+document.getElementById('modalMask').addEventListener('click', e => {
+  if (e.target.id === 'modalMask') closeModal();
+});
+
+/* ============================================================
+ * 路由
+ * ============================================================ */
+
+let currentPage = 'dashboard';
+
+function renderNav() {
+  const overdueCount = countOverdueFollowups();
+  const todayCount = countTodayFollowups();
+  const totalAlert = overdueCount + todayCount;
+  document.getElementById('nav').innerHTML = NAV_MENU.map(m => `
+    <div class="nav-item ${m.id === currentPage ? 'active' : ''}" data-page="${m.id}">
+      <span class="nav-icon">${m.icon}</span>${m.name}
+      ${m.id === 'dashboard' && totalAlert ? `<span class="nav-badge">${totalAlert}</span>` : ''}
+      ${m.id === 'followups' && overdueCount ? `<span class="nav-badge">${overdueCount}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+document.getElementById('nav').addEventListener('click', e => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+  currentPage = item.dataset.page;
+  renderNav();
+  render();
+});
+
+function render() {
+  const fn = ({
+    dashboard: renderDashboard, leads: renderLeads, customers: renderCustomers,
+    opportunities: renderOpps, products: renderProducts, quotations: renderQuotations,
+    samples: renderSamples, orders: renderOrders, followups: renderFollowups,
+    templates: renderTemplates, backup: renderBackup
+  })[currentPage];
+  fn && fn();
+}
+
+function setTabs(html) { document.getElementById('tabsBar').innerHTML = html ? '<div class="tabs">' + html + '</div>' : ''; }
+
+/* ============================================================
+ * 工作台
+ * ============================================================ */
+
+function todayDate() { return new Date(todayStr()); }
+
+function countOverdueFollowups() {
+  const today = todayStr();
+  return DB.followups.filter(f => f.reminderDate && !f.done && f.reminderDate < today).length;
+}
+function countTodayFollowups() {
+  const today = todayStr();
+  return DB.followups.filter(f => f.reminderDate && !f.done && f.reminderDate === today).length;
+}
+
+function renderDashboard() {
+  document.getElementById('pageTitle').textContent = '工作台';
+  document.getElementById('topbarActions').innerHTML = '';
+  setTabs('');
+
+  const overdue = DB.followups.filter(f => f.reminderDate && !f.done && f.reminderDate < todayStr())
+    .sort((a,b) => (a.reminderDate||'').localeCompare(b.reminderDate||''));
+  const today = DB.followups.filter(f => f.reminderDate && !f.done && f.reminderDate === todayStr());
+
+  const newLeads = DB.leads.filter(l => l.status === '新询盘').length;
+  const importantCustomers = DB.customers.filter(c => c.status === '重点客户').length;
+  const activeOpps = DB.opportunities.filter(o => !['已赢', '已输'].includes(o.stage));
+  const oppValue = activeOpps.reduce((s, o) => s + (Number(o.expectedAmount) || 0) * (Number(o.probability) || 0) / 100, 0);
+  const inProduction = DB.orders.filter(o => o.productionStatus === '生产中').length;
+  const unpaid = DB.orders.filter(o => o.paymentStatus !== '已结清').reduce((s, o) => s + (Number(o.amount) || 0), 0);
+
+  const recentCustomers = [...DB.customers].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||'')).slice(0, 5);
+  const recentOrders = [...DB.orders].sort((a,b) => (b.orderDate||'').localeCompare(a.orderDate||'')).slice(0, 5);
+
+  document.getElementById('content').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card ${overdue.length ? 'alert' : ''}">
+        <div class="stat-label">跟进已过期</div>
+        <div class="stat-value ${overdue.length ? 'red' : ''}">${overdue.length}</div>
+        <div class="stat-sub">超过提醒日期未处理</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">今日待跟进</div>
+        <div class="stat-value orange">${today.length}</div>
+        <div class="stat-sub">今天该联系的客户</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">新询盘</div>
+        <div class="stat-value blue">${newLeads}</div>
+        <div class="stat-sub">尚未处理的询盘</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">重点客户</div>
+        <div class="stat-value">${importantCustomers}</div>
+        <div class="stat-sub">共 ${DB.customers.length} 个客户</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">商机加权金额</div>
+        <div class="stat-value blue">${Math.round(oppValue).toLocaleString()}</div>
+        <div class="stat-sub">${activeOpps.length} 个活跃商机（混合币种）</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">生产中订单</div>
+        <div class="stat-value">${inProduction}</div>
+        <div class="stat-sub">未结清 ${unpaid.toLocaleString()} (混合币种)</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span>⏰ 待跟进事项 (${overdue.length + today.length})</span>
+          <button class="btn btn-sm" onclick="currentPage='followups';renderNav();render();">查看全部</button>
+        </div>
+        <div class="panel-body no-pad">
+          ${[...overdue, ...today].length === 0 ?
+            '<div class="empty" style="padding:30px;">暂无待跟进事项</div>' :
+            '<table>' + [...overdue, ...today].map(f => {
+              const isOverdue = f.reminderDate < todayStr();
+              return `<tr>
+                <td class="no-wrap" style="width:80px;">
+                  <span class="tag ${isOverdue ? 'tag-red' : 'tag-orange'}">${isOverdue ? '已过期' : '今日'}</span>
+                </td>
+                <td><strong>${customerNameWithFlag(f.customerId)}</strong>
+                  <div class="muted" style="font-size:11px;">${escapeHtml(truncate(f.nextAction || htmlToText(f.content), 40))}</div></td>
+                <td class="text-right no-wrap">
+                  <button class="btn-link" onclick="viewCustomerDetail('${f.customerId}')">客户详情</button>
+                  <button class="btn-link" onclick="markFollowupDone('${f.id}')">标记已处理</button>
+                </td>
+              </tr>`;
+            }).join('') + '</table>'
+          }
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span>👤 最近客户</span>
+          <button class="btn btn-sm" onclick="currentPage='customers';renderNav();render();">查看全部</button>
+        </div>
+        <div class="panel-body no-pad">
+          ${recentCustomers.length === 0 ? '<div class="empty" style="padding:30px;">暂无客户</div>' :
+            '<table>' + recentCustomers.map(c => `
+              <tr>
+                <td class="code no-wrap">${escapeHtml(c.code || '')}</td>
+                <td class="click" onclick="viewCustomerDetail('${c.id}')">
+                  <span class="flag">${flagFor(c.country)}</span><strong>${escapeHtml(c.company)}</strong>
+                </td>
+                <td>${starsHtml(c.rating)}</td>
+                <td class="muted">${escapeHtml(c.contact || '')}</td>
+              </tr>
+            `).join('') + '</table>'
+          }
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span>📦 最近订单</span>
+          <button class="btn btn-sm" onclick="currentPage='orders';renderNav();render();">查看全部</button>
+        </div>
+        <div class="panel-body no-pad">
+          ${recentOrders.length === 0 ? '<div class="empty" style="padding:30px;">暂无订单</div>' :
+            '<table>' + recentOrders.map(o => `
+              <tr>
+                <td class="code no-wrap">${escapeHtml(o.orderNo || '')}</td>
+                <td>${customerNameWithFlag(o.customerId)}</td>
+                <td class="no-wrap"><strong>${escapeHtml(o.currency || '')} ${Number(o.amount || 0).toLocaleString()}</strong></td>
+                <td><span class="tag ${getStatus(PAYMENT_STATUSES, o.paymentStatus).tag}">${escapeHtml(o.paymentStatus || '-')}</span></td>
+              </tr>
+            `).join('') + '</table>'
+          }
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span>📊 客户来源分布</span></div>
+        <div class="panel-body">${renderSourceStats()}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSourceStats() {
+  const counts = {};
+  DB.customers.forEach(c => {
+    const s = c.source || '其他';
+    counts[s] = (counts[s] || 0) + 1;
+  });
+  const total = DB.customers.length;
+  if (total === 0) return '<div class="muted">暂无数据</div>';
+  return Object.entries(counts).sort((a,b) => b[1] - a[1]).map(([s, n]) => {
+    const pct = (n / total * 100).toFixed(1);
+    return `<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+        <span>${escapeHtml(s)}</span><span class="muted">${n} (${pct}%)</span>
+      </div>
+      <div style="background:#f3f4f6;height:6px;border-radius:3px;overflow:hidden;">
+        <div style="background:#4a90e2;height:100%;width:${pct}%;"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markFollowupDone(id) {
+  const f = DB.followups.find(x => x.id === id);
+  if (!f) return;
+  f.done = true;
+  saveDB();
+  renderNav();
+  render();
+  toast('已标记为处理', 'success');
+}
+
+/* ============================================================
+ * 客户管理
+ * ============================================================ */
+
+let customerFilter = '';
+let customerTab = 'all';
+let customerStatusFilter = '';
+let customerCountryFilter = '';
+let customerTagFilter = '';
+
+function renderCustomers() {
+  document.getElementById('pageTitle').textContent = '客户管理';
+  document.getElementById('topbarActions').innerHTML = `
+    <button class="btn" onclick="exportCustomersCSV()">↓ 导出CSV</button>
+    <button class="btn btn-primary" onclick="editCustomer()">+ 新建客户</button>
+  `;
+
+  // Tabs
+  const tabs = [
+    { id: 'all', name: '全部', filter: () => true },
+    { id: 'important', name: '重点客户', filter: c => c.status === '重点客户' },
+    { id: 'intent', name: '意向客户', filter: c => c.status === '普通意向客户' },
+    { id: 'sample', name: '已打样', filter: c => c.status === '已打样' },
+    { id: 'deal', name: '已成交', filter: c => c.status === '已成交' },
+    { id: 'idle', name: '暂无需求', filter: c => c.status === '暂无需求' || c.status === '已搁置' },
+  ];
+  setTabs(tabs.map(t => `<div class="tab ${t.id === customerTab ? 'active' : ''}" onclick="customerTab='${t.id}';renderCustomers();">${t.name}</div>`).join(''));
+
+  const tabFilter = tabs.find(t => t.id === customerTab).filter;
+  const kw = customerFilter.toLowerCase();
+  const list = DB.customers.filter(c => tabFilter(c) && (
+    !kw ||
+    (c.company || '').toLowerCase().includes(kw) ||
+    (c.code || '').toLowerCase().includes(kw) ||
+    (c.contact || '').toLowerCase().includes(kw) ||
+    (c.country || '').toLowerCase().includes(kw) ||
+    (c.email || '').toLowerCase().includes(kw)
+  ) && (!customerStatusFilter || c.status === customerStatusFilter)
+    && (!customerCountryFilter || c.country === customerCountryFilter)
+    && (!customerTagFilter || (c.tags || []).includes(customerTagFilter))
+  ).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+
+  const allCountries = [...new Set(DB.customers.map(c => c.country).filter(Boolean))].sort();
+  const allTags = [...new Set(DB.customers.flatMap(c => c.tags || []))].sort();
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 公司 / 编号 / 联系人 / 国家 / 邮箱..."
+               value="${escapeHtml(customerFilter)}"
+               oninput="customerFilter=this.value;renderCustomers()">
+        <select class="btn" onchange="customerStatusFilter=this.value;renderCustomers()">
+          <option value="">全部状态</option>
+          ${CUSTOMER_STATUSES.map(s => `<option ${customerStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <select class="btn" onchange="customerCountryFilter=this.value;renderCustomers()">
+          <option value="">全部国家</option>
+          ${allCountries.map(c => `<option ${customerCountryFilter===c?'selected':''}>${flagFor(c)} ${c}</option>`).join('')}
+        </select>
+        ${allTags.length ? `<select class="btn" onchange="customerTagFilter=this.value;renderCustomers()">
+          <option value="">全部标签</option>
+          ${allTags.map(t => `<option ${customerTagFilter===t?'selected':''}>${escapeHtml(t)}</option>`).join('')}
+        </select>` : ''}
+        <span class="muted">共 ${list.length} 个客户</span>
+      </div>
+      <div class="tbl-scroll">
+      ${list.length === 0 ? '<div class="empty">暂无客户</div>' : `
+      <table>
+        <thead><tr>
+          <th>客户编号</th><th>公司名称</th><th>客户状态</th><th>等级</th>
+          <th>来源</th><th>区域</th><th>联系人</th><th>标签</th><th>最后跟进</th>
+          <th class="text-right">操作</th>
+        </tr></thead>
+        <tbody>
+        ${list.map(c => {
+          const lastF = [...DB.followups].filter(f => f.customerId === c.id).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+          return `<tr>
+            <td class="code no-wrap">${escapeHtml(c.code || '')}</td>
+            <td class="click bold" onclick="viewCustomerDetail('${c.id}')">${escapeHtml(c.company)}</td>
+            <td>${c.status ? `<span class="tag ${getStatus(CUSTOMER_STATUSES, c.status).tag}">${escapeHtml(c.status)}</span>` : '<span class="muted">-</span>'}</td>
+            <td>${starsHtml(c.rating)}</td>
+            <td class="muted">${escapeHtml(c.source || '-')}</td>
+            <td class="no-wrap">${flagFor(c.country) ? '<span class="flag">' + flagFor(c.country) + '</span>' : ''}${escapeHtml(c.country || '')}</td>
+            <td>${escapeHtml(c.contact || '')}</td>
+            <td>${(c.tags || []).slice(0,2).map(t => `<span class="tag tag-purple">${escapeHtml(t)}</span>`).join(' ') + ((c.tags||[]).length > 2 ? ' +' + ((c.tags||[]).length-2) : '')}</td>
+            <td class="muted no-wrap">${lastF ? fmtDate(lastF.date) + '<div style="font-size:10px;">' + escapeHtml(truncate(htmlToText(lastF.content), 20)) + '</div>' : '<span class="muted">-</span>'}</td>
+            <td class="text-right no-wrap">
+              <button class="btn-link" onclick="viewCustomerDetail('${c.id}')">详情</button>
+              <button class="btn-link" onclick="editCustomer('${c.id}')">编辑</button>
+              <button class="btn-link danger" onclick="deleteCustomer('${c.id}')">删除</button>
+            </td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>`}
+      </div>
+    </div>
+  `;
+}
+
+function customerForm(c) {
+  c = c || {};
+  return `
+    <div class="form-grid">
+      <div class="field full"><label>公司名称 <span class="req">*</span></label>
+        <input name="company" required value="${escapeHtml(c.company || '')}"></div>
+      <div class="field"><label>客户编号</label>
+        <input name="code" value="${escapeHtml(c.code || '')}" placeholder="留空自动生成"></div>
+      <div class="field"><label>客户状态</label>
+        <select name="status">
+          <option value="">未设置</option>
+          ${CUSTOMER_STATUSES.map(s => `<option ${c.status===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>客户等级（星级）</label>
+        ${starInputHtml(c.rating, 'rating')}</div>
+      <div class="field"><label>来源渠道</label>
+        <select name="source">
+          ${CUSTOMER_SOURCES.map(s => `<option ${c.source===s?'selected':''}>${s}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>联系人</label>
+        <input name="contact" value="${escapeHtml(c.contact || '')}"></div>
+      <div class="field"><label>国家 / 地区</label>
+        <input name="country" value="${escapeHtml(c.country || '')}" list="countryList">
+        <datalist id="countryList">${COUNTRIES.map(c => '<option value="' + c[0] + '">').join('')}</datalist>
+      </div>
+      <div class="field"><label>邮箱</label>
+        <input name="email" type="email" value="${escapeHtml(c.email || '')}"></div>
+      <div class="field"><label>电话</label>
+        <input name="phone" value="${escapeHtml(c.phone || '')}"></div>
+      <div class="field"><label>WhatsApp</label>
+        <input name="whatsapp" value="${escapeHtml(c.whatsapp || '')}"></div>
+      <div class="field full"><label>标签</label>
+        ${tagsInputHtml(c.tags, 'tags')}</div>
+      <div class="field full"><label>地址</label>
+        <input name="address" value="${escapeHtml(c.address || '')}"></div>
+      <div class="field full"><label>备注</label>
+        <textarea name="notes">${escapeHtml(c.notes || '')}</textarea></div>
+    </div>
+  `;
+}
+
+function editCustomer(id) {
+  const c = id ? DB.customers.find(x => x.id === id) : {};
+  openModal(id ? '编辑客户' : '新建客户',
+    `<form id="customerForm" onsubmit="return saveCustomer(event, '${id || ''}')">${customerForm(c)}</form>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="document.getElementById('customerForm').requestSubmit()">保存</button>`,
+    'lg'
+  );
+}
+
+function saveCustomer(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  data.tags = (data.tags || '').split(',').filter(Boolean);
+  data.rating = Number(data.rating) || 0;
+  if (id) {
+    const c = DB.customers.find(x => x.id === id);
+    Object.assign(c, data);
+  } else {
+    if (!data.code) data.code = nextCode('C');
+    DB.customers.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  }
+  saveDB();
+  closeModal();
+  renderCustomers();
+  toast('已保存', 'success');
+  return false;
+}
+
+function deleteCustomer(id) {
+  const c = DB.customers.find(x => x.id === id);
+  if (!c) return;
+  const refs = DB.samples.filter(s => s.customerId === id).length
+             + DB.orders.filter(o => o.customerId === id).length
+             + DB.followups.filter(f => f.customerId === id).length
+             + DB.opportunities.filter(o => o.customerId === id).length
+             + DB.quotations.filter(q => q.customerId === id).length;
+  let msg = '确定删除客户 "' + c.company + '"？';
+  if (refs) msg += '\n\n该客户有 ' + refs + ' 条关联记录（样品/订单/跟进/商机/报价），删除后这些记录将显示为"已删除"。';
+  if (!confirm(msg)) return;
+  DB.customers = DB.customers.filter(x => x.id !== id);
+  saveDB();
+  renderCustomers();
+  toast('已删除');
+}
+
+/* 客户详情页（时间轴） */
+function viewCustomerDetail(id) {
+  const c = DB.customers.find(x => x.id === id);
+  if (!c) return;
+
+  const samples = DB.samples.filter(x => x.customerId === id);
+  const orders = DB.orders.filter(x => x.customerId === id);
+  const followups = DB.followups.filter(x => x.customerId === id);
+  const opps = DB.opportunities.filter(x => x.customerId === id);
+  const qts = DB.quotations.filter(x => x.customerId === id);
+
+  const events = [];
+  followups.forEach(f => events.push({
+    date: f.date, dot: 'gray', title: '跟进 · ' + (f.channel || ''),
+    content: f.content, isHtml: true,
+    extra: f.nextAction ? '下一步：' + f.nextAction : ''
+  }));
+  samples.forEach(s => events.push({
+    date: s.sentDate || s.createdAt, dot: 'orange',
+    title: '样品 ' + (s.sampleNo || '') + ' · ' + (s.status || ''),
+    content: (s.productName || '') + (s.specs ? ' / ' + s.specs : ''),
+    extra: s.feedback ? '反馈：' + s.feedback : ''
+  }));
+  qts.forEach(q => events.push({
+    date: q.date, dot: 'purple',
+    title: '报价 ' + (q.code || '') + ' · ' + (q.status || ''),
+    content: (q.currency || '') + ' ' + Number(q.totalAmount || 0).toLocaleString(),
+    extra: ''
+  }));
+  orders.forEach(o => events.push({
+    date: o.orderDate, dot: 'green',
+    title: '订单 ' + (o.orderNo || '') + ' · ' + (o.paymentStatus || ''),
+    content: (o.currency || '') + ' ' + Number(o.amount || 0).toLocaleString() + ' / ' + (o.productionStatus || ''),
+    extra: o.items || ''
+  }));
+  opps.forEach(o => events.push({
+    date: o.createdAt, dot: 'red',
+    title: '商机 · ' + (o.stage || ''),
+    content: o.title + ' (' + (o.currency || '') + ' ' + Number(o.expectedAmount || 0).toLocaleString() + ')',
+    extra: o.nextStep ? '下一步：' + o.nextStep : ''
+  }));
+  events.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  openModal(escapeHtml(c.company), `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:14px;">
+      <dl class="detail-grid">
+        <dt>客户编号</dt><dd class="code">${escapeHtml(c.code || '-')}</dd>
+        <dt>公司名称</dt><dd>${escapeHtml(c.company)}</dd>
+        <dt>状态</dt><dd>${c.status ? `<span class="tag ${getStatus(CUSTOMER_STATUSES, c.status).tag}">${escapeHtml(c.status)}</span>` : '-'}</dd>
+        <dt>等级</dt><dd>${starsHtml(c.rating)}</dd>
+        <dt>来源</dt><dd>${escapeHtml(c.source || '-')}</dd>
+        <dt>标签</dt><dd>${(c.tags || []).map(t => `<span class="tag tag-purple">${escapeHtml(t)}</span>`).join(' ') || '-'}</dd>
+      </dl>
+      <dl class="detail-grid">
+        <dt>联系人</dt><dd>${escapeHtml(c.contact || '-')}</dd>
+        <dt>国家</dt><dd><span class="flag">${flagFor(c.country)}</span>${escapeHtml(c.country || '-')}</dd>
+        <dt>邮箱</dt><dd>${escapeHtml(c.email || '-')}</dd>
+        <dt>电话</dt><dd>${escapeHtml(c.phone || '-')}</dd>
+        <dt>WhatsApp</dt><dd>${escapeHtml(c.whatsapp || '-')}</dd>
+        <dt>地址</dt><dd>${escapeHtml(c.address || '-')}</dd>
+      </dl>
+    </div>
+    ${c.notes ? '<div class="info-box">备注：' + nl2br(c.notes) + '</div>' : ''}
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-sm" onclick="closeModal();editFollowup(null,'${c.id}')">+ 新建跟进</button>
+      <button class="btn btn-sm" onclick="closeModal();editSample(null,'${c.id}')">+ 新建样品</button>
+      <button class="btn btn-sm" onclick="closeModal();editQuotation(null,'${c.id}')">+ 新建报价</button>
+      <button class="btn btn-sm" onclick="closeModal();editOrder(null,'${c.id}')">+ 新建订单</button>
+      <button class="btn btn-sm" onclick="closeModal();editOpp(null,'${c.id}')">+ 新建商机</button>
+      <button class="btn btn-sm" onclick="composeEmail('${c.id}')">✉ 写邮件</button>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">活动时间轴 · 共 ${events.length} 条</div>
+      ${events.length === 0 ? '<div class="muted" style="padding:14px 0;">暂无活动记录</div>' :
+        '<div class="timeline">' + events.map(e => `
+          <div class="timeline-item">
+            <div class="timeline-dot ${e.dot}"></div>
+            <div class="timeline-meta">${fmtDate(e.date) || '未知日期'}</div>
+            <div class="timeline-title">${escapeHtml(e.title)}</div>
+            <div class="timeline-content">${e.isHtml ? renderRichText(e.content || '') : nl2br(e.content || '')}${e.extra ? '<br><span class="muted">' + escapeHtml(e.extra) + '</span>' : ''}</div>
+          </div>
+        `).join('') + '</div>'
+      }
+    </div>
+
+    <div class="detail-section" id="dossierSection">
+      <div class="detail-section-title" style="display:flex;align-items:center;">
+        <span>客户档案</span>
+        <span class="dossier-storage-info" id="dossierStorageInfo"></span>
+      </div>
+      <div id="dossierWrap" data-customer-id="${c.id}">${dossierHtml(c)}</div>
+    </div>
+  `, `
+    <button class="btn" onclick="closeModal()">关闭</button>
+    <button class="btn btn-primary" onclick="closeModal();editCustomer('${id}')">编辑客户</button>
+  `, 'lg');
+
+  updateStorageInfo();
+}
+
+/* ============================================================
+ * 客户档案（类 Notion 块）
+ * ============================================================ */
+
+function dossierHtml(c) {
+  if (!c.dossier) c.dossier = [];
+  const empty = c.dossier.length === 0
+    ? '<div class="dossier-empty">还没有档案块。点击下方按钮添加文本、图片或表格。</div>'
+    : '<div class="dossier">' + c.dossier.map((b, i) => dossierBlockHtml(c.id, b, i, c.dossier.length)).join('') + '</div>';
+  return empty + `
+    <div class="dossier-add-bar">
+      <button onclick="addDossierBlock('${c.id}','text')">+ 文本块</button>
+      <button onclick="addDossierBlock('${c.id}','image')">+ 图片块</button>
+      <button onclick="addDossierBlock('${c.id}','table')">+ 表格块</button>
+    </div>`;
+}
+
+function dossierBlockHtml(cid, b, idx, total) {
+  const icon = b.type === 'text' ? 'T' : b.type === 'image' ? 'I' : b.type === 'table' ? '#' : '';
+  const editing = !!b._editing;
+  return `<div class="dossier-block ${b.collapsed ? 'collapsed' : ''}" data-block-id="${b.id}">
+    <div class="dossier-block-head" onclick="toggleDossierBlock(event,'${cid}','${b.id}')">
+      <span class="dossier-caret">▾</span>
+      <span class="dossier-type-icon">${icon}</span>
+      <input class="dossier-title" value="${escapeHtml(b.title || '')}" placeholder="无标题"
+        onclick="event.stopPropagation()"
+        onchange="updateDossierTitle('${cid}','${b.id}',this.value)">
+      <div class="dossier-actions" onclick="event.stopPropagation()">
+        ${idx > 0 ? `<button title="上移" onclick="moveDossierBlock('${cid}','${b.id}',-1)">↑</button>` : ''}
+        ${idx < total - 1 ? `<button title="下移" onclick="moveDossierBlock('${cid}','${b.id}',1)">↓</button>` : ''}
+        ${editing
+          ? `<button onclick="saveDossierBlock('${cid}','${b.id}')">保存</button>
+             <button onclick="cancelDossierEdit('${cid}','${b.id}')">取消</button>`
+          : `<button onclick="editDossierBlock('${cid}','${b.id}')">编辑</button>`}
+        <button class="danger" onclick="deleteDossierBlock('${cid}','${b.id}')">删除</button>
+      </div>
+    </div>
+    <div class="dossier-block-body">${dossierBodyHtml(b, editing)}</div>
+  </div>`;
+}
+
+function dossierBodyHtml(b, editing) {
+  if (b.type === 'text') {
+    if (editing) {
+      return `<div class="dossier-toolbar">
+        <button type="button" onclick="dossierFmt('bold')"><b>B</b></button>
+        <button type="button" onclick="dossierFmt('italic')"><i>I</i></button>
+        <button type="button" onclick="dossierFmt('underline')"><u>U</u></button>
+        <button type="button" onclick="dossierFmt('insertUnorderedList')">• 列表</button>
+        <button type="button" onclick="dossierFmt('insertOrderedList')">1. 列表</button>
+        <button type="button" onclick="dossierFmt('formatBlock','h4')">小标题</button>
+        <button type="button" onclick="dossierLinkCmd()">链接</button>
+        <button type="button" onclick="dossierFmt('removeFormat')">清格式</button>
+      </div>
+      <div class="dossier-text-edit" contenteditable="true">${b.content || ''}</div>`;
+    }
+    return `<div class="dossier-text-view">${b.content || '<span class="muted">（空）</span>'}</div>`;
+  }
+  if (b.type === 'image') {
+    const src = b.content && b.content.src;
+    const cap = (b.content && b.content.caption) || '';
+    if (editing) {
+      return `<div class="dossier-image-wrap">
+        ${src ? `<img src="${src}">` : '<div class="dossier-image-empty">尚未上传图片</div>'}
+        <input type="file" accept="image/*" onchange="dossierImageUpload(event,'${b.id}')"
+          style="display:block;margin:8px auto;">
+        <input type="text" class="dossier-image-caption-edit" placeholder="图片说明（可选）"
+          value="${escapeHtml(cap)}"
+          style="width:100%;border:1px solid #d1d5db;padding:4px 6px;border-radius:3px;font-size:11.5px;margin-top:4px;">
+      </div>`;
+    }
+    if (!src) return '<div class="muted">未上传图片</div>';
+    return `<div class="dossier-image-wrap">
+      <img src="${src}">
+      ${cap ? `<div class="dossier-image-caption">${escapeHtml(cap)}</div>` : ''}
+    </div>`;
+  }
+  if (b.type === 'table') {
+    const rows = (b.content && b.content.rows && b.content.rows.length > 0) ? b.content.rows : [['', '']];
+    if (editing) {
+      return `<table class="dossier-table">
+        ${rows.map((r, ri) => `<tr>${r.map((cell, ci) => `<td><input value="${escapeHtml(cell)}" data-r="${ri}" data-c="${ci}"></td>`).join('')}</tr>`).join('')}
+      </table>
+      <div class="dossier-table-tools">
+        <button type="button" onclick="dossierTableAddRow('${b.id}')">+ 行</button>
+        <button type="button" onclick="dossierTableAddCol('${b.id}')">+ 列</button>
+        <button type="button" onclick="dossierTableDelRow('${b.id}')">− 行</button>
+        <button type="button" onclick="dossierTableDelCol('${b.id}')">− 列</button>
+      </div>`;
+    }
+    return `<table class="dossier-table">
+      ${rows.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c || '')}</td>`).join('')}</tr>`).join('')}
+    </table>`;
+  }
+  return '';
+}
+
+function getDossierCustomer(cid) {
+  const c = customerById(cid);
+  if (!c) return null;
+  if (!c.dossier) c.dossier = [];
+  return c;
+}
+
+function refreshDossier(cid) {
+  const c = getDossierCustomer(cid);
+  const wrap = document.getElementById('dossierWrap');
+  if (!wrap || !c) return;
+  wrap.innerHTML = dossierHtml(c);
+  updateStorageInfo();
+}
+
+function addDossierBlock(cid, type) {
+  const c = getDossierCustomer(cid);
+  if (!c) return;
+  let content;
+  if (type === 'text') content = '';
+  else if (type === 'image') content = { src: '', caption: '' };
+  else if (type === 'table') content = { rows: [['', ''], ['', '']] };
+  const block = { id: uid(), type: type, title: '', collapsed: false, content: content, _editing: true };
+  c.dossier.push(block);
+  saveDB();
+  refreshDossier(cid);
+}
+
+function toggleDossierBlock(e, cid, bid) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+  const c = getDossierCustomer(cid);
+  const b = c && c.dossier.find(x => x.id === bid);
+  if (!b) return;
+  if (b._editing) return;
+  b.collapsed = !b.collapsed;
+  saveDB();
+  refreshDossier(cid);
+}
+
+function moveDossierBlock(cid, bid, dir) {
+  const c = getDossierCustomer(cid);
+  const idx = c.dossier.findIndex(x => x.id === bid);
+  const j = idx + dir;
+  if (j < 0 || j >= c.dossier.length) return;
+  const arr = c.dossier;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  saveDB();
+  refreshDossier(cid);
+}
+
+function deleteDossierBlock(cid, bid) {
+  if (!confirm('确定删除该档案块？')) return;
+  const c = getDossierCustomer(cid);
+  c.dossier = c.dossier.filter(x => x.id !== bid);
+  saveDB();
+  refreshDossier(cid);
+}
+
+function updateDossierTitle(cid, bid, value) {
+  const c = getDossierCustomer(cid);
+  const b = c && c.dossier.find(x => x.id === bid);
+  if (!b) return;
+  b.title = value;
+  saveDB();
+}
+
+function editDossierBlock(cid, bid) {
+  const c = getDossierCustomer(cid);
+  const b = c && c.dossier.find(x => x.id === bid);
+  if (!b) return;
+  b._editing = true;
+  b.collapsed = false;
+  refreshDossier(cid);
+}
+
+function cancelDossierEdit(cid, bid) {
+  const c = getDossierCustomer(cid);
+  const b = c && c.dossier.find(x => x.id === bid);
+  if (!b) return;
+  delete b._editing;
+  refreshDossier(cid);
+}
+
+function saveDossierBlock(cid, bid) {
+  const c = getDossierCustomer(cid);
+  const b = c && c.dossier.find(x => x.id === bid);
+  if (!b) return;
+  const blockEl = document.querySelector('.dossier-block[data-block-id="' + bid + '"]');
+  if (!blockEl) return;
+  if (b.type === 'text') {
+    const ed = blockEl.querySelector('.dossier-text-edit');
+    b.content = ed ? ed.innerHTML.trim() : '';
+  } else if (b.type === 'image') {
+    const capInp = blockEl.querySelector('.dossier-image-caption-edit');
+    if (capInp) {
+      b.content = b.content || { src: '', caption: '' };
+      b.content.caption = capInp.value;
+    }
+  } else if (b.type === 'table') {
+    syncDossierTableInputs(b);
+  }
+  delete b._editing;
+  try {
+    saveDB();
+    toast('已保存', 'success');
+  } catch (e) {
+    toast('保存失败：' + e.message, 'error');
+  }
+  refreshDossier(cid);
+}
+
+function dossierFmt(cmd, arg) {
+  document.execCommand(cmd, false, arg || null);
+}
+
+function dossierLinkCmd() {
+  const url = prompt('输入链接 URL：', 'https://');
+  if (url) document.execCommand('createLink', false, url);
+}
+
+function dossierImageUpload(e, bid) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    toast('请选择图片文件', 'error'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 1200;
+      const scale = Math.min(max / img.width, max / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      let q = 0.75;
+      let data = canvas.toDataURL('image/jpeg', q);
+      // 超过约 500KB 再压一次
+      if (data.length > 685000) {
+        data = canvas.toDataURL('image/jpeg', 0.55);
+      }
+      const wrap = document.getElementById('dossierWrap');
+      const cid = wrap.dataset.customerId;
+      const c = getDossierCustomer(cid);
+      const b = c.dossier.find(x => x.id === bid);
+      if (!b) return;
+      b.content = b.content || { src: '', caption: '' };
+      b.content.src = data;
+      // 保留 caption 输入框中未提交的值
+      const blockEl = document.querySelector('.dossier-block[data-block-id="' + bid + '"]');
+      const capInp = blockEl && blockEl.querySelector('.dossier-image-caption-edit');
+      if (capInp) b.content.caption = capInp.value;
+      try {
+        saveDB();
+        toast('图片已加载 (' + Math.round(data.length / 1024) + 'KB)', 'success');
+      } catch (err) {
+        toast('保存失败，可能存储空间不足', 'error');
+      }
+      refreshDossier(cid);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function syncDossierTableInputs(b) {
+  const blockEl = document.querySelector('.dossier-block[data-block-id="' + b.id + '"]');
+  if (!blockEl) return;
+  const inputs = blockEl.querySelectorAll('table input');
+  if (inputs.length === 0) return;
+  inputs.forEach(inp => {
+    const r = Number(inp.dataset.r), col = Number(inp.dataset.c);
+    if (b.content.rows[r]) b.content.rows[r][col] = inp.value;
+  });
+}
+
+function dossierTableOp(bid, fn) {
+  const wrap = document.getElementById('dossierWrap');
+  if (!wrap) return;
+  const cid = wrap.dataset.customerId;
+  const c = getDossierCustomer(cid);
+  const b = c.dossier.find(x => x.id === bid);
+  if (!b) return;
+  syncDossierTableInputs(b);
+  fn(b);
+  refreshDossier(cid);
+}
+
+function dossierTableAddRow(bid) {
+  dossierTableOp(bid, b => {
+    const cols = (b.content.rows[0] || ['']).length;
+    b.content.rows.push(new Array(cols).fill(''));
+  });
+}
+function dossierTableAddCol(bid) {
+  dossierTableOp(bid, b => { b.content.rows.forEach(r => r.push('')); });
+}
+function dossierTableDelRow(bid) {
+  dossierTableOp(bid, b => { if (b.content.rows.length > 1) b.content.rows.pop(); });
+}
+function dossierTableDelCol(bid) {
+  dossierTableOp(bid, b => {
+    if ((b.content.rows[0] || []).length > 1) b.content.rows.forEach(r => r.pop());
+  });
+}
+
+function updateStorageInfo() {
+  const info = document.getElementById('dossierStorageInfo');
+  if (!info) return;
+  try {
+    const sizeKB = JSON.stringify(DB).length / 1024;
+    const sizeMB = (sizeKB / 1024).toFixed(2);
+    const pct = Math.min(100, Math.round(sizeKB / 1024 / 5 * 100));
+    info.textContent = '存储 ' + sizeMB + 'MB / ~5MB (' + pct + '%)';
+    info.className = 'dossier-storage-info' + (pct >= 80 ? ' danger' : pct >= 60 ? ' warn' : '');
+  } catch (e) {}
+}
+
+/* ============================================================
+ * 线索 / 询盘
+ * ============================================================ */
+
+let leadFilter = '';
+let leadStatusFilter = '';
+
+function renderLeads() {
+  document.getElementById('pageTitle').textContent = '线索 / 询盘';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editLead()">+ 新建询盘</button>`;
+  setTabs('');
+
+  const kw = leadFilter.toLowerCase();
+  const list = DB.leads.filter(l =>
+    (!kw || (l.buyerName||'').toLowerCase().includes(kw) || (l.message||'').toLowerCase().includes(kw) || (l.company||'').toLowerCase().includes(kw))
+    && (!leadStatusFilter || l.status === leadStatusFilter)
+  ).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 询盘内容 / 客户姓名..."
+               value="${escapeHtml(leadFilter)}" oninput="leadFilter=this.value;renderLeads()">
+        <select class="btn" onchange="leadStatusFilter=this.value;renderLeads()">
+          <option value="">全部状态</option>
+          ${LEAD_STATUSES.map(s => `<option ${leadStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <span class="muted">共 ${list.length} 条</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无询盘记录</div>' : `
+      <table>
+        <thead><tr>
+          <th>日期</th><th>来源</th><th>询盘人</th><th>公司</th><th>国家</th>
+          <th>询盘内容</th><th>状态</th><th class="text-right">操作</th>
+        </tr></thead>
+        <tbody>
+        ${list.map(l => `
+          <tr>
+            <td class="no-wrap">${fmtDate(l.date)}</td>
+            <td><span class="tag tag-blue">${escapeHtml(l.source || '-')}</span></td>
+            <td><strong>${escapeHtml(l.buyerName || '-')}</strong>
+              <div class="muted" style="font-size:11px;">${escapeHtml(l.email || '')}</div></td>
+            <td>${escapeHtml(l.company || '-')}</td>
+            <td class="no-wrap"><span class="flag">${flagFor(l.country)}</span>${escapeHtml(l.country || '')}</td>
+            <td>${escapeHtml(truncate(l.message, 50))}</td>
+            <td><span class="tag ${getStatus(LEAD_STATUSES, l.status).tag}">${escapeHtml(l.status || '-')}</span></td>
+            <td class="text-right no-wrap">
+              ${l.status !== '已转客户' ? `<button class="btn-link" onclick="convertLead('${l.id}')">转客户</button>` : ''}
+              <button class="btn-link" onclick="editLead('${l.id}')">编辑</button>
+              <button class="btn-link danger" onclick="deleteLead('${l.id}')">删除</button>
+            </td>
+          </tr>
+        `).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editLead(id) {
+  const l = id ? DB.leads.find(x => x.id === id) : { date: todayStr(), status: '新询盘', source: '阿里巴巴' };
+  openModal(id ? '编辑询盘' : '新建询盘', `
+    <form id="leadForm" onsubmit="return saveLead(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field"><label>日期 <span class="req">*</span></label>
+          <input name="date" type="date" required value="${fmtDate(l.date)}"></div>
+        <div class="field"><label>来源</label>
+          <select name="source">${CUSTOMER_SOURCES.map(s => `<option ${l.source===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="field"><label>询盘人 <span class="req">*</span></label>
+          <input name="buyerName" required value="${escapeHtml(l.buyerName || '')}"></div>
+        <div class="field"><label>公司</label>
+          <input name="company" value="${escapeHtml(l.company || '')}"></div>
+        <div class="field"><label>国家</label>
+          <input name="country" value="${escapeHtml(l.country || '')}" list="countryList"></div>
+        <div class="field"><label>邮箱</label>
+          <input name="email" type="email" value="${escapeHtml(l.email || '')}"></div>
+        <div class="field"><label>电话/WhatsApp</label>
+          <input name="phone" value="${escapeHtml(l.phone || '')}"></div>
+        <div class="field"><label>状态</label>
+          <select name="status">${LEAD_STATUSES.map(s => `<option ${l.status===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+        <div class="field full"><label>感兴趣的产品</label>
+          <input name="interestedProduct" value="${escapeHtml(l.interestedProduct || '')}"></div>
+        <div class="field full"><label>询盘内容</label>
+          <textarea name="message">${escapeHtml(l.message || '')}</textarea></div>
+        <div class="field full"><label>处理备注</label>
+          <textarea name="notes">${escapeHtml(l.notes || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('leadForm').requestSubmit()">保存</button>`);
+}
+
+function saveLead(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.leads.find(x => x.id === id), data);
+  else DB.leads.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  saveDB(); closeModal(); renderLeads(); toast('已保存', 'success'); return false;
+}
+
+function deleteLead(id) {
+  if (!confirm('确定删除该询盘？')) return;
+  DB.leads = DB.leads.filter(x => x.id !== id);
+  saveDB(); renderLeads(); toast('已删除');
+}
+
+function convertLead(id) {
+  const l = DB.leads.find(x => x.id === id);
+  if (!l) return;
+  if (!confirm('确定将此询盘转为正式客户？')) return;
+  const customer = {
+    id: uid(), code: nextCode('C'),
+    createdAt: new Date().toISOString(),
+    company: l.company || l.buyerName,
+    contact: l.buyerName, country: l.country || '',
+    email: l.email || '', phone: l.phone || '',
+    source: l.source || '', status: '普通意向客户',
+    rating: 0, tags: [], notes: l.message || '',
+  };
+  DB.customers.push(customer);
+  l.status = '已转客户';
+  l.convertedCustomerId = customer.id;
+  saveDB(); renderLeads();
+  toast('已转为客户：' + customer.code, 'success');
+}
+
+/* ============================================================
+ * 商机
+ * ============================================================ */
+
+let oppFilter = '';
+let oppStageFilter = '';
+
+function renderOpps() {
+  document.getElementById('pageTitle').textContent = '商机管理';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editOpp()">+ 新建商机</button>`;
+  setTabs('');
+
+  const kw = oppFilter.toLowerCase();
+  const list = DB.opportunities.filter(o => {
+    const c = customerById(o.customerId);
+    return (!kw || (o.title || '').toLowerCase().includes(kw) || (c && c.company.toLowerCase().includes(kw)))
+        && (!oppStageFilter || o.stage === oppStageFilter);
+  }).sort((a,b) => (b.expectedAmount||0) - (a.expectedAmount||0));
+
+  const totalWeighted = list.reduce((s, o) => s + (Number(o.expectedAmount) || 0) * (Number(o.probability) || 0) / 100, 0);
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 商机 / 客户..." value="${escapeHtml(oppFilter)}" oninput="oppFilter=this.value;renderOpps()">
+        <select class="btn" onchange="oppStageFilter=this.value;renderOpps()">
+          <option value="">全部阶段</option>
+          ${OPP_STAGES.map(s => `<option ${oppStageFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <span class="muted">共 ${list.length} 个 / 加权金额 ${Math.round(totalWeighted).toLocaleString()}</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无商机</div>' : `
+      <table>
+        <thead><tr>
+          <th>商机标题</th><th>客户</th><th>预计金额</th><th>阶段</th><th>概率</th>
+          <th>加权值</th><th>预计成交日</th><th>下一步</th><th class="text-right">操作</th>
+        </tr></thead>
+        <tbody>
+        ${list.map(o => {
+          const stage = OPP_STAGES.find(s => s.name === o.stage) || {};
+          const weighted = (Number(o.expectedAmount) || 0) * (Number(o.probability) || stage.prob || 0) / 100;
+          return `<tr>
+            <td><strong>${escapeHtml(o.title || '-')}</strong></td>
+            <td>${customerNameWithFlag(o.customerId)}</td>
+            <td class="no-wrap"><strong>${escapeHtml(o.currency || '')} ${Number(o.expectedAmount || 0).toLocaleString()}</strong></td>
+            <td><span class="tag ${stage.tag || 'tag-gray'}">${escapeHtml(o.stage || '-')}</span></td>
+            <td>${o.probability || stage.prob || 0}%</td>
+            <td class="muted">${Math.round(weighted).toLocaleString()}</td>
+            <td class="no-wrap">${fmtDate(o.expectedCloseDate)}</td>
+            <td class="muted">${escapeHtml(truncate(o.nextStep, 30))}</td>
+            <td class="text-right no-wrap">
+              <button class="btn-link" onclick="editOpp('${o.id}')">编辑</button>
+              <button class="btn-link danger" onclick="deleteOpp('${o.id}')">删除</button>
+            </td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editOpp(id, customerId) {
+  if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
+  const o = id ? DB.opportunities.find(x => x.id === id) : {
+    customerId: customerId || '', currency: 'USD', stage: '新建', probability: 10
+  };
+  openModal(id ? '编辑商机' : '新建商机', `
+    <form id="oppForm" onsubmit="return saveOpp(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field full"><label>商机标题 <span class="req">*</span></label>
+          <input name="title" required value="${escapeHtml(o.title || '')}" placeholder="如：XX公司 100K USD 木盒订单"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(o.customerId)}</select></div>
+        <div class="field"><label>预计金额</label>
+          <input name="expectedAmount" type="number" step="0.01" value="${escapeHtml(o.expectedAmount || '')}"></div>
+        <div class="field"><label>币种</label>
+          <select name="currency">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>预计成交日</label>
+          <input name="expectedCloseDate" type="date" value="${fmtDate(o.expectedCloseDate)}"></div>
+        <div class="field"><label>阶段</label>
+          <select name="stage">
+            ${OPP_STAGES.map(s => `<option ${o.stage===s.name?'selected':''}>${s.name}</option>`).join('')}
+          </select></div>
+        <div class="field"><label>赢单概率(%)</label>
+          <input name="probability" type="number" min="0" max="100" value="${o.probability || 0}"></div>
+        <div class="field full"><label>下一步</label>
+          <textarea name="nextStep">${escapeHtml(o.nextStep || '')}</textarea></div>
+        <div class="field full"><label>备注</label>
+          <textarea name="notes">${escapeHtml(o.notes || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('oppForm').requestSubmit()">保存</button>`);
+  if (o.customerId) { const sel = document.querySelector('#oppForm [name=customerId]'); if (sel) sel.value = o.customerId; }
+}
+
+function saveOpp(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  data.expectedAmount = Number(data.expectedAmount) || 0;
+  data.probability = Number(data.probability) || 0;
+  if (id) Object.assign(DB.opportunities.find(x => x.id === id), data);
+  else DB.opportunities.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  saveDB(); closeModal(); renderOpps(); toast('已保存', 'success'); return false;
+}
+
+function deleteOpp(id) {
+  if (!confirm('确定删除该商机？')) return;
+  DB.opportunities = DB.opportunities.filter(x => x.id !== id);
+  saveDB(); renderOpps(); toast('已删除');
+}
+
+function customerOptions(selectedId) {
+  return DB.customers.map(c =>
+    `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.code ? c.code + ' · ' : ''}${escapeHtml(c.company)}${c.country ? ' (' + flagFor(c.country) + escapeHtml(c.country) + ')' : ''}</option>`
+  ).join('');
+}
+
+/* ============================================================
+ * 产品库
+ * ============================================================ */
+
+let productFilter = '';
+let productCatFilter = '';
+
+function renderProducts() {
+  document.getElementById('pageTitle').textContent = '产品库';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editProduct()">+ 新建产品</button>`;
+  setTabs('');
+
+  const kw = productFilter.toLowerCase();
+  const list = DB.products.filter(p => {
+    const matchKw = !kw || (p.code||'').toLowerCase().includes(kw) || (p.nameEn||'').toLowerCase().includes(kw) || (p.nameZh||'').toLowerCase().includes(kw);
+    const matchCat = !productCatFilter || (productCatFilter === '__none' ? !p.category : p.category === productCatFilter);
+    return matchKw && matchCat;
+  }).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+
+  const noneCount = DB.products.filter(p => !p.category).length;
+
+  document.getElementById('content').innerHTML = `
+    <div class="split" style="height:calc(100vh - 110px);background:#fff;border-radius:6px;border:1px solid #e3e8ef;overflow:hidden;">
+      <div class="tree">
+        <div class="tree-actions">
+          <button class="btn btn-sm" onclick="addCategory()">+ 添加分类</button>
+        </div>
+        <div class="tree-item ${!productCatFilter?'active':''}" onclick="productCatFilter='';renderProducts()">
+          📁 全部产品 <span class="count">${DB.products.length}</span>
+        </div>
+        ${DB.productCategories.map(c => `
+          <div class="tree-item ${productCatFilter===c?'active':''}" onclick="productCatFilter='${escapeHtml(c)}';renderProducts()">
+            📂 ${escapeHtml(c)} <span class="count">${DB.products.filter(p => p.category === c).length}</span>
+          </div>
+        `).join('')}
+        ${noneCount > 0 ? `
+          <div class="tree-item ${productCatFilter==='__none'?'active':''}" onclick="productCatFilter='__none';renderProducts()">
+            📂 未分类 <span class="count">${noneCount}</span>
+          </div>` : ''}
+        ${DB.productCategories.length > 0 ? '<div style="padding:8px 14px;color:#9ca3af;font-size:11px;">点击分类切换 / 双击删除</div>' : ''}
+      </div>
+      <div class="split-main">
+        <div class="table-toolbar">
+          <input class="search-box" placeholder="搜索 产品编号 / 英文名 / 中文名..."
+                 value="${escapeHtml(productFilter)}" oninput="productFilter=this.value;renderProducts()">
+          ${productCatFilter && productCatFilter !== '__none' ? `<button class="btn btn-sm" onclick="deleteCategory('${escapeHtml(productCatFilter)}')">删除当前分类</button>` : ''}
+          <span class="muted">共 ${list.length} 个产品</span>
+        </div>
+        <div style="flex:1;overflow:auto;">
+          ${list.length === 0 ? '<div class="empty">暂无产品</div>' : `
+          <table>
+            <thead><tr>
+              <th>缩略图</th><th>产品编号</th><th>英文名</th><th>中文名</th>
+              <th>分类</th><th class="text-right">价格</th><th>规格</th>
+              <th class="text-right">操作</th>
+            </tr></thead>
+            <tbody>
+            ${list.map(p => `
+              <tr>
+                <td>${p.image ? `<img src="${p.image}" class="product-thumb">` : '<div class="product-thumb"></div>'}</td>
+                <td class="code no-wrap">${escapeHtml(p.code || '')}</td>
+                <td><strong>${escapeHtml(p.nameEn || '')}</strong></td>
+                <td>${escapeHtml(p.nameZh || '')}</td>
+                <td>${p.category ? `<span class="tag tag-cyan">${escapeHtml(p.category)}</span>` : '<span class="muted">-</span>'}</td>
+                <td class="text-right no-wrap"><strong>${escapeHtml(p.currency || '')} ${escapeHtml(p.price || '0')}</strong></td>
+                <td class="muted">${escapeHtml(p.specs || '')}</td>
+                <td class="text-right no-wrap">
+                  <button class="btn-link" onclick="viewProduct('${p.id}')">详情</button>
+                  <button class="btn-link" onclick="editProduct('${p.id}')">编辑</button>
+                  <button class="btn-link danger" onclick="deleteProduct('${p.id}')">删除</button>
+                </td>
+              </tr>
+            `).join('')}
+            </tbody>
+          </table>`}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addCategory() {
+  const name = prompt('分类名称：');
+  if (!name || !name.trim()) return;
+  if (DB.productCategories.includes(name.trim())) { toast('分类已存在', 'error'); return; }
+  DB.productCategories.push(name.trim());
+  saveDB(); renderProducts(); toast('已添加');
+}
+
+function deleteCategory(name) {
+  const count = DB.products.filter(p => p.category === name).length;
+  const msg = count > 0 ? '该分类下有 ' + count + ' 个产品，删除分类后产品将变为未分类。继续？' : '确定删除分类 "' + name + '"？';
+  if (!confirm(msg)) return;
+  DB.productCategories = DB.productCategories.filter(c => c !== name);
+  DB.products.forEach(p => { if (p.category === name) p.category = ''; });
+  productCatFilter = '';
+  saveDB(); renderProducts();
+}
+
+function editProduct(id) {
+  const p = id ? DB.products.find(x => x.id === id) : { currency: 'USD' };
+  openModal(id ? '编辑产品' : '新建产品', `
+    <form id="productForm" onsubmit="return saveProduct(event, '${id || ''}')">
+      <div style="display:flex;gap:18px;margin-bottom:14px;">
+        <div>
+          <label class="muted" style="font-size:11px;">产品图</label>
+          <div id="imgWrap">
+            ${p.image ? `<img src="${p.image}" class="product-thumb-large" onclick="document.getElementById('productImage').click()">` :
+              '<div class="image-uploader" onclick="document.getElementById(\'productImage\').click()">点击上传图片<br><span style="font-size:10px;">建议 ≤ 1MB</span></div>'}
+          </div>
+          <input type="file" id="productImage" accept="image/*" style="display:none;" onchange="handleProductImage(event)">
+          <input type="hidden" name="image" value="${p.image || ''}">
+          ${p.image ? '<button type="button" class="btn btn-sm" style="margin-top:6px;" onclick="clearProductImage()">移除图片</button>' : ''}
+        </div>
+        <div style="flex:1;">
+          <div class="form-grid">
+            <div class="field"><label>产品编号</label>
+              <input name="code" value="${escapeHtml(p.code || '')}" placeholder="留空自动生成"></div>
+            <div class="field"><label>分类</label>
+              <select name="category">
+                <option value="">未分类</option>
+                ${DB.productCategories.map(c => `<option ${p.category===c?'selected':''}>${c}</option>`).join('')}
+              </select></div>
+            <div class="field full"><label>英文名 <span class="req">*</span></label>
+              <input name="nameEn" required value="${escapeHtml(p.nameEn || '')}"></div>
+            <div class="field full"><label>中文名</label>
+              <input name="nameZh" value="${escapeHtml(p.nameZh || '')}"></div>
+            <div class="field"><label>销售价</label>
+              <input name="price" type="number" step="0.01" value="${escapeHtml(p.price || '')}"></div>
+            <div class="field"><label>币种</label>
+              <select name="currency">${CURRENCIES.map(c => `<option ${p.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>规格</label>
+          <input name="specs" value="${escapeHtml(p.specs || '')}" placeholder="如 33x4cm, 重量 1.3kg"></div>
+        <div class="field"><label>HS 编码</label>
+          <input name="hsCode" value="${escapeHtml(p.hsCode || '')}"></div>
+        <div class="field"><label>MOQ</label>
+          <input name="moq" value="${escapeHtml(p.moq || '')}"></div>
+        <div class="field"><label>包装</label>
+          <input name="packing" value="${escapeHtml(p.packing || '')}"></div>
+        <div class="field full"><label>产品描述</label>
+          <textarea name="description">${escapeHtml(p.description || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('productForm').requestSubmit()">保存</button>`, 'lg');
+}
+
+function handleProductImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  handleImageFile(file, dataUrl => {
+    document.querySelector('#productForm [name=image]').value = dataUrl;
+    document.getElementById('imgWrap').innerHTML = `<img src="${dataUrl}" class="product-thumb-large" onclick="document.getElementById('productImage').click()">`;
+  });
+}
+
+function clearProductImage() {
+  document.querySelector('#productForm [name=image]').value = '';
+  document.getElementById('imgWrap').innerHTML = '<div class="image-uploader" onclick="document.getElementById(\'productImage\').click()">点击上传图片</div>';
+}
+
+function saveProduct(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.products.find(x => x.id === id), data);
+  else {
+    if (!data.code) data.code = nextCode('PRO');
+    DB.products.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  }
+  saveDB(); closeModal(); renderProducts(); toast('已保存', 'success'); return false;
+}
+
+function deleteProduct(id) {
+  if (!confirm('确定删除该产品？')) return;
+  DB.products = DB.products.filter(x => x.id !== id);
+  saveDB(); renderProducts(); toast('已删除');
+}
+
+function viewProduct(id) {
+  const p = DB.products.find(x => x.id === id);
+  if (!p) return;
+  openModal(p.nameEn || p.nameZh || '产品详情', `
+    <div style="display:flex;gap:18px;">
+      <div>${p.image ? `<img src="${p.image}" class="product-thumb-large">` : '<div class="product-thumb-large"></div>'}</div>
+      <div style="flex:1;">
+        <dl class="detail-grid">
+          <dt>产品编号</dt><dd class="code">${escapeHtml(p.code || '-')}</dd>
+          <dt>英文名</dt><dd>${escapeHtml(p.nameEn || '-')}</dd>
+          <dt>中文名</dt><dd>${escapeHtml(p.nameZh || '-')}</dd>
+          <dt>分类</dt><dd>${p.category ? '<span class="tag tag-cyan">' + escapeHtml(p.category) + '</span>' : '-'}</dd>
+          <dt>价格</dt><dd><strong>${escapeHtml(p.currency || '')} ${escapeHtml(p.price || '-')}</strong></dd>
+          <dt>规格</dt><dd>${escapeHtml(p.specs || '-')}</dd>
+          <dt>HS编码</dt><dd>${escapeHtml(p.hsCode || '-')}</dd>
+          <dt>MOQ</dt><dd>${escapeHtml(p.moq || '-')}</dd>
+          <dt>包装</dt><dd>${escapeHtml(p.packing || '-')}</dd>
+          <dt>描述</dt><dd>${nl2br(p.description || '-')}</dd>
+        </dl>
+      </div>
+    </div>
+  `, `<button class="btn" onclick="closeModal()">关闭</button>
+      <button class="btn btn-primary" onclick="closeModal();editProduct('${id}')">编辑</button>`);
+}
+
+/* ============================================================
+ * 报价单
+ * ============================================================ */
+
+let qtFilter = '';
+let qtStatusFilter = '';
+
+function renderQuotations() {
+  document.getElementById('pageTitle').textContent = '报价单';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editQuotation()">+ 新建报价</button>`;
+  setTabs('');
+
+  const kw = qtFilter.toLowerCase();
+  const list = DB.quotations.filter(q => {
+    const c = customerById(q.customerId);
+    return (!kw || (q.code||'').toLowerCase().includes(kw) || (c && c.company.toLowerCase().includes(kw)))
+        && (!qtStatusFilter || q.status === qtStatusFilter);
+  }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 报价编号 / 客户..." value="${escapeHtml(qtFilter)}" oninput="qtFilter=this.value;renderQuotations()">
+        <select class="btn" onchange="qtStatusFilter=this.value;renderQuotations()">
+          <option value="">全部状态</option>
+          ${QT_STATUSES.map(s => `<option ${qtStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <span class="muted">共 ${list.length} 条</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无报价单</div>' : `
+      <table>
+        <thead><tr>
+          <th>报价编号</th><th>日期</th><th>客户</th><th>项数</th><th class="text-right">总金额</th>
+          <th>状态</th><th>有效期</th><th class="text-right">操作</th>
+        </tr></thead>
+        <tbody>
+        ${list.map(q => `
+          <tr>
+            <td class="code no-wrap">${escapeHtml(q.code || '')}</td>
+            <td class="no-wrap">${fmtDate(q.date)}</td>
+            <td>${customerNameWithFlag(q.customerId)}</td>
+            <td>${(q.items || []).length}</td>
+            <td class="text-right no-wrap"><strong>${escapeHtml(q.currency || '')} ${Number(q.totalAmount || 0).toLocaleString()}</strong></td>
+            <td><span class="tag ${getStatus(QT_STATUSES, q.status).tag}">${escapeHtml(q.status || '-')}</span></td>
+            <td class="no-wrap muted">${fmtDate(q.validUntil) || '-'}</td>
+            <td class="text-right no-wrap">
+              <button class="btn-link" onclick="viewQuotation('${q.id}')">详情</button>
+              <button class="btn-link" onclick="editQuotation('${q.id}')">编辑</button>
+              ${q.status !== '已转订单' ? `<button class="btn-link" onclick="convertQtToOrder('${q.id}')">转订单</button>` : ''}
+              <button class="btn-link danger" onclick="deleteQuotation('${q.id}')">删除</button>
+            </td>
+          </tr>
+        `).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editQuotation(id, customerId) {
+  if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
+  const q = id ? DB.quotations.find(x => x.id === id) : {
+    customerId: customerId || '', date: todayStr(), currency: 'USD', status: '草稿', items: []
+  };
+  q.items = q.items || [];
+
+  openModal(id ? '编辑报价单' : '新建报价单', `
+    <form id="qtForm" onsubmit="return saveQuotation(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field"><label>报价编号</label>
+          <input name="code" value="${escapeHtml(q.code || '')}" placeholder="留空自动生成"></div>
+        <div class="field"><label>日期</label>
+          <input name="date" type="date" value="${fmtDate(q.date)}"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(q.customerId)}</select></div>
+        <div class="field"><label>币种</label>
+          <select name="currency">${CURRENCIES.map(c => `<option ${q.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>有效期</label>
+          <input name="validUntil" type="date" value="${fmtDate(q.validUntil)}"></div>
+        <div class="field"><label>状态</label>
+          <select name="status">${QT_STATUSES.map(s => `<option ${q.status===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+          产品明细
+          <button type="button" class="btn btn-sm" onclick="addQtItem()">+ 添加产品</button>
+        </div>
+        <table class="qt-items">
+          <thead><tr>
+            <th style="width:30%;">产品</th><th>规格</th>
+            <th style="width:80px;">数量</th><th style="width:90px;">单价</th>
+            <th style="width:100px;" class="num">小计</th><th style="width:30px;"></th>
+          </tr></thead>
+          <tbody id="qtItemsBody"></tbody>
+          <tfoot>
+            <tr><td colspan="4" class="text-right bold">合计：</td>
+              <td class="num bold"><span id="qtTotal">0</span></td><td></td></tr>
+          </tfoot>
+        </table>
+        <input type="hidden" name="totalAmount" id="qtTotalInput" value="${q.totalAmount || 0}">
+        <input type="hidden" name="items" id="qtItemsInput">
+      </div>
+      <hr class="div">
+      <div class="form-grid cols-1">
+        <div class="field"><label>付款方式</label>
+          <input name="paymentTerms" value="${escapeHtml(q.paymentTerms || '30% T/T deposit, 70% before shipment')}"></div>
+        <div class="field"><label>交货期</label>
+          <input name="leadTime" value="${escapeHtml(q.leadTime || '')}"></div>
+        <div class="field"><label>贸易条款</label>
+          <input name="tradeTerms" value="${escapeHtml(q.tradeTerms || 'FOB')}"></div>
+        <div class="field"><label>备注</label>
+          <textarea name="notes">${escapeHtml(q.notes || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveQtItemsToInput();document.getElementById('qtForm').requestSubmit()">保存</button>`,
+  'lg');
+
+  window.__qtItems = [...q.items];
+  renderQtItems();
+  if (q.customerId) { const sel = document.querySelector('#qtForm [name=customerId]'); if (sel) sel.value = q.customerId; }
+}
+
+function renderQtItems() {
+  const tbody = document.getElementById('qtItemsBody');
+  if (!tbody) return;
+  tbody.innerHTML = window.__qtItems.map((it, i) => `
+    <tr>
+      <td><select onchange="onQtProductChange(${i}, this)">
+        <option value="">选择产品...</option>
+        ${DB.products.map(p => `<option value="${p.id}" ${it.productId===p.id?'selected':''}>${escapeHtml(p.nameEn || p.nameZh)} (${escapeHtml(p.code||'')})</option>`).join('')}
+        <option value="__custom" ${it.productId==='__custom'?'selected':''}>自定义产品</option>
+      </select>
+      ${it.productId === '__custom' ? `<input style="margin-top:3px;" placeholder="产品名" value="${escapeHtml(it.customName||'')}" oninput="window.__qtItems[${i}].customName=this.value">` : ''}
+      </td>
+      <td><input value="${escapeHtml(it.specs||'')}" oninput="window.__qtItems[${i}].specs=this.value"></td>
+      <td><input type="number" class="num" value="${it.qty||0}" oninput="window.__qtItems[${i}].qty=Number(this.value);recalcQt()"></td>
+      <td><input type="number" step="0.01" class="num" value="${it.price||0}" oninput="window.__qtItems[${i}].price=Number(this.value);recalcQt()"></td>
+      <td class="num bold">${(Number(it.qty||0) * Number(it.price||0)).toFixed(2)}</td>
+      <td><button type="button" class="btn-link danger" onclick="removeQtItem(${i})">×</button></td>
+    </tr>
+  `).join('');
+  recalcQt();
+}
+
+function onQtProductChange(i, sel) {
+  const id = sel.value;
+  if (id === '__custom') {
+    window.__qtItems[i] = { productId: '__custom', customName: '', specs: '', qty: 1, price: 0 };
+  } else if (id) {
+    const p = productById(id);
+    if (p) window.__qtItems[i] = { productId: id, specs: p.specs || '', qty: 1, price: Number(p.price) || 0 };
+  } else {
+    window.__qtItems[i].productId = '';
+  }
+  renderQtItems();
+}
+
+function addQtItem() {
+  window.__qtItems.push({ productId: '', specs: '', qty: 1, price: 0 });
+  renderQtItems();
+}
+
+function removeQtItem(i) {
+  window.__qtItems.splice(i, 1);
+  renderQtItems();
+}
+
+function recalcQt() {
+  if (!window.__qtItems) return;
+  const total = window.__qtItems.reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.price) || 0), 0);
+  const totalEl = document.getElementById('qtTotal');
+  if (totalEl) totalEl.textContent = total.toFixed(2);
+  const totalInput = document.getElementById('qtTotalInput');
+  if (totalInput) totalInput.value = total;
+}
+
+function saveQtItemsToInput() {
+  document.getElementById('qtItemsInput').value = JSON.stringify(window.__qtItems);
+}
+
+function saveQuotation(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  data.items = JSON.parse(data.items || '[]');
+  data.totalAmount = Number(data.totalAmount) || 0;
+  if (id) Object.assign(DB.quotations.find(x => x.id === id), data);
+  else {
+    if (!data.code) data.code = nextCode('Q');
+    DB.quotations.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  }
+  saveDB(); closeModal(); renderQuotations(); toast('已保存', 'success'); return false;
+}
+
+function deleteQuotation(id) {
+  if (!confirm('确定删除该报价单？')) return;
+  DB.quotations = DB.quotations.filter(x => x.id !== id);
+  saveDB(); renderQuotations(); toast('已删除');
+}
+
+function viewQuotation(id) {
+  const q = DB.quotations.find(x => x.id === id);
+  if (!q) return;
+  openModal('报价单：' + (q.code || ''), `
+    <dl class="detail-grid">
+      <dt>报价编号</dt><dd class="code">${escapeHtml(q.code || '-')}</dd>
+      <dt>日期</dt><dd>${fmtDate(q.date) || '-'}</dd>
+      <dt>客户</dt><dd>${customerNameWithFlag(q.customerId)}</dd>
+      <dt>状态</dt><dd><span class="tag ${getStatus(QT_STATUSES, q.status).tag}">${escapeHtml(q.status || '-')}</span></dd>
+      <dt>有效期</dt><dd>${fmtDate(q.validUntil) || '-'}</dd>
+      <dt>付款方式</dt><dd>${escapeHtml(q.paymentTerms || '-')}</dd>
+      <dt>交货期</dt><dd>${escapeHtml(q.leadTime || '-')}</dd>
+      <dt>贸易条款</dt><dd>${escapeHtml(q.tradeTerms || '-')}</dd>
+    </dl>
+    <table class="qt-items" style="margin-top:14px;">
+      <thead><tr><th>产品</th><th>规格</th><th class="num">数量</th><th class="num">单价</th><th class="num">小计</th></tr></thead>
+      <tbody>
+      ${(q.items || []).map(it => {
+        const p = productById(it.productId);
+        const name = it.productId === '__custom' ? it.customName : (p ? (p.nameEn || p.nameZh) : '[已删除]');
+        return `<tr>
+          <td>${escapeHtml(name)}</td>
+          <td class="muted">${escapeHtml(it.specs || '')}</td>
+          <td class="num">${it.qty}</td>
+          <td class="num">${it.price}</td>
+          <td class="num bold">${(Number(it.qty||0) * Number(it.price||0)).toFixed(2)}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+      <tfoot><tr><td colspan="4" class="text-right bold">合计</td>
+        <td class="num bold">${escapeHtml(q.currency || '')} ${Number(q.totalAmount || 0).toFixed(2)}</td></tr></tfoot>
+    </table>
+    ${q.notes ? '<div class="info-box" style="margin-top:14px;">备注：' + nl2br(q.notes) + '</div>' : ''}
+  `, `<button class="btn" onclick="closeModal()">关闭</button>
+      <button class="btn" onclick="printQuotation('${id}')">打印</button>
+      <button class="btn btn-primary" onclick="closeModal();editQuotation('${id}')">编辑</button>`, 'lg');
+}
+
+function printQuotation(id) {
+  const q = DB.quotations.find(x => x.id === id);
+  const c = customerById(q.customerId);
+  if (!q || !c) return;
+  const w = window.open('', '_blank');
+  const itemsHtml = (q.items || []).map((it, i) => {
+    const p = productById(it.productId);
+    const name = it.productId === '__custom' ? (it.customName || '') : (p ? (p.nameEn || p.nameZh || '') : '');
+    return '<tr><td>' + (i+1) + '</td><td>' + escapeHtml(name) + '</td><td>' + escapeHtml(it.specs||'') + '</td>' +
+      '<td class="right">' + it.qty + '</td><td class="right">' + it.price + '</td>' +
+      '<td class="right">' + (Number(it.qty||0)*Number(it.price||0)).toFixed(2) + '</td></tr>';
+  }).join('');
+  w.document.write('<html><head><title>Quotation ' + q.code + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;padding:40px;color:#2c3e50;font-size:13px;}' +
+    'h1{margin:0 0 20px;}table{width:100%;border-collapse:collapse;margin:20px 0;}' +
+    'th,td{padding:8px 10px;border:1px solid #ddd;}th{background:#f4f6f9;}' +
+    '.right{text-align:right;}.info{display:flex;justify-content:space-between;margin-bottom:20px;}' +
+    '</style></head><body>' +
+    '<h1>QUOTATION</h1>' +
+    '<div class="info"><div><strong>To: ' + escapeHtml(c.company) + '</strong><br>' +
+    'Attn: ' + escapeHtml(c.contact || '') + '<br>' + escapeHtml(c.country || '') + '<br>' +
+    escapeHtml(c.email || '') + '</div>' +
+    '<div class="right">Quote No.: <strong>' + escapeHtml(q.code) + '</strong><br>' +
+    'Date: ' + fmtDate(q.date) + '<br>Valid Until: ' + (fmtDate(q.validUntil) || '-') + '</div></div>' +
+    '<table><thead><tr><th>#</th><th>Description</th><th>Specs</th><th class="right">Qty</th><th class="right">Unit Price</th><th class="right">Amount</th></tr></thead>' +
+    '<tbody>' + itemsHtml + '</tbody>' +
+    '<tfoot><tr><td colspan="5" class="right"><strong>TOTAL</strong></td>' +
+    '<td class="right"><strong>' + q.currency + ' ' + Number(q.totalAmount||0).toFixed(2) + '</strong></td></tr></tfoot></table>' +
+    '<p><strong>Payment Terms:</strong> ' + escapeHtml(q.paymentTerms || '') + '</p>' +
+    '<p><strong>Lead Time:</strong> ' + escapeHtml(q.leadTime || '') + '</p>' +
+    '<p><strong>Trade Terms:</strong> ' + escapeHtml(q.tradeTerms || '') + '</p>' +
+    (q.notes ? '<p><strong>Notes:</strong> ' + escapeHtml(q.notes) + '</p>' : '') +
+    '<scr' + 'ipt>window.onload=function(){window.print();}</scr' + 'ipt>' +
+    '</body></html>');
+  w.document.close();
+}
+
+function convertQtToOrder(id) {
+  const q = DB.quotations.find(x => x.id === id);
+  if (!q) return;
+  if (!confirm('转为正式订单？')) return;
+  const order = {
+    id: uid(), createdAt: new Date().toISOString(),
+    orderNo: nextCode('SO'),
+    customerId: q.customerId,
+    orderDate: todayStr(),
+    amount: q.totalAmount,
+    currency: q.currency,
+    paymentStatus: '未付款',
+    productionStatus: '未开始',
+    items: (q.items || []).map(it => {
+      const p = productById(it.productId);
+      const name = it.productId === '__custom' ? it.customName : (p ? (p.nameEn || p.nameZh) : '');
+      return name + ' x ' + it.qty + ' @ ' + it.price;
+    }).join('\n'),
+    quotationId: q.id,
+    notes: q.notes || '',
+  };
+  DB.orders.push(order);
+  q.status = '已转订单';
+  saveDB(); renderQuotations();
+  toast('已转为订单：' + order.orderNo, 'success');
+}
+
+/* ============================================================
+ * 样品 / 订单 / 跟进
+ * ============================================================ */
+
+let sampleFilter = '', sampleStatusFilter = '';
+
+function renderSamples() {
+  document.getElementById('pageTitle').textContent = '样品管理';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editSample()">+ 新建样品</button>`;
+  setTabs('');
+  const kw = sampleFilter.toLowerCase();
+  const list = DB.samples.filter(s => {
+    const c = customerById(s.customerId);
+    return (!kw || (s.sampleNo||'').toLowerCase().includes(kw) || (s.productName||'').toLowerCase().includes(kw) || (c && c.company.toLowerCase().includes(kw)))
+        && (!sampleStatusFilter || s.status === sampleStatusFilter);
+  }).sort((a,b) => (b.sentDate||'').localeCompare(a.sentDate||''));
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 编号 / 产品 / 客户..." value="${escapeHtml(sampleFilter)}" oninput="sampleFilter=this.value;renderSamples()">
+        <select class="btn" onchange="sampleStatusFilter=this.value;renderSamples()">
+          <option value="">全部状态</option>
+          ${SAMPLE_STATUSES.map(s => `<option ${sampleStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <span class="muted">共 ${list.length} 条</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无样品记录</div>' : `
+      <table>
+        <thead><tr><th>编号</th><th>客户</th><th>产品</th><th>规格</th><th>寄出日期</th><th>快递</th><th>状态</th><th class="text-right">操作</th></tr></thead>
+        <tbody>
+        ${list.map(s => `<tr>
+          <td class="code no-wrap">${escapeHtml(s.sampleNo || '')}</td>
+          <td>${customerNameWithFlag(s.customerId)}</td>
+          <td>${escapeHtml(s.productName || '')}</td>
+          <td class="muted">${escapeHtml(s.specs || '')}</td>
+          <td class="no-wrap">${fmtDate(s.sentDate)}</td>
+          <td class="muted">${escapeHtml(s.trackingNo || '')}</td>
+          <td><span class="tag ${getStatus(SAMPLE_STATUSES, s.status).tag}">${escapeHtml(s.status || '-')}</span></td>
+          <td class="text-right no-wrap">
+            <button class="btn-link" onclick="editSample('${s.id}')">编辑</button>
+            <button class="btn-link danger" onclick="deleteSample('${s.id}')">删除</button>
+          </td>
+        </tr>`).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editSample(id, customerId) {
+  if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
+  const s = id ? DB.samples.find(x => x.id === id) : { customerId: customerId || '', sentDate: todayStr(), status: '筹备中' };
+  openModal(id ? '编辑样品' : '新建样品', `
+    <form id="sampleForm" onsubmit="return saveSample(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field"><label>样品编号</label>
+          <input name="sampleNo" value="${escapeHtml(s.sampleNo || '')}" placeholder="留空自动生成"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(s.customerId)}</select></div>
+        <div class="field full"><label>产品名称 <span class="req">*</span></label>
+          <input name="productName" required value="${escapeHtml(s.productName || '')}" list="productNameList">
+          <datalist id="productNameList">${DB.products.map(p => '<option value="' + escapeHtml(p.nameEn || p.nameZh) + '">').join('')}</datalist></div>
+        <div class="field"><label>规格</label>
+          <input name="specs" value="${escapeHtml(s.specs || '')}"></div>
+        <div class="field"><label>样品成本</label>
+          <input name="cost" value="${escapeHtml(s.cost || '')}"></div>
+        <div class="field"><label>寄出日期</label>
+          <input name="sentDate" type="date" value="${fmtDate(s.sentDate)}"></div>
+        <div class="field"><label>状态</label>
+          <select name="status">${SAMPLE_STATUSES.map(st => `<option ${s.status===st.name?'selected':''}>${st.name}</option>`).join('')}</select></div>
+        <div class="field full"><label>快递公司 / 单号</label>
+          <input name="trackingNo" value="${escapeHtml(s.trackingNo || '')}"></div>
+        <div class="field full"><label>客户反馈 / 备注</label>
+          <textarea name="feedback">${escapeHtml(s.feedback || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('sampleForm').requestSubmit()">保存</button>`);
+  if (s.customerId) { const sel = document.querySelector('#sampleForm [name=customerId]'); if (sel) sel.value = s.customerId; }
+}
+
+function saveSample(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.samples.find(x => x.id === id), data);
+  else {
+    if (!data.sampleNo) data.sampleNo = nextCode('SP');
+    DB.samples.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  }
+  saveDB(); closeModal(); renderSamples(); toast('已保存', 'success'); return false;
+}
+
+function deleteSample(id) {
+  if (!confirm('确定删除？')) return;
+  DB.samples = DB.samples.filter(x => x.id !== id);
+  saveDB(); renderSamples(); toast('已删除');
+}
+
+let orderFilter = '', orderPaymentFilter = '';
+
+function renderOrders() {
+  document.getElementById('pageTitle').textContent = '订单管理';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editOrder()">+ 新建订单</button>`;
+  setTabs('');
+  const kw = orderFilter.toLowerCase();
+  const list = DB.orders.filter(o => {
+    const c = customerById(o.customerId);
+    return (!kw || (o.orderNo||'').toLowerCase().includes(kw) || (o.items||'').toLowerCase().includes(kw) || (c && c.company.toLowerCase().includes(kw)))
+        && (!orderPaymentFilter || o.paymentStatus === orderPaymentFilter);
+  }).sort((a,b) => (b.orderDate||'').localeCompare(a.orderDate||''));
+
+  const total = list.reduce((s, o) => s + (Number(o.amount) || 0), 0);
+  const unpaid = list.filter(o => o.paymentStatus !== '已结清').reduce((s, o) => s + (Number(o.amount) || 0), 0);
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 订单号 / 产品 / 客户..." value="${escapeHtml(orderFilter)}" oninput="orderFilter=this.value;renderOrders()">
+        <select class="btn" onchange="orderPaymentFilter=this.value;renderOrders()">
+          <option value="">全部付款状态</option>
+          ${PAYMENT_STATUSES.map(s => `<option ${orderPaymentFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <span class="muted">共 ${list.length} 条 / 合计 ${total.toLocaleString()} / 未结清 ${unpaid.toLocaleString()}</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无订单</div>' : `
+      <table>
+        <thead><tr><th>订单号</th><th>客户</th><th>产品</th><th class="text-right">金额</th><th>付款</th><th>生产</th><th>交期</th><th class="text-right">操作</th></tr></thead>
+        <tbody>
+        ${list.map(o => `<tr>
+          <td class="code"><strong>${escapeHtml(o.orderNo || '')}</strong>
+            <div class="muted" style="font-size:10px;">${fmtDate(o.orderDate)}</div></td>
+          <td>${customerNameWithFlag(o.customerId)}</td>
+          <td class="muted">${escapeHtml(truncate(o.items, 35))}</td>
+          <td class="text-right no-wrap"><strong>${escapeHtml(o.currency || '')} ${Number(o.amount || 0).toLocaleString()}</strong></td>
+          <td><span class="tag ${getStatus(PAYMENT_STATUSES, o.paymentStatus).tag}">${escapeHtml(o.paymentStatus || '-')}</span></td>
+          <td><span class="tag ${getStatus(PRODUCTION_STATUSES, o.productionStatus).tag}">${escapeHtml(o.productionStatus || '-')}</span></td>
+          <td class="no-wrap">${fmtDate(o.deliveryDate)}</td>
+          <td class="text-right no-wrap">
+            <button class="btn-link" onclick="editOrder('${o.id}')">编辑</button>
+            <button class="btn-link danger" onclick="deleteOrder('${o.id}')">删除</button>
+          </td>
+        </tr>`).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editOrder(id, customerId) {
+  if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
+  const o = id ? DB.orders.find(x => x.id === id) : {
+    customerId: customerId || '', orderDate: todayStr(), currency: 'USD',
+    paymentStatus: '未付款', productionStatus: '未开始'
+  };
+  openModal(id ? '编辑订单' : '新建订单', `
+    <form id="orderForm" onsubmit="return saveOrder(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field"><label>订单号</label>
+          <input name="orderNo" value="${escapeHtml(o.orderNo || '')}" placeholder="留空自动生成"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(o.customerId)}</select></div>
+        <div class="field"><label>下单日期</label><input name="orderDate" type="date" value="${fmtDate(o.orderDate)}"></div>
+        <div class="field"><label>交货日期</label><input name="deliveryDate" type="date" value="${fmtDate(o.deliveryDate)}"></div>
+        <div class="field"><label>金额</label><input name="amount" type="number" step="0.01" value="${escapeHtml(o.amount || '')}"></div>
+        <div class="field"><label>币种</label>
+          <select name="currency">${CURRENCIES.map(c => `<option ${o.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>付款状态</label>
+          <select name="paymentStatus">${PAYMENT_STATUSES.map(s => `<option ${o.paymentStatus===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+        <div class="field"><label>生产状态</label>
+          <select name="productionStatus">${PRODUCTION_STATUSES.map(s => `<option ${o.productionStatus===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+        <div class="field full"><label>产品明细</label>
+          <textarea name="items" placeholder="产品A x 100pcs">${escapeHtml(o.items || '')}</textarea></div>
+        <div class="field full"><label>备注</label>
+          <textarea name="notes">${escapeHtml(o.notes || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('orderForm').requestSubmit()">保存</button>`, 'lg');
+  if (o.customerId) { const sel = document.querySelector('#orderForm [name=customerId]'); if (sel) sel.value = o.customerId; }
+}
+
+function saveOrder(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.orders.find(x => x.id === id), data);
+  else {
+    if (!data.orderNo) data.orderNo = nextCode('SO');
+    DB.orders.push({ id: uid(), createdAt: new Date().toISOString(), ...data });
+  }
+  saveDB(); closeModal(); renderOrders(); toast('已保存', 'success'); return false;
+}
+
+function deleteOrder(id) {
+  if (!confirm('确定删除该订单？')) return;
+  DB.orders = DB.orders.filter(x => x.id !== id);
+  saveDB(); renderOrders(); toast('已删除');
+}
+
+let followupFilter = '', followupTab = 'all';
+
+function renderFollowups() {
+  document.getElementById('pageTitle').textContent = '跟进记录';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editFollowup()">+ 新建跟进</button>`;
+
+  const today = todayStr();
+  const tabs = [
+    { id: 'all', name: '全部', f: () => true },
+    { id: 'today', name: '今日待跟进', f: f => f.reminderDate === today && !f.done },
+    { id: 'overdue', name: '已过期', f: f => f.reminderDate && f.reminderDate < today && !f.done },
+    { id: 'done', name: '已处理', f: f => f.done },
+  ];
+  setTabs(tabs.map(t => `<div class="tab ${t.id===followupTab?'active':''}" onclick="followupTab='${t.id}';renderFollowups()">${t.name}${t.id==='today'||t.id==='overdue' ? ' (' + DB.followups.filter(t.f).length + ')' : ''}</div>`).join(''));
+
+  const tabFilter = tabs.find(t => t.id === followupTab).f;
+  const kw = followupFilter.toLowerCase();
+  const list = DB.followups.filter(f => tabFilter(f) && (
+    !kw || htmlToText(f.content||'').toLowerCase().includes(kw) || (f.nextAction||'').toLowerCase().includes(kw) ||
+    (customerById(f.customerId) && customerById(f.customerId).company.toLowerCase().includes(kw))
+  )).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 客户 / 内容 / 下一步..." value="${escapeHtml(followupFilter)}" oninput="followupFilter=this.value;renderFollowups()">
+        <span class="muted">共 ${list.length} 条</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无跟进记录</div>' : `
+      <table>
+        <thead><tr><th>日期</th><th>客户</th><th>方式</th><th>沟通内容</th><th>下一步行动</th><th>提醒</th><th class="text-right">操作</th></tr></thead>
+        <tbody>
+        ${list.map(f => `<tr style="${f.done?'opacity:0.6;':''}">
+          <td class="no-wrap">${fmtDate(f.date)}</td>
+          <td>${customerNameWithFlag(f.customerId)}</td>
+          <td><span class="tag tag-blue">${escapeHtml(f.channel || '-')}</span></td>
+          <td>${escapeHtml(truncate(htmlToText(f.content), 50))}</td>
+          <td class="muted">${escapeHtml(truncate(f.nextAction, 40))}</td>
+          <td class="no-wrap">${f.reminderDate ?
+            (f.done ? '<span class="tag tag-gray">已处理</span>' :
+             f.reminderDate < today ? `<span class="tag tag-red">已过期 ${fmtDate(f.reminderDate)}</span>` :
+             f.reminderDate === today ? '<span class="tag tag-orange">今日</span>' :
+             `<span class="tag tag-blue">${fmtDate(f.reminderDate)}</span>`) : ''}</td>
+          <td class="text-right no-wrap">
+            ${f.reminderDate && !f.done ? `<button class="btn-link" onclick="markFollowupDone('${f.id}')">标记已处理</button>` : ''}
+            <button class="btn-link" onclick="editFollowup('${f.id}')">编辑</button>
+            <button class="btn-link danger" onclick="deleteFollowup('${f.id}')">删除</button>
+          </td>
+        </tr>`).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editFollowup(id, customerId) {
+  if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
+  const f = id ? DB.followups.find(x => x.id === id) : { customerId: customerId || '', date: todayStr(), channel: '邮件' };
+  openModal(id ? '编辑跟进' : '新建跟进', `
+    <form id="followupForm" onsubmit="return saveFollowup(event, '${id || ''}')">
+      <div class="form-grid">
+        <div class="field"><label>日期 <span class="req">*</span></label><input name="date" type="date" required value="${fmtDate(f.date)}"></div>
+        <div class="field"><label>客户 <span class="req">*</span></label>
+          <select name="customerId" required><option value="">请选择</option>${customerOptions(f.customerId)}</select></div>
+        <div class="field"><label>沟通方式</label>
+          <select name="channel">${CHANNELS.map(c => `<option ${f.channel===c?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label>下次跟进提醒</label><input name="reminderDate" type="date" value="${fmtDate(f.reminderDate)}"></div>
+        <div class="field full"><label>沟通内容 <span class="req">*</span></label>
+          ${richTextEditor('content', f.content || '', { minHeight: 160, placeholder: '记录沟通过程...支持 Ctrl+V 粘贴截图、拖入图片、文字格式' })}
+        </div>
+        <div class="field full"><label>下一步行动</label><textarea name="nextAction">${escapeHtml(f.nextAction || '')}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('followupForm').requestSubmit()">保存</button>`);
+  if (f.customerId) { const sel = document.querySelector('#followupForm [name=customerId]'); if (sel) sel.value = f.customerId; }
+}
+
+function saveFollowup(e, id) {
+  e.preventDefault();
+  const form = e.target;
+  if (rteIsEmpty(form, 'content')) { toast('请填写沟通内容', 'error'); return false; }
+  const data = Object.fromEntries(new FormData(form).entries());
+  data.content = rteGetValue(form, 'content');
+  if (id) Object.assign(DB.followups.find(x => x.id === id), data);
+  else DB.followups.push({ id: uid(), createdAt: new Date().toISOString(), done: false, ...data });
+  try {
+    saveDB();
+  } catch (err) {
+    toast('保存失败：存储空间不足，请删除部分图片', 'error');
+    return false;
+  }
+  closeModal(); renderNav(); render(); toast('已保存', 'success'); return false;
+}
+
+function deleteFollowup(id) {
+  if (!confirm('确定删除？')) return;
+  DB.followups = DB.followups.filter(x => x.id !== id);
+  saveDB(); renderNav(); renderFollowups(); toast('已删除');
+}
+
+/* ============================================================
+ * 邮件模板
+ * ============================================================ */
+
+function renderTemplates() {
+  document.getElementById('pageTitle').textContent = '邮件模板';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editTemplate()">+ 新建模板</button>`;
+  setTabs('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="info-box">
+      💡 模板支持变量替换：<code>{{contact}}</code>(联系人) <code>{{company}}</code>(公司) <code>{{country}}</code>(国家)
+      <code>{{productName}}</code>(产品) <code>{{orderNo}}</code>(订单号) <code>{{date}}</code>(日期) <code>{{myName}}</code>(您的名字)
+      <br>在客户详情页点击"写邮件"可选择模板自动套用客户信息。
+      <br><br>您的名字：<input type="text" id="myNameInput" value="${escapeHtml(DB.meta.myName)}" placeholder="设置您的名字（用于 {{myName}}）" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:3px;width:200px;">
+      <button class="btn btn-sm" onclick="DB.meta.myName=document.getElementById('myNameInput').value;saveDB();toast('已保存','success')">保存</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+      ${DB.templates.map(t => `
+        <div class="panel">
+          <div class="panel-header">
+            <span><strong>${escapeHtml(t.name)}</strong></span>
+            <div>
+              <button class="btn-link" onclick="editTemplate('${t.id}')">编辑</button>
+              <button class="btn-link danger" onclick="deleteTemplate('${t.id}')">删除</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="muted" style="font-size:11px;margin-bottom:6px;">主题：</div>
+            <div style="font-size:12px;margin-bottom:8px;">${escapeHtml(t.subject)}</div>
+            <div class="muted" style="font-size:11px;margin-bottom:6px;">正文：</div>
+            <div style="font-size:11px;color:#4b5563;white-space:pre-wrap;max-height:120px;overflow:hidden;">${escapeHtml(truncate(t.body, 200))}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function editTemplate(id) {
+  const t = id ? DB.templates.find(x => x.id === id) : { name: '', subject: '', body: '' };
+  openModal(id ? '编辑模板' : '新建模板', `
+    <form id="templateForm" onsubmit="return saveTemplate(event, '${id || ''}')">
+      <div class="form-grid cols-1">
+        <div class="field"><label>模板名称 <span class="req">*</span></label>
+          <input name="name" required value="${escapeHtml(t.name)}"></div>
+        <div class="field"><label>邮件主题</label>
+          <input name="subject" value="${escapeHtml(t.subject)}" placeholder="支持 {{company}} 等变量"></div>
+        <div class="field"><label>邮件正文</label>
+          <textarea name="body" rows="14" style="min-height:280px;font-family:ui-monospace,Consolas,monospace;">${escapeHtml(t.body)}</textarea></div>
+      </div>
+    </form>
+  `, `<button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="document.getElementById('templateForm').requestSubmit()">保存</button>`, 'lg');
+}
+
+function saveTemplate(e, id) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  if (id) Object.assign(DB.templates.find(x => x.id === id), data);
+  else DB.templates.push({ id: uid(), ...data });
+  saveDB(); closeModal(); renderTemplates(); toast('已保存', 'success'); return false;
+}
+
+function deleteTemplate(id) {
+  if (!confirm('确定删除该模板？')) return;
+  DB.templates = DB.templates.filter(x => x.id !== id);
+  saveDB(); renderTemplates(); toast('已删除');
+}
+
+function composeEmail(customerId) {
+  const c = customerById(customerId);
+  if (!c) return;
+  const tplOptions = DB.templates.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
+
+  openModal('写邮件 给 ' + c.company, `
+    <div class="form-grid cols-1">
+      <div class="field"><label>选择模板</label>
+        <select id="tplSelect" onchange="applyTemplate('${customerId}')">
+          <option value="">-- 请选择模板 --</option>${tplOptions}
+        </select></div>
+      <div class="field"><label>产品名称（可选，用于 {{productName}}）</label>
+        <input id="emailProduct" placeholder="产品名称">
+      </div>
+      <div class="field"><label>主题</label>
+        <input id="emailSubject"></div>
+      <div class="field"><label>正文</label>
+        <textarea id="emailBody" rows="14" style="min-height:280px;font-family:ui-monospace,Consolas,monospace;"></textarea></div>
+    </div>
+    <div class="info-box" style="margin-top:10px;">
+      📋 编辑完成后点击"复制内容"，到邮件客户端粘贴。或点"打开邮件客户端"用本地客户端发送。
+    </div>
+  `, `<button class="btn" onclick="closeModal()">�

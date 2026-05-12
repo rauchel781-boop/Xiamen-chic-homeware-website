@@ -232,18 +232,24 @@ function ProductView({ p, locale }) {
     manufacturer: { '@id': `${SITE.siteUrl}/#organization` },
     category: p.categories?.[0]?.name || 'Wooden Products',
     url: `${SITE.siteUrl}/products/${p.slug}`,
-    // No public price — explicitly mark as a quote-only B2B product so Google
-    // doesn't expect a Product/Offer with price (avoids "fake offers" flag).
+    // Quote-only B2B product — no public price. Earlier we set price:'0' to
+    // satisfy schema validators, but Google Search Console flags that as
+    // "Invalid price" and revokes Product rich-result eligibility.
+    // Instead: omit price entirely, declare a PriceSpecification with
+    // currency + VAT flag so the offer is structurally valid, and lean on
+    // businessFunction + eligibleQuantity (MOQ) to signal wholesale intent.
     offers: {
       '@type': 'Offer',
       url: `${SITE.siteUrl}/contact`,
-      priceCurrency: 'USD',
-      price: '0',
-      priceValidUntil: '2099-12-31',
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/NewCondition',
       businessFunction: 'https://schema.org/Sell',
       eligibleQuantity: { '@type': 'QuantitativeValue', minValue: 100, unitCode: 'C62' },
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        priceCurrency: 'USD',
+        valueAddedTaxIncluded: false,
+      },
       seller: { '@id': `${SITE.siteUrl}/#organization` },
     },
   };

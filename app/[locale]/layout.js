@@ -131,15 +131,9 @@ const WEBSITE_LD = {
     'kitchenware, storage and gift packaging for B2B brands worldwide.',
   publisher: { '@id': `${SITE.siteUrl}/#organization` },
   inLanguage: 'en-US',
-  // Enables the Sitelinks Search Box in Google results
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: `${SITE.siteUrl}/products?q={search_term_string}`,
-    },
-    'query-input': 'required name=search_term_string',
-  },
+  // NOTE: SearchAction removed — /products?q= filtering isn't implemented,
+  // and a SearchAction that points to a non-functional URL hurts trust signals.
+  // Add it back once /products supports a real ?q= search filter + UI.
 };
 
 // Tells Next.js to pre-render every locale at build time.

@@ -622,8 +622,6 @@ hr.div { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-<script src="logo.js"></script>
 <script src="crm.js"></script>
 
 </body>
