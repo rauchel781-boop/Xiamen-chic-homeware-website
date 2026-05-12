@@ -613,7 +613,7 @@ function sanitizeRichHtml(html) {
       const n = attr.name.toLowerCase(), v = attr.value || '';
       if (n.startsWith('on')) el.removeAttribute(attr.name);
       else if (n === 'href' && /^\s*javascript:/i.test(v)) el.removeAttribute(attr.name);
-      else if (n === 'src' && !/^(https?:|data:image\/|\/|\.\/)/i.test(v)) el.removeAttribute(attr.name);
+      else if (n === 'src' && !/^(https?:|data:image\/|\/|\.\/|blob:)/i.test(v)) el.removeAttribute(attr.name);
     });
   });
   return d.innerHTML;
@@ -621,7 +621,7 @@ function sanitizeRichHtml(html) {
 
 function renderRichText(s) {
   if (!s) return '';
-  if (isHtml(s)) return resolveRichTextImages(sanitizeRichHtml(s));
+  if (isHtml(s)) return sanitizeRichHtml(resolveRichTextImages(s));
   return nl2br(s);
 }
 
@@ -651,7 +651,7 @@ function compressImgFile(file, callback) {
 function richTextEditor(name, raw, opts) {
   opts = opts || {};
   const id = 'rte_' + name + '_' + Math.random().toString(36).substr(2, 6);
-  const initial = isHtml(raw) ? resolveRichTextImages(sanitizeRichHtml(raw)) : escapeHtml(raw || '').replace(/\n/g, '<br>');
+  const initial = isHtml(raw) ? sanitizeRichHtml(resolveRichTextImages(raw)) : escapeHtml(raw || '').replace(/\n/g, '<br>');
   const placeholder = opts.placeholder || '在此输入...支持粘贴图片 (Ctrl+V)、拖入图片';
   const minH = opts.minHeight || 120;
   return `
