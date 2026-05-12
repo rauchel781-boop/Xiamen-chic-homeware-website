@@ -22,6 +22,12 @@ const ALIAS_REDIRECTS = {
   'wooden-products-factory-in-china': '/about',
   'complete-guide-wood-materials-for-kitchenware': '/material-guide',
   'blog-wooden-homeware-sourcing-blog': '/blog',
+  // Legacy WooCommerce wishlist orphan — covers both Next.js-decoded form (raw
+  // Chinese) and WP's URL-encoded form, in both upper- and lower-case hex.
+  // Sends /<locale>/心愿单 → /<locale> regardless of how the path arrives.
+  '心愿单':                          '/',
+  '%E5%BF%83%E6%84%BF%E5%8D%95':     '/',
+  '%e5%bf%83%e6%84%bf%e5%8d%95':     '/',
 };
 
 const RESERVED = new Set([

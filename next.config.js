@@ -61,10 +61,15 @@ const nextConfig = {
       // ── Wishlist orphan from WP/WooCommerce import → home ──
       // Chinese-slug page (心愿单 = "wishlist") leftover from the old WP store.
       // Has no business on the English B2B site; 301 to / to consolidate any link equity.
-      // Needs to cover both encoded + decoded forms, and all locale-prefixed variants
-      // (just /心愿单 wasn't catching /de/心愿单, /es/心愿单 etc.).
-      { source: '/心愿单',                            destination: '/',         permanent: true },
-      { source: '/:locale(de|es|fr|ja)/心愿单',       destination: '/:locale',  permanent: true },
+      // Belt-and-suspenders: cover both URL-encoded + decoded forms × all locales.
+      // Browsers/proxies may or may not decode the path before Next.js sees it,
+      // so we match both variants.
+      { source: '/心愿单',                                          destination: '/',         permanent: true },
+      { source: '/%E5%BF%83%E6%84%BF%E5%8D%95',                    destination: '/',         permanent: true },
+      { source: '/%e5%bf%83%e6%84%bf%e5%8d%95',                    destination: '/',         permanent: true },
+      { source: '/:locale(de|es|fr|ja)/心愿单',                    destination: '/:locale',  permanent: true },
+      { source: '/:locale(de|es|fr|ja)/%E5%BF%83%E6%84%BF%E5%8D%95', destination: '/:locale', permanent: true },
+      { source: '/:locale(de|es|fr|ja)/%e5%bf%83%e6%84%bf%e5%8d%95', destination: '/:locale', permanent: true },
 
       // ── Locale clean-up redirects ──────────────────────────────────
       // /en → / (English is the no-prefix canonical, localePrefix: 'as-needed')

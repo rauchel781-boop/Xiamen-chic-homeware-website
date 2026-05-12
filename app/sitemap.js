@@ -138,6 +138,11 @@ export default function sitemap() {
   for (const wp of wpPages()) {
     if (ALIAS_SLUGS.has(wp.slug)) continue;
     if (!wp.content || wp.content.length < 50) continue;
+    // Defensive: skip any slug with URL-encoded chars or non-ASCII (e.g. Chinese
+    // wishlist page 心愿单 stored as %e5%bf%83...). These are legacy WP artifacts
+    // not useful for international SEO.
+    if (/%[0-9a-fA-F]{2}/.test(wp.slug)) continue;
+    if (!/^[a-z0-9-]+$/i.test(wp.slug))   continue;
     push(`/${wp.slug}`, {
       lastModified: wp.date ? new Date(wp.date) : TODAY,
       priority: 0.5,
