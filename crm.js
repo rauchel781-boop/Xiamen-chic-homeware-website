@@ -253,13 +253,12 @@ async function migrateAllImagesToIndexedDB() {
 
 const NAV_MENU = [
   { id: 'dashboard',     name: '工作台',   icon: '▦' },
-  { id: 'leads',         name: '线索/询盘', icon: '◎' },
   { id: 'customers',     name: '客户',     icon: '●' },
-  { id: 'opportunities', name: '商机',     icon: '◆' },
   { id: 'products',      name: '产品库',   icon: '▣' },
   { id: 'quotations',    name: '报价单',   icon: '$' },
   { id: 'samples',       name: '样品',     icon: '⬢' },
   { id: 'orders',        name: '订单',     icon: '▤' },
+  { id: 'purchases',     name: '采购',     icon: '⊞' },
   { id: 'shipments',     name: '出货单',   icon: '📦' },
   { id: 'followups',     name: '跟进',     icon: '◉' },
   { id: 'templates',     name: '邮件模板', icon: '✉' },
@@ -515,6 +514,7 @@ let DB = {
   samples: [],
   orders: [],
   shipments: [],
+  purchases: [],
   followups: [],
   templates: [],
   meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
@@ -535,6 +535,7 @@ function loadDB() {
     DB.productCategories = DB.productCategories || [];
     DB.quotations = DB.quotations || [];
     DB.shipments = DB.shipments || [];
+    DB.purchases = DB.purchases || [];
     migrateProducts();
     migrateSamples();
     migrateOrders();
@@ -993,9 +994,9 @@ document.getElementById('nav').addEventListener('click', e => {
 
 function render() {
   const fn = ({
-    dashboard: renderDashboard, leads: renderLeads, customers: renderCustomers,
-    opportunities: renderOpps, products: renderProducts, quotations: renderQuotations,
-    samples: renderSamples, orders: renderOrders, shipments: renderShipments, followups: renderFollowups,
+    dashboard: renderDashboard, customers: renderCustomers,
+    products: renderProducts, quotations: renderQuotations,
+    samples: renderSamples, orders: renderOrders, purchases: renderPurchases, shipments: renderShipments, followups: renderFollowups,
     templates: renderTemplates, backup: renderBackup
   })[currentPage];
   fn && fn();
@@ -1027,10 +1028,7 @@ function renderDashboard() {
     .sort((a,b) => (a.reminderDate||'').localeCompare(b.reminderDate||''));
   const today = DB.followups.filter(f => f.reminderDate && !f.done && f.reminderDate === todayStr());
 
-  const newLeads = DB.leads.filter(l => l.status === '新询盘').length;
   const importantCustomers = DB.customers.filter(c => c.status === '重点客户').length;
-  const activeOpps = DB.opportunities.filter(o => !['已赢', '已输'].includes(o.stage));
-  const oppValue = activeOpps.reduce((s, o) => s + (Number(o.expectedAmount) || 0) * (Number(o.probability) || 0) / 100, 0);
   const inProduction = DB.orders.filter(o => o.productionStatus === '生产中').length;
   const unpaid = DB.orders.filter(o => o.paymentStatus !== '已结清').reduce((s, o) => s + (Number(o.amount) || 0), 0);
 
@@ -1061,19 +1059,9 @@ function renderDashboard() {
         <div class="stat-sub">今天该联系的客户</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">新询盘</div>
-        <div class="stat-value blue">${newLeads}</div>
-        <div class="stat-sub">尚未处理的询盘</div>
-      </div>
-      <div class="stat-card">
         <div class="stat-label">重点客户</div>
         <div class="stat-value">${importantCustomers}</div>
         <div class="stat-sub">共 ${DB.customers.length} 个客户</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">商机加权金额</div>
-        <div class="stat-value blue">${Math.round(oppValue).toLocaleString()}</div>
-        <div class="stat-sub">${activeOpps.length} 个活跃商机（混合币种）</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">生产中订单</div>
@@ -1385,7 +1373,6 @@ function viewCustomerDetail(id) {
   const samples = DB.samples.filter(x => x.customerId === id);
   const orders = DB.orders.filter(x => x.customerId === id);
   const followups = DB.followups.filter(x => x.customerId === id);
-  const opps = DB.opportunities.filter(x => x.customerId === id);
   const qts = DB.quotations.filter(x => x.customerId === id);
 
   const events = [];
@@ -1412,12 +1399,7 @@ function viewCustomerDetail(id) {
     content: (o.currency || '') + ' ' + Number(o.amount || 0).toLocaleString() + ' / ' + (o.productionStatus || ''),
     extra: o.items || ''
   }));
-  opps.forEach(o => events.push({
-    date: o.createdAt, dot: 'red',
-    title: '商机 · ' + (o.stage || ''),
-    content: o.title + ' (' + (o.currency || '') + ' ' + Number(o.expectedAmount || 0).toLocaleString() + ')',
-    extra: o.nextStep ? '下一步：' + o.nextStep : ''
-  }));
+
   (DB.shipments || []).filter(x => x.customerId === id).forEach(s => {
     const t = calcShipmentTotal(s);
     events.push({
@@ -3628,6 +3610,7 @@ function renderOrders() {
               <button class="btn-link" onclick="editOrder('${o.id}')">编辑</button>
               <button class="btn-link" onclick="exportOrderPIZh('${o.id}')" title="导出中文订单确认书">↓中</button>
               <button class="btn-link" onclick="exportOrderPIEn('${o.id}')" title="导出英文 Proforma Invoice">↓EN</button>
+              <button class="btn-link" onclick="createPurchaseFromOrder('${o.id}')" title="基于此订单创建采购单">→采购</button>
               <button class="btn-link" onclick="createShipmentFromOrder('${o.id}')" title="基于此订单创建出货单">→出货</button>
               <button class="btn-link danger" onclick="deleteOrder('${o.id}')">删除</button>
             </td>
@@ -4446,6 +4429,413 @@ function deleteOrder(id) {
   if (!confirm('确定删除该订单？')) return;
   DB.orders = (DB.orders || []).filter(x => x.id !== id);
   saveDB(); renderOrders(); toast('已删除');
+}
+
+// === 采购模块 ===
+
+const PURCHASE_STATUSES = [
+  { name: '待下单', tag: 'tag-gray' },
+  { name: '生产中', tag: 'tag-blue' },
+  { name: '已到货', tag: 'tag-green' },
+  { name: '已结清', tag: 'tag-purple' },
+];
+
+let purchaseFilter = '', purchaseStatusFilter = '', purchaseFactoryFilter = '';
+let _editingPurchase = null;
+let _purchasePickerItemId = null;
+let _expandedPurchases = new Set();
+
+function calcPurchaseTotal(p) {
+  return (p.items || []).reduce((s, it) => {
+    const qty = Number(it.qty) || 0;
+    const price = Number(it.unitPriceWithTax || it.unitPriceNoTax) || 0;
+    return s + qty * price;
+  }, 0);
+}
+
+function togglePurchaseExpand(id) {
+  if (_expandedPurchases.has(id)) _expandedPurchases.delete(id);
+  else _expandedPurchases.add(id);
+  renderPurchases();
+}
+
+function renderPurchaseExpandedItems(p) {
+  const items = p.items || [];
+  if (items.length === 0) return '<div class="muted" style="padding:8px;">无产品</div>';
+  return '<table style="width:100%;background:#fff;border:1px solid #e5e7eb;">' +
+    '<thead><tr style="background:#f8fafb;">' +
+      '<th style="width:42px;text-align:center;">#</th>' +
+      '<th style="width:60px;text-align:center;">图片</th>' +
+      '<th>产品编号</th>' +
+      '<th>产品名</th>' +
+      '<th>规格</th>' +
+      '<th class="text-right">数量</th>' +
+      '<th class="text-right">单价(不含税)</th>' +
+      '<th class="text-right">单价(含税)</th>' +
+      '<th>生产周期</th>' +
+      '<th class="text-right">小计</th>' +
+    '</tr></thead><tbody>' +
+    items.map((it, idx) => {
+      const prod = it.productId ? productById(it.productId) : null;
+      const qty = Number(it.qty) || 0;
+      const pn = Number(it.unitPriceNoTax) || 0;
+      const pw = Number(it.unitPriceWithTax) || 0;
+      const sub = (qty * (pw || pn)).toFixed(2);
+      return '<tr>' +
+        '<td class="text-center muted">' + (idx + 1) + '</td>' +
+        '<td class="text-center">' + (prod && prod.image ? '<img src="' + imgUrl(prod.image) + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
+        '<td class="code">' + escapeHtml((prod && prod.code) || '-') + '</td>' +
+        '<td>' + escapeHtml(it.productName || (prod && (prod.nameZh || prod.nameEn)) || '-') + '</td>' +
+        '<td class="muted">' + escapeHtml(it.specs || '-') + '</td>' +
+        '<td class="text-right">' + qty + '</td>' +
+        '<td class="text-right">' + (pn ? '¥' + pn.toFixed(2) : '-') + '</td>' +
+        '<td class="text-right">' + (pw ? '¥' + pw.toFixed(2) : '-') + '</td>' +
+        '<td class="muted">' + escapeHtml(it.productionDays || '-') + '</td>' +
+        '<td class="text-right"><strong>¥' + sub + '</strong></td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table>';
+}
+
+function renderPurchases() {
+  document.getElementById('pageTitle').textContent = '采购管理';
+  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editPurchase()">+ 新建采购单</button>`;
+  setTabs('');
+  const kw = purchaseFilter.toLowerCase();
+  const factories = [...new Set((DB.purchases || []).map(p => p.factoryName).filter(x => x))];
+
+  const list = (DB.purchases || []).filter(p => {
+    const items = p.items || [];
+    const productMatch = items.some(it => (it.productName||'').toLowerCase().includes(kw));
+    return (!kw || (p.code||'').toLowerCase().includes(kw) || productMatch || (p.factoryName||'').toLowerCase().includes(kw))
+        && (!purchaseStatusFilter || p.status === purchaseStatusFilter)
+        && (!purchaseFactoryFilter || p.factoryName === purchaseFactoryFilter);
+  }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const total = list.reduce((s, p) => s + calcPurchaseTotal(p), 0);
+
+  document.getElementById('content').innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-box" placeholder="搜索 采购单号 / 工厂 / 产品..." value="${escapeHtml(purchaseFilter)}" oninput="purchaseFilter=this.value;renderPurchases()">
+        <select class="btn" onchange="purchaseFactoryFilter=this.value;renderPurchases()">
+          <option value="">全部工厂</option>
+          ${factories.map(f => `<option value="${escapeHtml(f)}" ${purchaseFactoryFilter===f?'selected':''}>${escapeHtml(f)}</option>`).join('')}
+        </select>
+        <select class="btn" onchange="purchaseStatusFilter=this.value;renderPurchases()">
+          <option value="">全部状态</option>
+          ${PURCHASE_STATUSES.map(s => `<option ${purchaseStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+        <span class="muted">共 ${list.length} 单 / 合计 ¥${total.toLocaleString()}</span>
+      </div>
+      ${list.length === 0 ? '<div class="empty">暂无采购单</div>' : `
+      <table>
+        <thead><tr>
+          <th style="width:30px;"></th>
+          <th style="width:50px;">图片</th>
+          <th>采购单号</th><th>工厂</th>
+          <th>产品</th><th class="text-right">产品数</th>
+          <th class="text-right">金额(RMB)</th>
+          <th>采购日期</th><th>预计到货</th>
+          <th>状态</th>
+          <th class="text-right">操作</th>
+        </tr></thead>
+        <tbody>
+        ${list.map(p => {
+          const items = p.items || [];
+          const firstProd = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
+          const amount = calcPurchaseTotal(p);
+          const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameZh || (productById(it.productId)||{}).nameEn || '-').join('; ');
+          const expanded = _expandedPurchases.has(p.id);
+          let html = `<tr>
+            <td class="text-center" style="cursor:pointer;user-select:none;" onclick="togglePurchaseExpand('${p.id}')">
+              <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
+            </td>
+            <td>${firstProd && firstProd.image ? '<img src="' + imgUrl(firstProd.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+            <td class="code"><strong>${escapeHtml(p.code || '-')}</strong></td>
+            <td>${escapeHtml(p.factoryName || '-')}</td>
+            <td class="muted">${escapeHtml(truncate(productNames, 35))}</td>
+            <td class="text-right">${items.length}</td>
+            <td class="text-right no-wrap"><strong>¥${amount.toLocaleString()}</strong></td>
+            <td class="no-wrap">${fmtDate(p.date)}</td>
+            <td class="no-wrap muted">${fmtDate(p.expectedDate) || '-'}</td>
+            <td><span class="tag ${getStatus(PURCHASE_STATUSES, p.status).tag}">${escapeHtml(p.status || '-')}</span></td>
+            <td class="text-right no-wrap">
+              <button class="btn-link" onclick="editPurchase('${p.id}')">编辑</button>
+              <button class="btn-link danger" onclick="deletePurchase('${p.id}')">删除</button>
+            </td>
+          </tr>`;
+          if (expanded) {
+            html += '<tr><td colspan="11" style="padding:0;background:#fafbfc;"><div style="padding:8px 12px;">' + renderPurchaseExpandedItems(p) + '</div></td></tr>';
+          }
+          return html;
+        }).join('')}
+        </tbody>
+      </table>`}
+    </div>
+  `;
+}
+
+function editPurchase(id) {
+  if (id) {
+    const p = (DB.purchases || []).find(x => x.id === id);
+    if (!p) return;
+    _editingPurchase = JSON.parse(JSON.stringify(p));
+    if (!_editingPurchase.items) _editingPurchase.items = [];
+  } else {
+    _editingPurchase = {
+      id: uid(),
+      code: nextCode('PUR'),
+      factoryName: '',
+      date: todayStr(),
+      expectedDate: '',
+      actualDate: '',
+      status: '待下单',
+      paymentTerms: '',
+      notes: '',
+      items: [],
+      createdAt: new Date().toISOString(),
+    };
+  }
+  openModal((id ? '编辑采购单 ' : '新建采购单 ') + _editingPurchase.code,
+    renderPurchaseForm(),
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="savePurchaseForm('${id || ''}')">保存</button>`,
+    'xl');
+}
+
+function renderPurchaseForm() {
+  const p = _editingPurchase;
+  return `
+    <div class="form-grid cols-3" style="margin-bottom:14px;">
+      <div class="field"><label>采购单号</label>
+        <input value="${escapeHtml(p.code || '')}" oninput="_editingPurchase.code=this.value"></div>
+      <div class="field"><label>工厂名称 <span class="req">*</span></label>
+        <input value="${escapeHtml(p.factoryName || '')}" oninput="_editingPurchase.factoryName=this.value" placeholder="供应工厂"></div>
+      <div class="field"><label>状态</label>
+        <select onchange="_editingPurchase.status=this.value">${PURCHASE_STATUSES.map(s => `<option ${p.status===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
+      <div class="field"><label>采购日期</label>
+        <input type="date" value="${fmtDate(p.date)}" onchange="_editingPurchase.date=this.value"></div>
+      <div class="field"><label>预计到货日期</label>
+        <input type="date" value="${fmtDate(p.expectedDate)}" onchange="_editingPurchase.expectedDate=this.value"></div>
+      <div class="field"><label>实际到货日期</label>
+        <input type="date" value="${fmtDate(p.actualDate)}" onchange="_editingPurchase.actualDate=this.value"></div>
+      <div class="field full"><label>付款条款</label>
+        <input value="${escapeHtml(p.paymentTerms || '')}" oninput="_editingPurchase.paymentTerms=this.value" placeholder="如 30% 定金 70% 见提单复印件"></div>
+      <div class="field full"><label>备注</label>
+        <textarea oninput="_editingPurchase.notes=this.value">${escapeHtml(p.notes || '')}</textarea></div>
+    </div>
+
+    <div style="margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center;">
+      <strong style="font-size:14px;">采购产品</strong>
+      <button type="button" class="btn btn-sm btn-primary" onclick="addPurchaseItem()">+ 添加产品</button>
+    </div>
+    <div id="purchaseItems">${p.items.length === 0 ? '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>' : p.items.map(it => purchaseItemHtml(it)).join('')}</div>
+    <div id="purchaseTotal" style="margin-top:14px;">${purchaseTotalHtml()}</div>
+  `;
+}
+
+function purchaseItemHtml(item) {
+  return `
+    <div class="ship-item" data-purchase-item="${item.id}" style="border:1px solid #e5e7eb;border-radius:6px;padding:10px;margin-bottom:8px;background:#fff;">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:flex-end;">
+        <div class="field">
+          <label>产品</label>
+          <div style="display:flex;gap:6px;align-items:stretch;">
+            ${purchaseItemProductCardHtml(item)}
+            <button type="button" class="btn btn-sm" onclick="openPurchaseItemPicker('${item.id}')" style="white-space:nowrap;">${item.productId ? '更换' : '选择'}</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>数量</label>
+          <input type="number" min="0" step="1" value="${escapeHtml(item.qty || '')}" oninput="changePurchaseItem('${item.id}','qty',this.value)">
+        </div>
+        <div class="field">
+          <label>单价(不含税)</label>
+          <input type="number" min="0" step="0.01" value="${escapeHtml(item.unitPriceNoTax||'')}" oninput="changePurchaseItem('${item.id}','unitPriceNoTax',this.value)">
+        </div>
+        <div class="field">
+          <label>单价(含税)</label>
+          <input type="number" min="0" step="0.01" value="${escapeHtml(item.unitPriceWithTax||'')}" oninput="changePurchaseItem('${item.id}','unitPriceWithTax',this.value)">
+        </div>
+        <div class="field">
+          <label>小计</label>
+          <input value="${purchaseItemSubtotal(item)}" disabled style="background:#f9fafb;">
+        </div>
+        <div>
+          <button type="button" class="btn btn-sm" onclick="removePurchaseItem('${item.id}')" style="color:#ef4444;">删除</button>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div class="field">
+          <label>产品名（可改）</label>
+          <input value="${escapeHtml(item.productName||'')}" oninput="changePurchaseItem('${item.id}','productName',this.value)">
+        </div>
+        <div class="field">
+          <label>规格</label>
+          <input value="${escapeHtml(item.specs||'')}" oninput="changePurchaseItem('${item.id}','specs',this.value)">
+        </div>
+        <div class="field">
+          <label>生产周期</label>
+          <input value="${escapeHtml(item.productionDays||'')}" oninput="changePurchaseItem('${item.id}','productionDays',this.value)" placeholder="如 30 天">
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px;">
+        <label>工艺要求</label>
+        <textarea rows="2" oninput="changePurchaseItem('${item.id}','productCraft',this.value)" placeholder="材质、表面处理、特殊要求等">${escapeHtml(item.productCraft||'')}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function purchaseItemProductCardHtml(item) {
+  const p = productById(item.productId);
+  if (!p) {
+    return '<div class="ship-product-card"><div class="no-img">?</div><div class="info"><span class="empty-line">未选择</span></div></div>';
+  }
+  return '<div class="ship-product-card">' +
+    (p.image ? '<img src="' + imgUrl(p.image) + '">' : '<div class="no-img">无图</div>') +
+    '<div class="info">' +
+      '<div class="code-line">' + escapeHtml(p.code || '-') + '</div>' +
+      '<div class="name-line">' + escapeHtml(p.nameZh || p.nameEn || '-') + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function purchaseItemSubtotal(item) {
+  const qty = Number(item.qty) || 0;
+  const price = Number(item.unitPriceWithTax || item.unitPriceNoTax) || 0;
+  const sub = qty * price;
+  return sub > 0 ? sub.toFixed(2) : '';
+}
+
+function purchaseTotalHtml() {
+  const total = calcPurchaseTotal(_editingPurchase);
+  return `
+    <div style="border:2px solid #4a90e2;border-radius:6px;padding:12px 14px;background:#eff6ff;">
+      <div style="font-weight:600;margin-bottom:8px;color:#1e40af;font-size:13px;">采购合计</div>
+      <div style="font-size:16px;">总金额：<strong style="color:#1e40af;font-size:18px;">¥${total.toFixed(2)}</strong></div>
+    </div>
+  `;
+}
+
+function addPurchaseItem() {
+  if (!_editingPurchase) return;
+  if (DB.products.length === 0) { toast('请先添加产品', 'error'); return; }
+  openProductPickerV2('purchase-add');
+}
+
+function removePurchaseItem(itemId) {
+  if (!confirm('确定删除该行？')) return;
+  _editingPurchase.items = _editingPurchase.items.filter(x => x.id !== itemId);
+  const el = document.querySelector('[data-purchase-item="' + itemId + '"]');
+  if (el) el.remove();
+  if (_editingPurchase.items.length === 0) {
+    document.getElementById('purchaseItems').innerHTML = '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>';
+  }
+  refreshPurchaseTotal();
+}
+
+function changePurchaseItem(itemId, field, value) {
+  const it = _editingPurchase.items.find(x => x.id === itemId);
+  if (!it) return;
+  it[field] = value;
+  if (field === 'qty' || field === 'unitPriceNoTax' || field === 'unitPriceWithTax') {
+    const el = document.querySelector('[data-purchase-item="' + itemId + '"]');
+    if (el) {
+      const subs = el.querySelectorAll('input[disabled]');
+      if (subs && subs.length > 0) subs[0].value = purchaseItemSubtotal(it);
+    }
+    refreshPurchaseTotal();
+  }
+}
+
+function refreshPurchaseTotal() {
+  const el = document.getElementById('purchaseTotal');
+  if (el) el.innerHTML = purchaseTotalHtml();
+}
+
+function openPurchaseItemPicker(itemId) {
+  openProductPickerV2('purchase-replace', { itemId });
+}
+
+function savePurchaseForm(id) {
+  const p = _editingPurchase;
+  if (!p) return;
+  if (!p.factoryName) { toast('请填写工厂名称', 'error'); return; }
+  if (p.items.length === 0) { toast('请添加至少一个产品', 'error'); return; }
+  if (!p.code) p.code = nextCode('PUR');
+  for (const it of p.items) {
+    if (!it.productId && !it.productName) { toast('每行必须选产品或填产品名', 'error'); return; }
+  }
+  if (!DB.purchases) DB.purchases = [];
+  if (id) {
+    const idx = DB.purchases.findIndex(x => x.id === id);
+    if (idx >= 0) DB.purchases[idx] = p;
+    else DB.purchases.push(p);
+  } else {
+    DB.purchases.push(p);
+  }
+  try { saveDB(); } catch(err) { toast('保存失败：' + err.message, 'error'); return; }
+  _editingPurchase = null;
+  closeModal();
+  renderPurchases();
+  toast('已保存', 'success');
+}
+
+function deletePurchase(id) {
+  if (!confirm('确定删除该采购单？')) return;
+  DB.purchases = (DB.purchases || []).filter(x => x.id !== id);
+  saveDB(); renderPurchases(); toast('已删除');
+}
+
+// 订单→采购
+function createPurchaseFromOrder(orderId) {
+  const o = (DB.orders || []).find(x => x.id === orderId);
+  if (!o) return;
+  if (!confirm('基于此订单创建采购单？产品/数量自动带入，单价默认用产品的采购价（含税）')) return;
+  const newItems = (o.items || []).map(it => {
+    const prod = it.productId ? productById(it.productId) : null;
+    return {
+      id: uid(),
+      productId: it.productId || '',
+      productName: it.productName || (prod && (prod.nameZh || prod.nameEn)) || '',
+      specs: it.specs || (prod && prod.specs) || '',
+      qty: Number(it.qty) || 0,
+      unitPriceNoTax: (prod && prod.purchasePriceNoTax) || '',
+      unitPriceWithTax: (prod && prod.purchasePriceWithTax) || '',
+      productionDays: '',
+      productCraft: it.descriptionZh || (prod && (prod.descriptionZh || prod.description)) || '',
+    };
+  });
+  // 选第一个产品的工厂名作默认
+  const firstProd = newItems[0] && newItems[0].productId ? productById(newItems[0].productId) : null;
+  const factoryName = (firstProd && firstProd.factoryName) || '';
+  currentPage = 'purchases';
+  renderNav();
+  render();
+  setTimeout(() => {
+    _editingPurchase = {
+      id: uid(),
+      code: nextCode('PUR'),
+      factoryName: factoryName,
+      date: todayStr(),
+      expectedDate: o.deliveryDate || '',
+      actualDate: '',
+      status: '待下单',
+      paymentTerms: '',
+      notes: '基于订单 ' + (o.orderNo || '') + ' 创建',
+      sourceOrderId: o.id,
+      items: newItems,
+      createdAt: new Date().toISOString(),
+    };
+    openModal('新建采购单 ' + _editingPurchase.code,
+      renderPurchaseForm(),
+      '<button class="btn" onclick="closeModal()">取消</button>' +
+      `<button class="btn btn-primary" onclick="savePurchaseForm('')">保存</button>`,
+      'xl');
+    toast('已从订单 ' + (o.orderNo || '') + ' 创建采购单（请确认工厂和单价）', 'success');
+  }, 100);
 }
 
 // 占位 - 阶段 2/3 实现
@@ -5641,19 +6031,10 @@ function exportExcel() {
       日期: f.date, 客户: customerLookup(f.customerId), 方式: f.channel,
       内容: htmlToText(f.content), 下一步: f.nextAction, 提醒日期: f.reminderDate, 已处理: f.done ? '是' : '否'
     })),
-    '商机': DB.opportunities.map(o => ({
-      标题: o.title, 客户: customerLookup(o.customerId),
-      预计金额: o.expectedAmount, 币种: o.currency, 阶段: o.stage,
-      概率: o.probability, 预计成交: o.expectedCloseDate, 下一步: o.nextStep
-    })),
     '报价单': DB.quotations.map(q => ({
       编号: q.code, 日期: q.date, 客户: customerLookup(q.customerId),
       币种: q.currency, 总金额: q.totalAmount, 状态: q.status, 有效期: q.validUntil,
       项数: (q.items||[]).length, 付款方式: q.paymentTerms, 交货期: q.leadTime
-    })),
-    '询盘': DB.leads.map(l => ({
-      日期: l.date, 来源: l.source, 询盘人: l.buyerName, 公司: l.company,
-      国家: l.country, 邮箱: l.email, 询盘内容: l.message, 状态: l.status
     })),
   };
   Object.entries(sheets).forEach(([name, rows]) => {
@@ -5723,7 +6104,7 @@ async function importData(e) {
       DB = Object.assign({
         customers: [], leads: [], opportunities: [], products: [],
         productCategories: [], quotations: [], samples: [], orders: [],
-        shipments: [], followups: [], templates: [],
+        shipments: [], purchases: [], followups: [], templates: [],
         meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
       }, data);
       DB.shipments = DB.shipments || [];
@@ -5752,7 +6133,7 @@ async function importData(e) {
       DB = Object.assign({
         customers: [], leads: [], opportunities: [], products: [],
         productCategories: [], quotations: [], samples: [], orders: [],
-        shipments: [], followups: [], templates: [],
+        shipments: [], purchases: [], followups: [], templates: [],
         meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
       }, data);
       DB.shipments = DB.shipments || [];
@@ -5784,7 +6165,7 @@ function clearAllData() {
   DB = {
     customers: [], leads: [], opportunities: [], products: [],
     productCategories: [], quotations: [], samples: [], orders: [],
-    shipments: [], followups: [],
+    shipments: [], purchases: [], followups: [],
     templates: DEFAULT_TEMPLATES.map(t => ({ ...t, id: uid() })),
     meta: { version: 2, updatedAt: null, counters: {}, myName: '', tags: [] }
   };
@@ -5972,6 +6353,25 @@ function pickerConfirmAddAll() {
     const wrap = document.getElementById('shipItems');
     if (wrap) wrap.innerHTML = _editingShipment.items.map(it => shipmentItemHtml(it)).join('');
     refreshShipmentTotal();
+  } else if (_pickerMode === 'purchase-add') {
+    pids.forEach(pid => {
+      const prod = productById(pid);
+      const it = {
+        id: uid(),
+        productId: pid,
+        productName: (prod && (prod.nameZh || prod.nameEn)) || '',
+        specs: (prod && prod.specs) || '',
+        productCraft: (prod && (prod.descriptionZh || prod.description)) || '',
+        qty: '',
+        unitPriceNoTax: (prod && prod.purchasePriceNoTax) || '',
+        unitPriceWithTax: (prod && prod.purchasePriceWithTax) || '',
+        productionDays: '',
+      };
+      _editingPurchase.items.push(it);
+    });
+    const wrap = document.getElementById('purchaseItems');
+    if (wrap) wrap.innerHTML = _editingPurchase.items.map(it => purchaseItemHtml(it)).join('');
+    refreshPurchaseTotal();
   }
 
   closeProductPicker();
@@ -6014,6 +6414,19 @@ function pickerReplaceConfirm(pid) {
       const el = document.querySelector('[data-ship-item="' + _pickerTargetItemId + '"]');
       if (el) el.outerHTML = shipmentItemHtml(it);
       refreshShipmentTotal();
+    }
+  } else if (_pickerMode === 'purchase-replace') {
+    const it = _editingPurchase.items.find(x => x.id === _pickerTargetItemId);
+    if (it) {
+      it.productId = pid;
+      if (!it.productName) it.productName = p.nameZh || p.nameEn || '';
+      if (!it.specs) it.specs = p.specs || '';
+      if (!it.productCraft) it.productCraft = p.descriptionZh || p.description || '';
+      if (!it.unitPriceNoTax && p.purchasePriceNoTax) it.unitPriceNoTax = p.purchasePriceNoTax;
+      if (!it.unitPriceWithTax && p.purchasePriceWithTax) it.unitPriceWithTax = p.purchasePriceWithTax;
+      const el = document.querySelector('[data-purchase-item="' + _pickerTargetItemId + '"]');
+      if (el) el.outerHTML = purchaseItemHtml(it);
+      refreshPurchaseTotal();
     }
   }
   closeProductPicker();
