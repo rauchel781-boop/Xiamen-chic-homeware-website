@@ -5,6 +5,7 @@
 
 import { unstable_setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -179,9 +180,15 @@ function CategoryView({ cat, locale }) {
                 href={`/products/${p.slug}`}
                 className="group bg-white rounded-lg overflow-hidden border border-brand-line hover:shadow-lg transition"
               >
-                <div className="aspect-square bg-stone-100">
+                <div className="relative aspect-square bg-stone-100 overflow-hidden">
                   {p.featured_image && (
-                    <img src={p.featured_image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    <Image
+                      src={p.featured_image}
+                      alt={stripHtml(p.title)}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition duration-500"
+                    />
                   )}
                 </div>
                 <div className="p-4">
@@ -271,9 +278,16 @@ function ProductView({ p, locale }) {
 
         <div className="grid lg:grid-cols-2 gap-10 mb-12">
           <div>
-            <div className="aspect-square bg-stone-100 rounded-xl overflow-hidden">
+            <div className="relative aspect-square bg-stone-100 rounded-xl overflow-hidden">
               {p.featured_image ? (
-                <img src={p.featured_image} alt={p.title} className="w-full h-full object-cover" />
+                <Image
+                  src={p.featured_image}
+                  alt={stripHtml(p.title)}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                  className="object-cover"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-brand-mute">No image</div>
               )}
@@ -281,8 +295,14 @@ function ProductView({ p, locale }) {
             {p.gallery?.length > 0 && (
               <div className="grid grid-cols-4 gap-3 mt-4">
                 {p.gallery.slice(0, 8).map((g, i) => (
-                  <div key={i} className="aspect-square bg-stone-100 rounded overflow-hidden">
-                    <img src={g} alt="" className="w-full h-full object-cover" />
+                  <div key={i} className="relative aspect-square bg-stone-100 rounded overflow-hidden">
+                    <Image
+                      src={g}
+                      alt={`${stripHtml(p.title)} — detail ${i + 1}`}
+                      fill
+                      sizes="(max-width: 768px) 25vw, 12vw"
+                      className="object-cover"
+                    />
                   </div>
                 ))}
               </div>
@@ -358,8 +378,16 @@ function ProductView({ p, locale }) {
                   href={`/products/${r.slug}`}
                   className="group bg-white border border-brand-line rounded-lg overflow-hidden hover:shadow-lg transition"
                 >
-                  <div className="aspect-square bg-stone-100">
-                    {r.featured_image && <img src={r.featured_image} alt="" className="w-full h-full object-cover" />}
+                  <div className="relative aspect-square bg-stone-100 overflow-hidden">
+                    {r.featured_image && (
+                      <Image
+                        src={r.featured_image}
+                        alt={stripHtml(r.title)}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    )}
                   </div>
                   <div className="p-3">
                     <h3 className="text-sm font-semibold text-brand-green line-clamp-2">{r.title}</h3>

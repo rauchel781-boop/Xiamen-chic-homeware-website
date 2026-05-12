@@ -4,6 +4,7 @@
 // Author/brand card · Newsletter band · Related articles · Final CTA
 import { unstable_setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
@@ -163,11 +164,14 @@ export default function BlogPost({ params }) {
       {/* ── FEATURED IMAGE ── */}
       {p.featured_image && (
         <div className="max-w-[1100px] mx-auto px-6 lg:px-8 -mt-2 lg:-mt-6 relative z-10">
-          <div className="aspect-[16/9] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-            <img
+          <div className="relative aspect-[16/9] bg-brand-cream rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+            <Image
               src={p.featured_image}
               alt={stripHtml(p.title)}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 1100px) 100vw, 1100px"
+              priority
+              className="object-cover"
             />
           </div>
         </div>
@@ -309,12 +313,13 @@ export default function BlogPost({ params }) {
                   className="group bg-white border border-brand-line rounded-2xl overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col"
                 >
                   {r.featured_image && (
-                    <div className="aspect-[16/10] bg-brand-cream overflow-hidden">
-                      <img
+                    <div className="relative aspect-[16/10] bg-brand-cream overflow-hidden">
+                      <Image
                         src={r.featured_image}
-                        alt=""
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
+                        alt={stripHtml(r.title)}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-[1.03] transition duration-500"
                       />
                     </div>
                   )}
