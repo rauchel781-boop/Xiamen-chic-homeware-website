@@ -232,26 +232,22 @@ function ProductView({ p, locale }) {
     manufacturer: { '@id': `${SITE.siteUrl}/#organization` },
     category: p.categories?.[0]?.name || 'Wooden Products',
     url: `${SITE.siteUrl}/products/${p.slug}`,
-    // Quote-only B2B product — no public price. Earlier we set price:'0' to
-    // satisfy schema validators, but Google Search Console flags that as
-    // "Invalid price" and revokes Product rich-result eligibility.
-    // Instead: omit price entirely, declare a PriceSpecification with
-    // currency + VAT flag so the offer is structurally valid, and lean on
-    // businessFunction + eligibleQuantity (MOQ) to signal wholesale intent.
-    offers: {
-      '@type': 'Offer',
-      url: `${SITE.siteUrl}/contact`,
-      availability: 'https://schema.org/InStock',
-      itemCondition: 'https://schema.org/NewCondition',
-      businessFunction: 'https://schema.org/Sell',
-      eligibleQuantity: { '@type': 'QuantitativeValue', minValue: 100, unitCode: 'C62' },
-      priceSpecification: {
-        '@type': 'PriceSpecification',
-        priceCurrency: 'USD',
-        valueAddedTaxIncluded: false,
-      },
-      seller: { '@id': `${SITE.siteUrl}/#organization` },
-    },
+    // ── No `offers` block by design ────────────────────────────────────
+    // This is a B2B quote-only catalog — public prices don't exist. We
+    // tried two intermediate schemes:
+    //   1. price: '0'                  → Google flagged "Invalid price"
+    //   2. PriceSpecification w/o price → Google flagged "Missing price"
+    //
+    // Both broke Product rich-result eligibility site-wide. Cleanest fix
+    // is to omit `offers` entirely. Trade-off: no "Merchant listing"
+    // price snippet in SERP, but all other rich results (BreadcrumbList,
+    // FAQPage, Organization knowledge panel) keep working — and a
+    // "$3 starting from" snippet would actually hurt B2B credibility
+    // for an OEM/ODM factory anyway.
+    //
+    // To re-enable Product rich results later: add `aggregateRating`
+    // (from real customer reviews) or switch to `AggregateOffer` with
+    // honest lowPrice/highPrice that reflects MOQ-based wholesale ranges.
   };
 
   return (
