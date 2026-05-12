@@ -7,7 +7,8 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, routing } from '@/i18n/routing';
+import { schemaLang } from '@/i18n/seo';
 import ContactClient from './ContactClient';
 
 export async function generateMetadata({ params: { locale } = {} }) {
@@ -105,27 +106,53 @@ const FAQ = [
 export default function ContactPage({ params: { locale } }) {
   unstable_setRequestLocale(locale);
 
+  // localePrefix: 'as-needed' — English has NO prefix, others get /<locale>/.
+  // Schema URLs must match the canonical (or they 301-redirect, which Google flags).
+  const localePrefix = locale === routing.defaultLocale ? '' : `/${locale}`;
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.siteUrl}/${locale}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.siteUrl}${localePrefix || '/'}` },
       { '@type': 'ListItem', position: 2, name: 'Contact' },
     ],
   };
   const contactLd = {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
-    url: `${SITE.siteUrl}/${locale}/contact`,
+    '@id': `${SITE.siteUrl}${localePrefix}/contact#page`,
+    url: `${SITE.siteUrl}${localePrefix}/contact`,
     name: 'Contact CHIC',
+    description: 'Contact Xiamen Chic Homeware for custom wooden product quotes — email, WhatsApp, WeChat or contact form. Reply within 24 hours.',
+    inLanguage: schemaLang(locale),
     isPartOf: { '@id': `${SITE.siteUrl}/#website` },
     about: { '@id': `${SITE.siteUrl}/#organization` },
+    mainEntity: { '@id': `${SITE.siteUrl}/#organization` },
+    // FAQPage schema enables FAQ rich result — the contact page has 5+ FAQs
+    // and Google rewards content that pre-answers common pre-sales questions.
+    significantLink: [
+      `${SITE.siteUrl}${localePrefix}/about`,
+      `${SITE.siteUrl}${localePrefix}/products`,
+    ],
+  };
+
+  // FAQ schema for the on-page FAQs (real pre-sales objections)
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
   };
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={contactLd} />
+      <JsonLd data={faqLd} />
       {/* ── Hero ── */}
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8 py-14 lg:py-20">

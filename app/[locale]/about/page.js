@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
+import { schemaLang } from '@/i18n/seo';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const title = 'About CHIC — Custom Wooden Products Factory in Xiamen, China';
@@ -35,11 +36,27 @@ const ABOUT_BREADCRUMB = (locale) => ({
 const ABOUT_PAGE_LD = (locale) => ({
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
+  '@id': `${SITE.siteUrl}/about#page`,
   url: `${SITE.siteUrl}/about`,
   name: 'About CHIC — Wooden Products Factory in China',
+  description: 'Xiamen Chic Homeware Co.,Ltd. — wooden products factory in China, OEM & ODM manufacturer for global brands. 15+ years export experience, 20,000m² factory floor.',
+  inLanguage: schemaLang(locale),
   isPartOf: { '@id': `${SITE.siteUrl}/#website` },
   about: { '@id': `${SITE.siteUrl}/#organization` },
+  mainEntity: { '@id': `${SITE.siteUrl}/#organization` },
   primaryImageOfPage: `${SITE.siteUrl}/CHIC%20Factory.jpg`,
+  // Gallery — gives the AboutPage entity visual richness in knowledge panel
+  image: [
+    `${SITE.siteUrl}/CHIC%20Factory.jpg`,
+    `${SITE.siteUrl}/wp-images/2026/01/raw-material-warehouse.jpg`,
+    `${SITE.siteUrl}/wp-images/2026/01/production.jpg`,
+    `${SITE.siteUrl}/wp-images/2026/01/machine-4.jpg`,
+  ],
+  significantLink: [
+    `${SITE.siteUrl}/products`,
+    `${SITE.siteUrl}/contact`,
+    `${SITE.siteUrl}/material-guide`,
+  ],
 });
 
 // ─────────────────────────────────────────────────────────────────
