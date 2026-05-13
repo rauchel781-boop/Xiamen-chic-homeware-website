@@ -36,3 +36,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local CRM tool — not part of the website
+/crm.js
+/crm.js.bak-*
+/外贸客户管理系统.html
+/外贸客户管理系统.html.bak-*
+*.bak-py-*
+.translate-cache.json
