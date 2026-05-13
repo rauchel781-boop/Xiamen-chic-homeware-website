@@ -12,7 +12,7 @@ export default function CTA() {
           24 hours on business days.
         </p>
         <div className="mt-8">
-          <Link href="/contact" className="btn-yellow">
+          <Link href="/contact#form" className="btn-yellow">
             Send Us Your Needs Now
           </Link>
         </div>

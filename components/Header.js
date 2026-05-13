@@ -122,7 +122,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <LanguageSwitcher />
             <Link
-              href="/contact"
+              href="/contact#form"
               className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white shadow-md hover:bg-brand-greenDark transition"
             >
               {t('cta.getFreeQuoteCaps')}
@@ -162,7 +162,7 @@ export default function Header() {
               <LanguageSwitcher />
             </div>
             <Link
-              href="/contact"
+              href="/contact#form"
               onClick={() => setMobileOpen(false)}
               className="mt-2 inline-flex items-center justify-center w-full rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white"
             >

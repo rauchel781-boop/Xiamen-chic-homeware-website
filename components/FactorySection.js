@@ -108,7 +108,7 @@ export default function FactorySection() {
                 {t('learnMore')}
               </Link>
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
               >
                 {t('talkToTeam')}

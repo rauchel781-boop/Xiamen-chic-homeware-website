@@ -118,7 +118,7 @@ export default function CaseStudies() {
             </div>
             <div className="lg:justify-self-end">
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition"
               >
                 {t('ctaButton')}

@@ -89,7 +89,7 @@ export default function FAQ() {
                   </a>
                 </li>
                 <li>
-                  <Link href="/contact" className="flex items-center gap-3 text-brand-ink hover:text-brand-green group">
+                  <Link href="/contact#form" className="flex items-center gap-3 text-brand-ink hover:text-brand-green group">
                     <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-brand-line text-brand-green group-hover:bg-brand-green group-hover:text-white group-hover:border-brand-green transition shrink-0">
                       <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </span>

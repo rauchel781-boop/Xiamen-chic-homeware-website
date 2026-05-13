@@ -38,7 +38,7 @@ export default function MaterialsSection() {
                 {t('exploreGuide')} →
               </Link>
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center text-[15px] font-semibold text-brand-green hover:text-brand-greenDark px-2 py-3"
               >
                 {t('askEngineers')}

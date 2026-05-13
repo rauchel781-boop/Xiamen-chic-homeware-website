@@ -161,7 +161,7 @@ export default function FloatingChat() {
         {/* Footer */}
         <div className="px-5 pb-5 pt-2">
           <a
-            href="/contact"
+            href="/contact#form"
             className="block w-full text-center rounded-xl bg-brand-green text-white font-bold py-3 text-sm hover:bg-brand-greenDark transition"
           >
             Send a Detailed Inquiry →

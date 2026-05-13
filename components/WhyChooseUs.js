@@ -31,7 +31,7 @@ export default function WhyChooseUs() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
                 {tCta('getFreeQuote')}

@@ -335,7 +335,7 @@ export default function MaterialsGuide({ params: { locale } }) {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/contact"
+              href="/contact#form"
               className="inline-flex items-center rounded-full bg-brand-green px-8 py-3.5 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
             >
               {t('bottomCtaTalk')}
@@ -747,7 +747,7 @@ function SourcingChecklist() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
                 {t('ckCta')} →

@@ -270,7 +270,7 @@ export default function ProductsIndex({ params: { locale } }) {
               <div className="mt-5 bg-brand-greenDeep text-white rounded-2xl p-5">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-yellowSoft mb-2">Can&apos;t find it?</p>
                 <h4 className="font-extrabold text-base mb-2 leading-snug">Send us your sketch — we&apos;ll quote any wooden product.</h4>
-                <Link href="/contact" className="mt-3 inline-flex items-center rounded-full bg-white text-brand-green px-4 py-2 text-xs font-bold hover:bg-brand-cream transition">
+                <Link href="/contact#form" className="mt-3 inline-flex items-center rounded-full bg-white text-brand-green px-4 py-2 text-xs font-bold hover:bg-brand-cream transition">
                   Custom Inquiry →
                 </Link>
               </div>
@@ -295,7 +295,7 @@ export default function ProductsIndex({ params: { locale } }) {
             product, or just a written brief — we develop new wooden products from scratch every week.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-green px-8 py-3.5 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition">
+            <Link href="/contact#form" className="inline-flex items-center rounded-full bg-brand-green px-8 py-3.5 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition">
               Start a Custom Project
             </Link>
             <Link href="/material-guide" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-8 py-3.5 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">

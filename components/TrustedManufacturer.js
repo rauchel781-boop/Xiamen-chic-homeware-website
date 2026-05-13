@@ -48,7 +48,7 @@ export default function TrustedManufacturer() {
 
         <div className="mt-8 flex justify-center">
           <Link
-            href="/contact"
+            href="/contact#form"
             className="inline-flex items-center rounded-full bg-white text-brand-green px-8 py-3.5 text-[15px] font-bold hover:bg-brand-cream transition"
           >
             Start a Project →

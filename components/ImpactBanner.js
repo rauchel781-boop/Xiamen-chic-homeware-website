@@ -41,7 +41,7 @@ export default function ImpactBanner() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/contact"
+              href="/contact#form"
               className="inline-flex items-center rounded-full bg-white text-brand-green px-7 py-3 text-[15px] font-bold hover:bg-brand-cream transition"
             >
               {t('startProject')} →

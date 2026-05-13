@@ -162,7 +162,7 @@ export default function WoodenSofaTrayPage({ params }) {
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href="/contact"
+                  href="/contact#form"
                   className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
                 >
                   {t('ctaQuote')}
@@ -426,7 +426,7 @@ export default function WoodenSofaTrayPage({ params }) {
 
           <div className="mt-10 flex justify-center">
             <Link
-              href="/contact"
+              href="/contact#form"
               className="inline-flex items-center rounded-full bg-brand-green px-8 py-3.5 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
             >
               {t('sampleCta')}
@@ -452,7 +452,7 @@ export default function WoodenSofaTrayPage({ params }) {
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition"
               >
                 {tCta('getFreeQuote')}

@@ -255,7 +255,7 @@ export default function BlogPost({ params }) {
                   </p>
                 </div>
                 <Link
-                  href="/contact"
+                  href="/contact#form"
                   className="shrink-0 inline-flex items-center justify-center rounded-full bg-brand-green text-white font-semibold text-sm px-5 py-2.5 hover:bg-brand-greenDark transition"
                 >
                   Get a Quote →
@@ -322,7 +322,7 @@ export default function BlogPost({ params }) {
                   Get a wholesale quote in 24 hours.
                 </p>
                 <Link
-                  href="/contact"
+                  href="/contact#form"
                   className="inline-flex items-center rounded-full bg-white text-brand-green font-semibold text-sm px-4 py-2 hover:bg-brand-cream transition"
                 >
                   Contact Us →
@@ -429,7 +429,7 @@ export default function BlogPost({ params }) {
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition"
               >
                 Get a Free Quote
