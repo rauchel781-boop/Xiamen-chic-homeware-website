@@ -140,52 +140,91 @@ export default function ContactPage({ params: { locale } }) {
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={contactLd} />
       <JsonLd data={faqLd} />
-      {/* ── Hero ── */}
+      {/* ── Hero with FORM ON FIRST VIEWPORT ──
+          Conversion-first redesign: the inquiry form is the primary
+          element above the fold. Left column carries the SEO H1 +
+          short pitch + trust badges; right column is the form card,
+          rendered immediately so anyone arriving from an inquiry
+          button sees it without scrolling. */}
       <header className="bg-brand-cream border-b border-brand-line">
-        <div className="max-w-[1320px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
+        <div className="max-w-[1320px] mx-auto px-6 lg:px-8 py-10 lg:py-14">
           <nav className="text-xs text-brand-mute mb-4">
             <Link href="/" className="hover:text-brand-green">{tNav('home')}</Link>
             {' / '}
             <span className="text-brand-ink">{t('breadcrumb')}</span>
           </nav>
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-4">
-            {t('heroEyebrow')}
-          </p>
-          <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10 lg:gap-16 items-end">
-            <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
-              {t('heroH1Pre')}{' '}
-              <span className="text-brand-green">{t('heroH1Highlight')}</span>.
-            </h1>
-            <p className="text-brand-mute leading-relaxed lg:pb-3">
-              {t('heroSubtitle')}
-            </p>
-          </div>
 
-          {/* Quick stats */}
-          <div className="mt-9 flex flex-wrap gap-3 text-sm">
-            <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
-              <span className="font-extrabold text-brand-ink mr-2">≤ 24h</span>
-              <span className="text-brand-mute">{t('statQuote')}</span>
-            </span>
-            <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
-              <span className="font-extrabold text-brand-ink mr-2">EN · CN · JP</span>
-              <span className="text-brand-mute">{t('statLangs')}</span>
-            </span>
-            <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
-              <span className="font-extrabold text-brand-ink mr-2">60+</span>
-              <span className="text-brand-mute">{t('statMarkets')}</span>
-            </span>
-            <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
-              <span className="font-extrabold text-brand-ink mr-2">Mon–Sat</span>
-              <span className="text-brand-mute">{t('statHours')}</span>
-            </span>
+          {/* Single-H1 layout with explicit grid placement:
+              • Mobile (1 col):  H1  →  Form  →  Intro + Trust  →  Helpful list
+              • Desktop (2 col): [H1 + Intro + Trust + Helpful] | [Form spanning 2 rows]
+              Single H1 in DOM (good for SEO); form lands in the first
+              viewport on both screen sizes. */}
+          <div className="grid gap-6 lg:gap-14 lg:grid-cols-[1fr_1.1fr]">
+
+            {/* 1️⃣ TITLE — top of mobile / top-left of desktop */}
+            <div className="order-1 lg:order-none lg:col-start-1 lg:row-start-1">
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-2 lg:mb-3">
+                {t('formEyebrow')}
+              </p>
+              <h1 className="text-2xl md:text-3xl lg:text-[2.75rem] font-extrabold tracking-tight text-brand-ink leading-[1.1]">
+                {t('formTitlePre')}{' '}
+                <span className="text-brand-green">{t('formTitleHighlight')}</span>
+              </h1>
+            </div>
+
+            {/* 2️⃣ FORM — second on mobile (right under the title) /
+                right column spanning 2 rows on desktop */}
+            <div id="form" className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2 bg-white rounded-2xl border border-brand-line p-6 lg:p-8 shadow-sm scroll-mt-20">
+              <ContactClient />
+              <p className="mt-5 pt-5 border-t border-brand-line text-[12px] text-brand-mute leading-relaxed">
+                {t('privacyBody')}
+              </p>
+            </div>
+
+            {/* 3️⃣ INTRO + trust + helpful — bottom of mobile /
+                bottom-left of desktop, under the H1 */}
+            <div className="order-3 lg:order-none lg:col-start-1 lg:row-start-2">
+              <p className="text-brand-mute leading-relaxed text-[15px] lg:text-[16px]">
+                {t('formIntro')}
+              </p>
+
+              {/* Trust badges — compact, stacked rows */}
+              <div className="mt-6 lg:mt-7 space-y-2.5">
+                <TrustItem strong="≤ 24h" text={t('statQuote')} />
+                <TrustItem strong="EN · CN · JP" text={t('statLangs')} />
+                <TrustItem strong="60+" text={t('statMarkets')} />
+                <TrustItem strong="Mon–Sat" text={t('statHours')} />
+              </div>
+
+              {/* "What we'll ask" checklist — desktop only (mobile hides
+                  it so the form stays the focal point). */}
+              <div className="mt-8 hidden lg:block bg-white rounded-2xl border border-brand-line p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-2">
+                  {t('helpfulEyebrow')}
+                </p>
+                <p className="font-bold text-brand-ink text-[14px] mb-3">{t('helpfulTitle')}</p>
+                <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
+                  {HELPFUL.map((line) => (
+                    <li key={line} className="flex items-start gap-1.5 text-[12px] text-brand-ink/80 leading-snug">
+                      <CheckBadge />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* ── Quick channels strip ── */}
-      <section className="py-10 lg:py-12 border-b border-brand-line">
+      {/* ── Quick channels — alternative ways to contact us ──
+          Now BELOW the form, for visitors who'd rather email/WhatsApp/
+          call directly. Same 4 channels, smaller visual weight. */}
+      <section className="py-10 lg:py-12 bg-white border-b border-brand-line">
         <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-mute mb-5">
+            {t('orReachUs')}
+          </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {CHANNELS.map((c) => (
               <a
@@ -205,57 +244,6 @@ export default function ContactPage({ params: { locale } }) {
                 </div>
               </a>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Form + side panel ── */}
-      <section className="py-16 lg:py-20 border-b border-brand-line">
-        <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[1.5fr_1fr] gap-10 lg:gap-14">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
-                {t('formEyebrow')}
-              </p>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15] mb-6">
-                {t('formTitlePre')}{' '}
-                <span className="text-brand-green">{t('formTitleHighlight')}</span>
-              </h2>
-              <p className="text-brand-mute leading-relaxed mb-8">
-                {t('formIntro')}
-              </p>
-              <ContactClient />
-            </div>
-
-            {/* Side panel */}
-            <aside className="space-y-6">
-              {/* What we'll ask */}
-              <div className="bg-brand-cream rounded-2xl border border-brand-line p-6 lg:p-7">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-3">
-                  {t('helpfulEyebrow')}
-                </p>
-                <h3 className="font-extrabold text-brand-ink mb-3">{t('helpfulTitle')}</h3>
-                <ul className="space-y-2">
-                  {HELPFUL.map((line) => (
-                    <li key={line} className="flex items-start gap-2 text-sm text-brand-ink/85">
-                      <CheckBadge />
-                      <span>{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Reassurance */}
-              <div className="bg-brand-greenDeep text-white rounded-2xl p-6 lg:p-7">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-yellowSoft mb-3">
-                  {t('privacyEyebrow')}
-                </p>
-                <h3 className="text-lg font-extrabold mb-3 leading-snug">{t('privacyTitle')}</h3>
-                <p className="text-sm text-white/75 leading-relaxed">
-                  {t('privacyBody')}
-                </p>
-              </div>
-            </aside>
           </div>
         </div>
       </section>
@@ -427,6 +415,23 @@ export default function ContactPage({ params: { locale } }) {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────
+
+// Single-row trust badge for the contact-page hero. Stacks vertically
+// so the form on the right stays the visual focal point. Each row =
+// a green checkmark + bold metric + descriptive sub-label.
+function TrustItem({ strong, text }) {
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-white shrink-0">
+        <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 8.5l3 3 6-6" />
+        </svg>
+      </span>
+      <span className="font-extrabold text-brand-ink">{strong}</span>
+      <span className="text-brand-mute">{text}</span>
+    </div>
+  );
+}
 
 function CheckBadge() {
   return (
