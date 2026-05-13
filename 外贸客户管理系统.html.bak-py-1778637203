@@ -409,8 +409,6 @@ hr.div { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ship-product-card .empty-line { color: #9ca3af; font-size: 12px; }
-.ship-product-card img { transition: transform 0.15s; cursor: zoom-in; position: relative; z-index: 1; }
-.ship-product-card img:hover { transform: scale(5); transform-origin: left center; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.25); background: #fff; }
 .ship-detail-thumb {
   width: 36px; height: 36px; object-fit: contain; background: #f9fafb;
   border-radius: 3px; vertical-align: middle;

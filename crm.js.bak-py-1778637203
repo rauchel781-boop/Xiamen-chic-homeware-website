@@ -2469,6 +2469,10 @@ function renderQuotations() {
     <div class="table-wrap">
       <div class="table-toolbar">
         <input class="search-box" placeholder="搜索 报价编号 / 客户..." value="${escapeHtml(qtFilter)}" oninput="qtFilter=this.value;renderQuotations()">
+        <select class="btn" onchange="qtStatusFilter=this.value;renderQuotations()">
+          <option value="">全部状态</option>
+          ${QT_STATUSES.map(s => `<option ${qtStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
+        </select>
         <span class="muted">共 ${list.length} 条</span>
       </div>
       ${list.length === 0 ? '<div class="empty">暂无报价单</div>' : `
@@ -2476,7 +2480,7 @@ function renderQuotations() {
         <thead><tr>
           <th style="width:30px;"></th>
           <th>报价编号</th><th>日期</th><th>客户</th><th>项数</th><th class="text-right">总金额</th>
-          <th>有效期</th><th class="text-right">操作</th>
+          <th>状态</th><th>有效期</th><th class="text-right">操作</th>
         </tr></thead>
         <tbody>
         ${list.map(q => {
@@ -2491,6 +2495,7 @@ function renderQuotations() {
             <td>${customerNameWithFlag(q.customerId)}</td>
             <td>${(q.items || []).length}</td>
             <td class="text-right no-wrap"><strong>${escapeHtml(q.currency || '')} ${Number(q.totalAmount || 0).toLocaleString()}</strong></td>
+            <td><span class="tag ${getStatus(QT_STATUSES, q.status).tag}">${escapeHtml(q.status || '-')}</span></td>
             <td class="no-wrap muted">${fmtDate(q.validUntil) || '-'}</td>
             <td class="text-right no-wrap">
               <button class="btn-link" onclick="viewQuotation('${q.id}')">详情</button>
@@ -2498,11 +2503,11 @@ function renderQuotations() {
               <button class="btn-link" onclick="cloneQuotation('${q.id}')" title="复制此报价单">复制</button>
               <button class="btn-link" onclick="exportQuotationZh('${q.id}')" title="导出中文报价需求表">↓中</button>
               <button class="btn-link" onclick="exportQuotationEn('${q.id}')" title="导出英文 Quotation">↓EN</button>
-              <button class="btn-link" onclick="convertQtToOrder('${q.id}')">转订单</button>
+              ${q.status !== '已转订单' ? `<button class="btn-link" onclick="convertQtToOrder('${q.id}')">转订单</button>` : ''}
               <button class="btn-link danger" onclick="deleteQuotation('${q.id}')">删除</button>
             </td>
           </tr>
-          ${expanded ? `<tr><td colspan="8" style="padding:8px 16px;background:#fafbfc;">${renderQuotationExpandedItems(q)}</td></tr>` : ''}
+          ${expanded ? `<tr><td colspan="9" style="padding:8px 16px;background:#fafbfc;">${renderQuotationExpandedItems(q)}</td></tr>` : ''}
         `;}).join('')}
         </tbody>
       </table>`}
@@ -2513,7 +2518,7 @@ function renderQuotations() {
 function editQuotation(id, customerId) {
   if (DB.customers.length === 0) { toast('请先添加客户', 'error'); return; }
   const q = id ? DB.quotations.find(x => x.id === id) : {
-    customerId: customerId || '', date: todayStr(), currency: 'USD', items: []
+    customerId: customerId || '', date: todayStr(), currency: 'USD', status: '草稿', items: []
   };
   q.items = q.items || [];
 
@@ -2530,6 +2535,8 @@ function editQuotation(id, customerId) {
           <select name="currency">${CURRENCIES.map(c => `<option ${q.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
         <div class="field"><label>有效期</label>
           <input name="validUntil" type="date" value="${fmtDate(q.validUntil)}"></div>
+        <div class="field"><label>状态</label>
+          <select name="status">${QT_STATUSES.map(s => `<option ${q.status===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
       </div>
       <div class="detail-section">
         <div class="detail-section-title" style="display:flex;justify-content:space-between;align-items:center;">
@@ -2558,7 +2565,7 @@ function editQuotation(id, customerId) {
         <div class="field"><label>交货期</label>
           <input name="leadTime" value="${escapeHtml(q.leadTime || '')}"></div>
         <div class="field"><label>贸易条款</label>
-          <input name="tradeTerms" value="${escapeHtml(q.tradeTerms || 'EXW')}"></div>
+          <input name="tradeTerms" value="${escapeHtml(q.tradeTerms || 'FOB')}"></div>
         <div class="field"><label>备注</label>
           <textarea name="notes">${escapeHtml(q.notes || '')}</textarea></div>
       </div>
@@ -2696,20 +2703,19 @@ function viewQuotation(id) {
       <dt>报价编号</dt><dd class="code">${escapeHtml(q.code || '-')}</dd>
       <dt>日期</dt><dd>${fmtDate(q.date) || '-'}</dd>
       <dt>客户</dt><dd>${customerNameWithFlag(q.customerId)}</dd>
+      <dt>状态</dt><dd><span class="tag ${getStatus(QT_STATUSES, q.status).tag}">${escapeHtml(q.status || '-')}</span></dd>
       <dt>有效期</dt><dd>${fmtDate(q.validUntil) || '-'}</dd>
       <dt>付款方式</dt><dd>${escapeHtml(q.paymentTerms || '-')}</dd>
       <dt>交货期</dt><dd>${escapeHtml(q.leadTime || '-')}</dd>
       <dt>贸易条款</dt><dd>${escapeHtml(q.tradeTerms || '-')}</dd>
     </dl>
     <table class="qt-items" style="margin-top:14px;">
-      <thead><tr><th style="width:70px;">图片</th><th>产品</th><th>规格</th><th class="num">数量</th><th class="num">单价</th><th class="num">小计</th></tr></thead>
+      <thead><tr><th>产品</th><th>规格</th><th class="num">数量</th><th class="num">单价</th><th class="num">小计</th></tr></thead>
       <tbody>
       ${(q.items || []).map(it => {
         const p = productById(it.productId);
         const name = it.productId === '__custom' ? it.customName : (p ? (p.nameEn || p.nameZh) : '[已删除]');
-        const imgHtml = (p && p.image) ? '<div class="ship-product-card" style="padding:2px;border:none;"><img src="' + imgUrl(p.image) + '" style="width:56px;height:56px;"></div>' : '<span class="muted">-</span>';
         return `<tr>
-          <td class="text-center">${imgHtml}</td>
           <td>${escapeHtml(name)}</td>
           <td class="muted">${escapeHtml(it.specs || '')}</td>
           <td class="num">${it.qty}</td>
@@ -2718,7 +2724,7 @@ function viewQuotation(id) {
         </tr>`;
       }).join('')}
       </tbody>
-      <tfoot><tr><td colspan="5" class="text-right bold">合计</td>
+      <tfoot><tr><td colspan="4" class="text-right bold">合计</td>
         <td class="num bold">${escapeHtml(q.currency || '')} ${Number(q.totalAmount || 0).toFixed(2)}</td></tr></tfoot>
     </table>
     ${q.notes ? '<div class="info-box" style="margin-top:14px;">备注：' + nl2br(q.notes) + '</div>' : ''}
@@ -2779,11 +2785,11 @@ async function exportQuotationZh(id) {
     pageMargins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4 }
   });
 
-  // 8 列：产品编号 | 产品图 | 数量 | 尺寸 | 中文描述 | 中文包装 | 箱规 | 不含税运人民币价格
-  [16, 18, 10, 16, 26, 20, 22, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+  // 7 列：产品编号 | 产品图 | 数量 | 尺寸 | 中文描述 | 中文包装 | 不含税运人民币价格
+  [16, 18, 10, 18, 30, 22, 18].forEach((w, i) => { ws.getColumn(i + 1).width = w; });
 
   // 大标题
-  ws.mergeCells('A1:H1');
+  ws.mergeCells('A1:G1');
   const t = ws.getCell('A1');
   t.value = '报 价 需 求 表';
   t.font = { name: 'Microsoft YaHei', bold: true, size: 24, color: { argb: 'FF1F2937' } };
@@ -2792,7 +2798,7 @@ async function exportQuotationZh(id) {
 
   // 客户/日期信息
   const c = customerById(q.customerId);
-  ws.mergeCells('A3:H3');
+  ws.mergeCells('A3:G3');
   const info = ws.getCell('A3');
   info.value = '客户：' + (c ? c.company : '-') + '    日期：' + todayStr() + '    单号：' + (q.code || '-');
   info.font = { name: 'Microsoft YaHei', size: 11, color: { argb: 'FF4B5563' } };
@@ -2801,7 +2807,7 @@ async function exportQuotationZh(id) {
 
   // 表头
   const tableStart = 5;
-  const headers = ['产品编号', '产品图', '数量', '尺寸', '中文描述', '中文包装', '箱规(个/箱·外箱cm·毛重)', '不含税运人民币价格'];
+  const headers = ['产品编号', '产品图', '数量', '尺寸', '中文描述', '中文包装', '不含税运人民币价格'];
   ws.getRow(tableStart).height = 40;
   headers.forEach((h, i) => {
     const cell = ws.getCell(tableStart, i + 1);
@@ -2817,7 +2823,7 @@ async function exportQuotationZh(id) {
     const it = items[i];
     const p = it.productId && it.productId !== '__custom' ? productById(it.productId) : null;
     const r = tableStart + i + 1;
-    ws.getRow(r).height = 130;  // 加大行高
+    ws.getRow(r).height = 120;  // 加大行高
     ws.getCell(r, 1).value = (p && p.code) || '-';
     if (p && p.image) await addProductImage(wb, ws, 'B' + r, p.image, 110, 110);  // 加大图
     ws.getCell(r, 2).value = '';
@@ -2825,65 +2831,21 @@ async function exportQuotationZh(id) {
     ws.getCell(r, 4).value = it.specs || (p && p.specs) || '';
     ws.getCell(r, 5).value = (p && (p.descriptionZh || p.description)) || '';
     ws.getCell(r, 6).value = (p && (p.packingZh || p.packing)) || '';
-    // 箱规
-    let packingStr = '';
-    if (p && hasPackingInfo(p)) {
-      packingStr = (p.qtyPerCarton || '?') + '/箱\n' + p.cartonLength + '×' + p.cartonWidth + '×' + p.cartonHeight + 'cm\n毛重 ' + p.cartonGrossWeight + 'kg';
-    }
-    ws.getCell(r, 7).value = packingStr;
     // 不含税运（即不含税不含运费） — 使用不含税采购价
     const factoryPrice = p ? (Number(p.purchasePriceNoTax) || '') : '';
-    ws.getCell(r, 8).value = factoryPrice;
+    ws.getCell(r, 7).value = factoryPrice;
 
-    for (let col = 1; col <= 8; col++) {
+    for (let col = 1; col <= 7; col++) {
       const cell = ws.getCell(r, col);
       cell.font = { name: 'Microsoft YaHei', size: 10, color: { argb: 'FF1F2937' } };
       cell.border = thinBorderS();
-      if ([1, 2, 3, 4, 7].includes(col)) cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      else if (col === 8) {
+      if ([1, 2, 3, 4].includes(col)) cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      else if (col === 7) {
         cell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
         cell.numFmt = '¥#,##0.00';
       } else cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
     }
   }
-
-  // 底部统计：总箱数 / 总体积 / 总重量
-  let totalCartons = 0, totalCBM = 0, totalGW = 0;
-  for (const it of items) {
-    const p = it.productId && it.productId !== '__custom' ? productById(it.productId) : null;
-    if (!p || !hasPackingInfo(p)) continue;
-    const perBox = Number(p.qtyPerCarton) || 0;
-    const qty = Number(it.qty) || 0;
-    if (perBox <= 0) continue;
-    const ctn = Math.ceil(qty / perBox);
-    totalCartons += ctn;
-    totalCBM += ctn * calcCartonCBM(p);
-    totalGW += ctn * (Number(p.cartonGrossWeight) || 0);
-  }
-  const sumStart = tableStart + items.length + 1;
-  const sumRows = [
-    ['总箱数', totalCartons + ' 箱'],
-    ['总体积', totalCBM.toFixed(4) + ' CBM'],
-    ['总毛重', totalGW.toFixed(2) + ' kg']
-  ];
-  sumRows.forEach((row, i) => {
-    const r = sumStart + i;
-    ws.mergeCells('A' + r + ':F' + r);
-    const labelCell = ws.getCell(r, 1);
-    labelCell.value = row[0];
-    labelCell.font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FF1F2937' } };
-    labelCell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
-    labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
-    labelCell.border = thinBorderS();
-    ws.mergeCells('G' + r + ':H' + r);
-    const valCell = ws.getCell(r, 7);
-    valCell.value = row[1];
-    valCell.font = { name: 'Microsoft YaHei', bold: true, size: 11, color: { argb: 'FFB91C1C' } };
-    valCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    valCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } };
-    valCell.border = thinBorderS();
-    ws.getRow(r).height = 22;
-  });
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
