@@ -109,6 +109,36 @@ export const SITE = {
     projectId: 'wq9r1ngdo9',
   },
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Team — named individuals behind the company.
+  // Each entry is rendered as a Person schema.org card on /about/team and
+  // (for `chuan` and `cassie`) used as the author on blog posts.
+  // The `slug` is the i18n key prefix in messages/en.json `team` namespace.
+  // ─────────────────────────────────────────────────────────────────────
+  team: [
+    { slug: 'chuan',    name: 'Chuan Pu',       photo: '/people/chuan-pu.png',       roleKey: 'chuanRole',    bioKey: 'chuanBio'    },
+    { slug: 'cassie',   name: 'Cassie Zhang',   photo: '/people/cassie-zhang.jpg',   roleKey: 'cassieRole',   bioKey: 'cassieBio'   },
+    { slug: 'yucheng',  name: 'Yucheng Lu',     photo: '/people/yucheng-lu.png',     roleKey: 'yuchengRole',  bioKey: 'yuchengBio'  },
+    { slug: 'vivi',     name: 'Vivi Cheng',     photo: '/people/vivi-cheng.png',     roleKey: 'viviRole',     bioKey: 'viviBio'     },
+    { slug: 'lingling', name: 'Lingling Zhang', photo: '/people/lingling-zhang.png', roleKey: 'linglingRole', bioKey: 'linglingBio' },
+  ],
+
+  // Blog authors — rotation pool. Each post's author is picked
+  // deterministically from this list based on slug hash (see
+  // app/[locale]/blog/[slug]/page.js). All entries must also exist in
+  // the `team` array above so their bios are reachable.
+  blogAuthors: ['chuan', 'cassie'],
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Alibaba — verified-supplier status to display in trust strips.
+  // tier: 'gold' shows the Gold Supplier badge text + year on join.
+  // ─────────────────────────────────────────────────────────────────────
+  alibaba: {
+    tier: 'gold',
+    joinYear: 2025,
+    url: 'https://quke.en.alibaba.com',
+  },
+
   // Bump this date whenever we re-run scripts/translate.mjs to regenerate
   // de/es/fr/ja content. It becomes the BlogPosting.dateModified value on
   // translated locale variants and the basis for honest "freshness" signals.

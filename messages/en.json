@@ -83,6 +83,8 @@
     "madeInXiamen": "Made in Xiamen, China",
     "legalPrivacy": "Privacy Policy",
     "legalTerms": "Terms of Service",
+    "alibabaBadge": "Alibaba Gold Supplier",
+    "alibabaSince": "Since",
     "aboutLink": "About CHIC",
     "materialGuideLink": "Material Guide",
     "woodFabrication": "Wood Fabrication",
@@ -1144,6 +1146,41 @@
     "ctaBody": "Most of our buyers start with one product, one sample, and a single conversation. Tell us what you're trying to source and we'll come back within one business day with a real proposal.",
     "ctaButton": "Tell us about your project →",
     "disclaimer": "Case studies are anonymized to protect partner confidentiality. Specific volumes, SKU counts, and years reflect typical engagement patterns and may vary by account. References available after a signed NDA."
+  },
+  "team": {
+    "metaTitle": "Meet the Team — CHIC Wooden Expert",
+    "metaDesc": "The people behind CHIC: founder Chuan Pu, sales lead Cassie Zhang, production lead Yucheng Lu, design lead Vivi Cheng, and quality lead Lingling Zhang.",
+    "pageEyebrow": "Meet the team",
+    "pageTitle": "The people behind every shipment.",
+    "pageIntro": "CHIC is a real factory run by real people. Below are the five who lead our day-to-day work — from the founder who started the company fifteen years ago, to the team members you'll be talking to and emailing once you start a project with us.",
+    "breadcrumb": "Team",
+    "viewAllRoles": "View team",
+    "chuanRole": "Founder & CEO",
+    "chuanBio": "Chuan Pu founded CHIC in 2010 after more than a decade working across China's wooden-products supply chain — from raw timber sourcing in Cao County to finished export programs for global brands. His hands-on background informs how CHIC approaches material selection and helps buyers match the right wood to the right project. Chuan believes that better-informed buyers make better products, and that sustainably sourced wood, well crafted, will outperform a generic hardwood every time.",
+    "cassieRole": "Head of Sales",
+    "cassieBio": "Cassie leads the sales team and is the first point of contact for most of our long-term partners. With many years in foreign trade and B2B export, she is known for clear communication, fast turnaround on quotes and samples, and a no-shortcuts approach to problem-solving — whether that means untangling a sudden specification change mid-production or coordinating an urgent FBA-deadline shipment. Her view: the supplier who takes ownership when something goes wrong is the supplier worth keeping.",
+    "yuchengRole": "Production Manager",
+    "yuchengBio": "Yucheng runs day-to-day production at our 15,000 m² facility in Cao County. After three years at CHIC he knows every machine, every finisher, and every workshop lead by name. His job is to translate signed sales orders into finished goods on the dock — on spec, on time, and at the quality level the buyer signed off on. When sales says 'the buyer wants tighter grain on the lid,' Yucheng is the person who makes that happen on the floor.",
+    "viviRole": "Head of Design",
+    "viviBio": "Vivi is the bridge between buyer intent and what the factory floor can actually build. Once a product brief is confirmed with sales, she develops the construction drawings, material specifications, and prototype iterations — coordinating directly with the production team and the sales account manager. Her focus: drawings the workshop can hit, finishes the buyer will love, and details that survive a 30,000-piece production run without drift.",
+    "linglingRole": "Head of Quality",
+    "linglingBio": "Lingling owns quality from in-process inspection through final pre-shipment QC. She runs the 100% visual inspection for premium accounts and AQL sampling for the rest, and writes the corrective-action reports when a sample fails. Her standing rule on the floor: if a defect is found, it gets logged, root-caused, and fixed — never quietly shipped. That is how buyers come back season after season."
+  },
+  "founderStory": {
+    "eyebrow": "From the founder",
+    "title": "Why I started CHIC.",
+    "p1": "I started CHIC after a decade in wooden products because I kept seeing the same problem on both sides of the table.",
+    "p2": "Many of our buyers — brilliant product designers, established kitchenware brands, talented Amazon sellers — didn't fully understand the trade-offs between different wood materials. They would specify walnut for a budget-line storage box, or pine for a premium serving tray, and the result was either over-engineered cost or under-delivered quality.",
+    "p3": "On the factory side, suppliers often just took the order without flagging the mismatch. Easier to quote what the buyer asked for than to explain why a different wood would actually work better.",
+    "p4": "CHIC was built to close that gap. We treat material education as part of our service — we will tell you when paulownia makes more sense than pine, or when an acacia-walnut two-tone delivers more visual value than solid walnut at the same retail price. We invest in responsible sourcing and we publish a detailed material guide because better-informed buyers make better products and waste less wood doing it.",
+    "p5": "Fifteen years in, that is still the work: matching the right wood to the right project, making it well, and being honest about what each option can and cannot do.",
+    "signoff": "Chuan Pu, Founder",
+    "ctaText": "Meet the rest of the team",
+    "ctaHref": "/about/team"
+  },
+  "alibaba": {
+    "badgeLabel": "Alibaba Gold Supplier",
+    "badgeYearPrefix": "Since"
   },
   "about": {
     "metaTitle": "About CHIC — Custom Wooden Products Factory in Xiamen, China",

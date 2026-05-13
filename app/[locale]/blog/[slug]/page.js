@@ -3,6 +3,7 @@
 // 2-column layout (article + sticky sidebar) · Mid-article CTA ·
 // Author/brand card · Newsletter band · Related articles · Final CTA
 import { unstable_setRequestLocale } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -12,6 +13,18 @@ import { wpPosts, wpPostBySlug, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
 import { routing } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
+
+// Pick a blog author deterministically from SITE.blogAuthors based on a
+// simple hash of the post slug. Same slug always picks the same author,
+// so social shares / Schema.org cards stay consistent across renders.
+// Two authors (chuan + cassie) → roughly 50/50 distribution across posts.
+function pickBlogAuthor(slug) {
+  const pool = SITE.blogAuthors;
+  let n = 0;
+  for (let i = 0; i < slug.length; i++) n = (n * 31 + slug.charCodeAt(i)) | 0;
+  const authorSlug = pool[Math.abs(n) % pool.length];
+  return SITE.team.find((m) => m.slug === authorSlug);
+}
 
 // Build hreflang map for a given path — used in metadata.alternates.languages.
 function buildBlogAlternates(path) {
@@ -61,9 +74,18 @@ function readingTime(html) {
 
 export default function BlogPost({ params }) {
   unstable_setRequestLocale(params.locale);
+  const tTeam = useTranslations('team');
   const rawP = wpPostBySlug(params.slug);
   if (!rawP) notFound();
   const p = localizePost(rawP, params.locale);
+
+  // Resolve the named blog author for this post (Person schema + visible
+  // byline + author card). Replaces the old "Factory Team" Organization
+  // attribution, which Google E-E-A-T evaluators flag as low-authority.
+  const author = pickBlogAuthor(p.slug);
+  const authorRole = tTeam(author.roleKey);
+  const authorBio  = tTeam(author.bioKey);
+  const authorUrl  = `${SITE.siteUrl}/about/team#${author.slug}`;
 
   // Related — prefer same category, fall back to most recent
   const sameCategory = wpPosts().filter(x =>
@@ -105,7 +127,18 @@ export default function BlogPost({ params }) {
     datePublished: p.date,
     dateModified: isTranslated ? SITE.lastLocalizationDate : p.date,
     inLanguage: schemaLang(params.locale),
-    author: { '@type': 'Organization', name: SITE.company.brand, '@id': `${SITE.siteUrl}/#organization` },
+    // Named Person author (was Organization). Google's E-E-A-T evaluators
+    // explicitly weight named human authors above corporate attribution.
+    // The author Person entity is also emitted as schema in /about/team.
+    author: {
+      '@type': 'Person',
+      '@id': authorUrl,
+      name: author.name,
+      jobTitle: authorRole,
+      image: `${SITE.siteUrl}${author.photo}`,
+      worksFor: { '@id': `${SITE.siteUrl}/#organization` },
+      url: authorUrl,
+    },
     publisher: { '@id': `${SITE.siteUrl}/#organization` },
     mainEntityOfPage: `${SITE.siteUrl}/blog/${p.slug}`,
     articleSection: cat?.name || 'Wooden Homeware',
@@ -172,7 +205,7 @@ export default function BlogPost({ params }) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-green">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
               </svg>
-              By {SITE.company.brand} Factory Team
+              By <Link href="/about/team" className="hover:text-brand-green underline-offset-2 hover:underline">{author.name}</Link>
             </span>
           </div>
         </div>
@@ -248,28 +281,35 @@ export default function BlogPost({ params }) {
 
             {/* SIDEBAR */}
             <aside className="lg:sticky lg:top-24 lg:self-start space-y-5">
-              {/* Author / Publisher card */}
+              {/* Author card — named Person from /about/team */}
               <div className="bg-brand-cream border border-brand-line rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-11 h-11 rounded-xl bg-brand-green text-white flex items-center justify-center font-bold text-lg">
-                    C
+                  <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-white shrink-0">
+                    <Image
+                      src={author.photo}
+                      alt={author.name}
+                      fill
+                      sizes="44px"
+                      className="object-cover"
+                    />
                   </div>
                   <div>
                     <p className="font-bold text-brand-ink leading-tight text-[15px]">
-                      {SITE.company.brand} Factory Team
+                      {author.name}
                     </p>
-                    <p className="text-[11px] text-brand-mute">{SITE.company.tagline}</p>
+                    <p className="text-[11px] text-brand-green uppercase tracking-wider font-semibold mt-0.5">
+                      {authorRole}
+                    </p>
                   </div>
                 </div>
-                <p className="text-[13px] text-brand-mute leading-relaxed">
-                  We&apos;ve been manufacturing wooden homeware in China since 2010 — articles
-                  written from real OEM experience with brands and Amazon sellers worldwide.
+                <p className="text-[13px] text-brand-mute leading-relaxed line-clamp-5">
+                  {authorBio}
                 </p>
                 <Link
-                  href="/about"
+                  href="/about/team"
                   className="mt-3 inline-flex items-center text-[13px] font-semibold text-brand-green hover:text-brand-greenDark"
                 >
-                  About our factory →
+                  Meet the team →
                 </Link>
               </div>
 

@@ -4,6 +4,7 @@
 
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import CaseStudies from '@/components/CaseStudies';
@@ -207,6 +208,14 @@ export default function AboutPage({ params: { locale } }) {
           </div>
         </div>
       </section>
+
+      {/* ── From the Founder ──
+          Personal-voice section that humanizes the company early in the
+          page — pure E-E-A-T Experience signal (real person, real
+          background, real perspective). The portrait links through to
+          the full /about/team page so curious visitors can verify the
+          rest of the leadership exists too. */}
+      <FounderSection />
 
       {/* ── Factory tour video ── */}
       <section className="py-20 lg:py-24 bg-white border-b border-brand-line">
@@ -507,6 +516,65 @@ export default function AboutPage({ params: { locale } }) {
 }
 
 // ── helpers ──────────────────────────────────────────────────────
+
+// FounderSection — personal-voice block humanizing the company.
+// Pulls Chuan's photo from site-config so it stays in sync with the
+// /about/team page; pulls copy from the `founderStory` i18n namespace.
+function FounderSection() {
+  const t = useTranslations('founderStory');
+  const founder = SITE.team.find((m) => m.slug === 'chuan');
+  return (
+    <section className="py-20 lg:py-24 bg-white border-b border-brand-line">
+      <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-[1fr_1.4fr] gap-10 lg:gap-16 items-start">
+          {/* Portrait */}
+          <div className="lg:sticky lg:top-28">
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-brand-cream border border-brand-line">
+              {founder?.photo && (
+                <Image
+                  src={founder.photo}
+                  alt={`${founder.name} — Founder of CHIC`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 440px"
+                  className="object-cover"
+                />
+              )}
+            </div>
+            <div className="mt-5">
+              <div className="text-base font-extrabold text-brand-ink">{founder?.name}</div>
+              <div className="text-sm text-brand-mute mt-0.5">{t('signoff')}</div>
+            </div>
+          </div>
+
+          {/* Story */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
+              {t('eyebrow')}
+            </p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-[1.15] mb-7">
+              {t('title')}
+            </h2>
+            <div className="space-y-5 text-[17px] text-brand-ink/85 leading-relaxed">
+              <p>{t('p1')}</p>
+              <p>{t('p2')}</p>
+              <p>{t('p3')}</p>
+              <p>{t('p4')}</p>
+              <p className="font-medium text-brand-ink">{t('p5')}</p>
+            </div>
+            <div className="mt-8">
+              <Link
+                href="/about/team"
+                className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-6 py-2.5 text-[14px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
+              >
+                {t('ctaText')} →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function BaseCard({ tag, city, text, bullets, image }) {
   return (

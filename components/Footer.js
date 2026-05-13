@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { SITE } from '@/data/site-config';
 
 // Clean, simple footer matching the xmchichomeware.com aesthetic.
 // Replaces the previous translation-driven, EmailJS-dependent footer.
@@ -102,6 +103,18 @@ export default function Footer() {
             {t('footer.brandBlurb')}
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
+            {SITE.alibaba?.tier === 'gold' && (
+              <a
+                href={SITE.alibaba.url}
+                target="_blank"
+                rel="noopener nofollow"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-brand-wood text-brand-ink border border-brand-wood hover:bg-brand-woodSoft transition"
+                aria-label={`${t('footer.alibabaBadge')} — ${t('footer.alibabaSince')} ${SITE.alibaba.joinYear}`}
+              >
+                <span>★ {t('footer.alibabaBadge')}</span>
+                <span className="text-brand-ink/60">· {SITE.alibaba.joinYear}</span>
+              </a>
+            )}
             <Badge>FSC Sourced</Badge>
             <Badge>EU REACH</Badge>
             <Badge>ISO 9001</Badge>

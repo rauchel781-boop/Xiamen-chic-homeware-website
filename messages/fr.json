@@ -81,6 +81,10 @@
     "viewAllArrow": "Voir tout →",
     "allRightsReserved": "Tous droits réservés.",
     "madeInXiamen": "Fabriqué à Xiamen, Chine",
+    "legalPrivacy": "Politique de confidentialité",
+    "legalTerms": "Conditions de service",
+    "alibabaBadge": "Fournisseur d'or Alibaba",
+    "alibabaSince": "Depuis",
     "aboutLink": "À propos de CHIC",
     "materialGuideLink": "Guide des matériaux",
     "woodFabrication": "Fabrication du bois",
@@ -1942,5 +1946,40 @@
     "ctaBody": "La plupart de nos acheteurs commencent avec un produit, un échantillon et une seule conversation. Dites-nous ce que vous essayez de trouver et nous reviendrons dans un délai d'un jour ouvrable avec une vraie proposition.",
     "ctaButton": "Parlez-nous de votre projet →",
     "disclaimer": "Les études de cas sont anonymisées pour protéger la confidentialité des partenaires. Les volumes spécifiques, le nombre de SKU et les années reflètent les modèles d'engagement typiques et peuvent varier selon les comptes. Références disponibles après une NDA signée."
+  },
+  "team": {
+    "metaTitle": "Rencontrez l'équipe-CHIC Wooden Expert",
+    "metaDesc": "Les personnes derrière CHIC: le fondateur Chuan Pu, les ventes dirigent Cassie Zhang, le plomb de production Yucheng Lu, le plomb de conception Vivi Cheng et le plomb de qualité Lingling Zhang.",
+    "pageEyebrow": "Rencontrez l'équipe",
+    "pageTitle": "Les gens derrière chaque expédition.",
+    "pageIntro": "CHIC est une véritable usine dirigée par de vraies personnes. Vous trouverez ci-dessous les cinq personnes qui dirigent notre travail quotidien-du fondateur qui a lancé l'entreprise il y a quinze ans, aux membres de l'équipe à qui vous parlerez et qui vous enverrez un courriel une fois que vous commencerez un projet avec nous.",
+    "breadcrumb": "Équipe",
+    "viewAllRoles": "Voir l'équipe",
+    "chuanRole": "Fondateur & PDG",
+    "chuanBio": "Chuan Pu a fondé CHIC en 2010 après plus d'une décennie de travail dans la chaîne d'approvisionnement des produits en bois de la Chine-de l'approvisionnement en bois brut dans le comté de Cao aux programmes d'exportation finis pour les marques mondiales. Son expérience pratique explique comment CHIC aborde la sélection des matériaux et aide les acheteurs à faire correspondre le bon bois au bon projet. Chuan croit que les acheteurs mieux informés font de meilleurs produits, et que le bois de source durable, bien conçu, surpassera un bois dur générique à chaque fois.",
+    "cassieRole": "Chef des ventes",
+    "cassieBio": "Cassie dirige l'équipe des ventes et est le premier point de contact pour la plupart de nos partenaires de longue date. Avec de nombreuses années dans le commerce extérieur et l'exportation B2B, elle est connue pour une communication claire, un délai d'exécution rapide sur les devis et les échantillons, et une approche sans raccourcis pour la résolution de problèmes-que ce soit pour démêler un changement soudain de spécification à mi-production ou coordonner une expédition urgente FBA-date limite. Son point de vue: le fournisseur qui prend la propriété quand quelque chose ne va pas est le fournisseur qui vaut la peine d'être gardé.",
+    "yuchengRole": "Chef de production",
+    "yuchengBio": "Yucheng gère la production quotidienne dans notre usine de 15 000 m² située dans le comté de Cao. Après trois ans chez CHIC, il connaît chaque machine, chaque finisseur et chaque chef d'atelier par son nom. Son travail consiste à traduire les commandes de vente signées en produits finis sur le quai-sur les spécifications, à temps et au niveau de qualité que l'acheteur a approuvé. Lorsque les ventes disent que «l'acheteur veut un grain plus serré sur le couvercle», Yucheng est la personne qui rend cela possible sur le sol.",
+    "viviRole": "Chef du design",
+    "viviBio": "Vivi est le pont entre l'intention de l'acheteur et ce que l'usine peut réellement construire. Une fois qu'un brief produit est confirmé avec les ventes, elle développe les dessins de construction, les spécifications des matériaux et les itérations des prototypes-en coordination directe avec l'équipe de production et le responsable des ventes. Son objectif: les dessins que l'atelier peut frapper, les finitions que l'acheteur va adorer, et les détails qui survivent à une production de 30 000 pièces sans dérive.",
+    "linglingRole": "Chef de la qualité",
+    "linglingBio": "Lingling possède la qualité de l'inspection de dans-processus par le QC final de préexpédition. Elle exécute l'inspection visuelle à 100% pour les comptes premium et l'échantillonnage AQL pour le reste, et écrit les rapports d'action corrective lorsqu'un échantillon échoue. Sa règle permanente sur le sol: si un défaut est trouvé, il est enregistré, causé par la racine et réparé-jamais expédié tranquillement. C'est ainsi que les acheteurs reviennent saison après saison."
+  },
+  "founderStory": {
+    "eyebrow": "Du fondateur",
+    "title": "Pourquoi j'ai commencé Chic?",
+    "p1": "J'ai commencé CHIC après une décennie dans les produits en bois parce que je voyais toujours le même problème des deux côtés de la table.",
+    "p2": "Beaucoup de nos acheteurs-concepteurs de produits brillants, marques d'ustensiles de cuisine établies, vendeurs Amazon talentueux-ne comprenaient pas pleinement les compromis entre les différents matériaux en bois. Ils spécifieraient la noix pour une boîte de rangement de budget-ligne, ou le pin pour un plateau de portion de la meilleure qualité, et le résultat était coût sur-machiné ou qualité sous-livrée.",
+    "p3": "Du côté de l'usine, les fournisseurs ont souvent simplement pris la commande sans signaler l'inadéquation. Il est plus facile de citer ce que l'acheteur a demandé que d'expliquer pourquoi un bois différent fonctionnerait mieux.",
+    "p4": "CHIC a été construit pour combler cet écart. Nous traitons l'éducation matérielle dans le cadre de notre service-nous vous dirons quand le paulownia a plus de sens que le pin, ou quand un acacia-noyer bicolore offre plus de valeur visuelle que le noyer massif au même prix de détail. Nous investissons dans l'approvisionnement responsable et nous publions un guide détaillé des matériaux parce que les acheteurs mieux informés font de meilleurs produits et gaspillent moins de bois en le faisant.",
+    "p5": "Quinze ans après, c'est toujours le travail: faire correspondre le bon bois au bon projet, le faire bien et être honnête sur ce que chaque option peut et ne peut pas faire.",
+    "signoff": "Chuan Pu, Fondateur",
+    "ctaText": "Rencontrez le reste de l'équipe",
+    "ctaHref": "/À propos/équipe"
+  },
+  "alibaba": {
+    "badgeLabel": "Fournisseur d'or Alibaba",
+    "badgeYearPrefix": "Depuis"
   }
 }
