@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import FloatingChat from '@/components/FloatingChat';
 import JsonLd from '@/components/JsonLd';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import MicrosoftClarity from '@/components/MicrosoftClarity';
 import { SITE } from '@/data/site-config';
 import { routing } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -252,6 +253,9 @@ export default async function LocaleLayout({ children, params: { locale } }) {
         {/* GA4 — loads after hydration via strategy="afterInteractive",
             doesn't block LCP. Disable by setting measurementId to '' in site-config. */}
         <GoogleAnalytics />
+        {/* Microsoft Clarity — heatmaps + session recordings.
+            Same afterInteractive strategy. Disable via site-config projectId=''. */}
+        <MicrosoftClarity />
       </body>
     </html>
   );

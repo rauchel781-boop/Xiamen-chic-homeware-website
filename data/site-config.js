@@ -98,6 +98,17 @@ export const SITE = {
     measurementId: 'G-3B2XSYMNC6',
   },
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Microsoft Clarity — free heatmaps + session recordings.
+  // Project ID lives at clarity.microsoft.com → Settings → Setup.
+  // Complements GA4: GA gives the "what" (numbers), Clarity gives the
+  // "why" (actual user behavior — rage clicks, dead clicks, scroll depth).
+  // Set projectId to '' to disable.
+  // ─────────────────────────────────────────────────────────────────────
+  microsoftClarity: {
+    projectId: 'wq9r1ngdo9',
+  },
+
   // Bump this date whenever we re-run scripts/translate.mjs to regenerate
   // de/es/fr/ja content. It becomes the BlogPosting.dateModified value on
   // translated locale variants and the basis for honest "freshness" signals.
