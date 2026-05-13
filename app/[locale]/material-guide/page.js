@@ -508,6 +508,15 @@ function HardnessChart() {
 
         <p className="mt-8 text-xs text-brand-mute italic text-center">
           {t('jankaFooter')}
+          {' '}
+          <a
+            href="https://en.wikipedia.org/wiki/Janka_hardness_test"
+            target="_blank"
+            rel="noopener nofollow"
+            className="not-italic font-semibold text-brand-green hover:text-brand-greenDark"
+          >
+            Janka hardness test (Wikipedia) ↗
+          </a>
         </p>
       </div>
     </section>
@@ -612,11 +621,22 @@ function BrandIcon({ name }) {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// ComplianceSection — each certification card includes an outbound link
+// to the issuing authority's official site. Goal: pass an Expertise +
+// Trust signal to Google's E-E-A-T evaluators without leaking PageRank
+// (rel=noopener nofollow). The link also lets buyers verify the
+// standards themselves, which is real-world useful for B2B due diligence.
 function ComplianceSection() {
   const t = useTranslations('materialGuide');
-  const TAGS = ['FSC', 'EU REACH', 'CARB P2', 'LFGB / FDA', 'ISO 9001', 'Sedex SMETA'];
-  const CERTS = TAGS.map((tag, i) => ({
-    tag,
+  const CERTS = [
+    { tag: 'FSC',          authority: 'https://fsc.org/en',                                                      authorityLabel: 'fsc.org' },
+    { tag: 'EU REACH',     authority: 'https://echa.europa.eu/regulations/reach/understanding-reach',           authorityLabel: 'echa.europa.eu' },
+    { tag: 'CARB P2',      authority: 'https://ww2.arb.ca.gov/our-work/programs/composite-wood-products-arb',   authorityLabel: 'ww2.arb.ca.gov' },
+    { tag: 'LFGB / FDA',   authority: 'https://www.fda.gov/food/food-ingredients-packaging',                    authorityLabel: 'fda.gov' },
+    { tag: 'ISO 9001',     authority: 'https://www.iso.org/iso-9001-quality-management.html',                   authorityLabel: 'iso.org' },
+    { tag: 'Sedex SMETA',  authority: 'https://www.sedex.com/our-services/smeta-audit/',                        authorityLabel: 'sedex.com' },
+  ].map((c, i) => ({
+    ...c,
     full: t(`cert${i + 1}Full`),
     body: t(`cert${i + 1}Body`),
   }));
@@ -644,6 +664,14 @@ function ComplianceSection() {
               </div>
               <h3 className="text-sm font-bold text-brand-ink mb-2">{c.full}</h3>
               <p className="text-sm text-brand-mute leading-relaxed">{c.body}</p>
+              <a
+                href={c.authority}
+                target="_blank"
+                rel="noopener nofollow"
+                className="inline-flex items-center gap-1 mt-3 text-[11px] font-semibold text-brand-green hover:text-brand-greenDark"
+              >
+                {c.authorityLabel} ↗
+              </a>
             </article>
           ))}
         </div>

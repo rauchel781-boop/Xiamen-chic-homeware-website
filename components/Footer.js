@@ -171,7 +171,13 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-5 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-white/50">
           <span>© {year} Xiamen Chic Homeware Co.,Ltd. {t('footer.allRightsReserved')}</span>
-          <span className="uppercase tracking-wider">✦ {t('footer.madeInXiamen')}</span>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="text-white/60 hover:text-white">{t('footer.legalPrivacy')}</Link>
+            <span className="text-white/20">·</span>
+            <Link href="/terms" className="text-white/60 hover:text-white">{t('footer.legalTerms')}</Link>
+            <span className="text-white/20 hidden md:inline">·</span>
+            <span className="uppercase tracking-wider hidden md:inline">✦ {t('footer.madeInXiamen')}</span>
+          </div>
         </div>
       </div>
     </footer>

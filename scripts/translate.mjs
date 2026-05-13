@@ -212,35 +212,61 @@ function countStrings(obj) {
   return 0;
 }
 
-// Surgical: translate ONLY the `productContent` namespace and merge into
+// Surgical: translate ONE OR MORE top-level namespaces and merge into
 // existing locale JSONs without touching any other keys. Use this when
-// you've added new keys to productContent and don't want to retranslate
-// (and potentially overwrite manual fixes in) the rest of the file.
-async function cmdProductContent() {
-  const en = JSON.parse(await readFile(path.join(ROOT, 'messages/en.json'), 'utf8'));
-  const sourceBlock = en.productContent;
-  if (!sourceBlock) {
-    throw new Error('en.json has no `productContent` namespace.');
+// you've added a new namespace (e.g., privacy, terms, productContent)
+// and don't want to retranslate (and potentially overwrite manual fixes
+// in) the rest of the file.
+//
+// Usage:
+//   node scripts/translate.mjs namespace productContent
+//   node scripts/translate.mjs namespace privacy terms
+async function cmdNamespace(names) {
+  if (!names || names.length === 0) {
+    throw new Error('Usage: node scripts/translate.mjs namespace <ns1> [ns2 ...]');
   }
-  const totalStrings = countStrings(sourceBlock);
-  console.log(`productContent has ${totalStrings} strings × ${LANGS.length} languages = ${totalStrings * LANGS.length} translations.\n`);
+  const en = JSON.parse(await readFile(path.join(ROOT, 'messages/en.json'), 'utf8'));
+
+  // Validate all namespaces exist before we hit the API
+  for (const name of names) {
+    if (!en[name]) {
+      throw new Error(`en.json has no top-level key \`${name}\`.`);
+    }
+  }
+
+  const total = names.reduce((a, name) => a + countStrings(en[name]), 0);
+  console.log(`Translating [${names.join(', ')}]: ${total} strings × ${LANGS.length} languages = ${total * LANGS.length} translations.\n`);
 
   for (const lang of LANGS) {
     process.stdout.write(`→ ${lang.toUpperCase()}: `);
     let n = 0;
-    const translatedBlock = await translateJson(sourceBlock, lang, () => {
+    const onProgress = () => {
       n++;
-      process.stdout.write(`\r→ ${lang.toUpperCase()}: ${n}/${totalStrings}`);
-    });
+      process.stdout.write(`\r→ ${lang.toUpperCase()}: ${n}/${total}`);
+    };
+
+    // Translate each namespace separately
+    const translated = {};
+    for (const name of names) {
+      translated[name] = await translateJson(en[name], lang, onProgress);
+    }
+
     // Merge into the existing locale json — preserve everything else
     const existingPath = path.join(ROOT, `messages/${lang}.json`);
     const existing = JSON.parse(await readFile(existingPath, 'utf8'));
-    existing.productContent = translatedBlock;
+    for (const name of names) {
+      existing[name] = translated[name];
+    }
     await writeFile(existingPath, JSON.stringify(existing, null, 2) + '\n');
     await saveCache();
-    console.log(`  ✓ messages/${lang}.json (productContent merged)`);
+    console.log(`  ✓ messages/${lang}.json (merged: ${names.join(', ')})`);
   }
-  console.log('\n✓ productContent translation done.');
+  console.log('\n✓ Namespace translation done.');
+}
+
+// Backward-compat shim: `productContent` still works as a standalone command.
+async function cmdProductContent() {
+  return cmdNamespace(['productContent']);
 }
 
 // ── Inline overview generator ─────────────────────────────────────────
@@ -697,11 +723,12 @@ try {
     case 'test':           await cmdTest();           break;
     case 'count':          await cmdCount();          break;
     case 'ui':             await cmdUi();             break;
+    case 'namespace':      await cmdNamespace(process.argv.slice(3)); break;
     case 'productContent': await cmdProductContent(); break;
     case 'products':       await cmdProducts();       break;
     case 'blogs':          await cmdBlogs();          break;
     default:
-      console.log('Usage: node scripts/translate.mjs <test|count|ui|productContent|products|blogs>');
+      console.log('Usage: node scripts/translate.mjs <test|count|ui|namespace <ns>|productContent|products|blogs>');
       process.exit(1);
   }
 } catch (e) {
