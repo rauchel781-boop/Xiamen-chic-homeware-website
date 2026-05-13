@@ -2004,11 +2004,11 @@
     "todayLabel": "Donde estamos hoy"
   },
   "processVideos": {
-    "eyebrow": "Producción en movimiento",
-    "title": "Ver el trabajo, no sólo las palabras.",
-    "intro": "Clips cortos de nuestro piso de fábrica: lijado, acabado y ensamblaje capturados a medida que ocurren. Estos se ejecutan en su navegador sin salir de la página; haga clic para jugar.",
-    "v1Title": "Lijado y preparación de la superficie",
-    "v2Title": "Línea de acabado",
-    "v3Title": "Montaje final y control de calidad"
+    "eyebrow": "Materiales en acción",
+    "title": "Ver el bosque de cerca, en productos reales.",
+    "intro": "Clips cortos de piezas terminadas de nuestra fábrica: primeros planos de grano, acabado y construcción para que pueda ver cómo se ven realmente las maderas en esta guía como productos. Toca cualquier clip para jugar.",
+    "v1Title": "Rack de especias de bambú con frascos de vidrio",
+    "v2Title": "100% de madera de pino macizo-textura natural de cerca",
+    "v3Title": "Acacia vs bambú: comparación lado a lado"
   }
 }

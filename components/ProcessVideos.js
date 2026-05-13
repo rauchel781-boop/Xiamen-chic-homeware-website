@@ -23,12 +23,14 @@ const VIDEOS = [
 export default function ProcessVideos({ locale }) {
   const t = useTranslations('processVideos');
 
-  // VideoObject schema for each clip
+  // VideoObject schema for each clip — Google Video rich result eligibility.
+  // Description gives the wood-material context (this section sits inside
+  // /material-guide), not factory-process framing.
   const videoLds = VIDEOS.map((v) => ({
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: t(v.titleKey),
-    description: `${t('title')} — ${t(v.titleKey)} at CHIC's wooden products factory in Cao County, Shandong, China.`,
+    description: `${t(v.titleKey)} — wood material close-up from CHIC, a custom wooden products manufacturer in China.`,
     thumbnailUrl: [`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`],
     contentUrl: `https://www.youtube.com/shorts/${v.id}`,
     embedUrl:   `https://www.youtube-nocookie.com/embed/${v.id}`,
