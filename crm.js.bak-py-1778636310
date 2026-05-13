@@ -2157,7 +2157,6 @@ function renderProducts() {
                 <td class="text-right no-wrap">
                   <button class="btn-link" onclick="viewProduct('${p.id}')">详情</button>
                   <button class="btn-link" onclick="editProduct('${p.id}')">编辑</button>
-                  <button class="btn-link" onclick="cloneProduct('${p.id}')" title="复制此产品">复制</button>
                   <button class="btn-link danger" onclick="deleteProduct('${p.id}')">删除</button>
                 </td>
               </tr>
@@ -2345,25 +2344,6 @@ function saveProduct(e, id) {
   saveDB(); closeModal(); renderProducts(); toast('已保存', 'success'); return false;
 }
 
-function cloneProduct(id) {
-  const p = (DB.products || []).find(x => x.id === id);
-  if (!p) return;
-  const clone = JSON.parse(JSON.stringify(p));
-  clone.id = uid();
-  clone.code = nextCode('PRO');
-  clone.createdAt = new Date().toISOString();
-  // 名字加 -COPY 后缀（用户可在编辑里改）
-  if (clone.nameEn) clone.nameEn = clone.nameEn + ' (Copy)';
-  if (clone.nameZh) clone.nameZh = clone.nameZh + '（复制）';
-  // image 字段是 IndexedDB imageId 字符串，共用同一张图 OK
-  DB.products.push(clone);
-  saveDB();
-  renderProducts();
-  toast('已复制为 ' + clone.code + '，请编辑确认', 'success');
-  // 直接打开编辑
-  editProduct(clone.id);
-}
-
 function deleteProduct(id) {
   if (!confirm('确定删除该产品？')) return;
   DB.products = DB.products.filter(x => x.id !== id);
@@ -2406,49 +2386,6 @@ function viewProduct(id) {
 let qtFilter = '';
 let qtStatusFilter = '';
 
-let _expandedQuotations = new Set();
-
-function toggleQuotationExpand(id) {
-  if (_expandedQuotations.has(id)) _expandedQuotations.delete(id);
-  else _expandedQuotations.add(id);
-  renderQuotations();
-}
-
-function renderQuotationExpandedItems(q) {
-  const items = q.items || [];
-  if (items.length === 0) return '<div class="muted" style="padding:8px;">无产品</div>';
-  const cur = q.currency || 'USD';
-  return '<table style="width:100%;background:#fff;border:1px solid #e5e7eb;">' +
-    '<thead><tr style="background:#f8fafb;">' +
-      '<th style="width:42px;text-align:center;">#</th>' +
-      '<th style="width:60px;text-align:center;">图片</th>' +
-      '<th>产品编号</th>' +
-      '<th>产品名</th>' +
-      '<th>规格</th>' +
-      '<th class="text-right">数量</th>' +
-      '<th class="text-right">单价(' + cur + ')</th>' +
-      '<th class="text-right">小计</th>' +
-    '</tr></thead><tbody>' +
-    items.map((it, idx) => {
-      const p = it.productId && it.productId !== '__custom' ? productById(it.productId) : null;
-      const qty = Number(it.qty) || 0;
-      const price = Number(it.price) || 0;
-      const sub = (qty * price).toFixed(2);
-      const name = (p && p.nameEn) || it.customName || '-';
-      return '<tr>' +
-        '<td class="text-center muted">' + (idx + 1) + '</td>' +
-        '<td class="text-center">' + (p && p.image ? '<img src="' + imgUrl(p.image) + '" style="width:42px;height:42px;object-fit:contain;background:#f9fafb;border-radius:3px;">' : '<span class="muted">-</span>') + '</td>' +
-        '<td class="code">' + escapeHtml((p && p.code) || '-') + '</td>' +
-        '<td>' + escapeHtml(name) + '</td>' +
-        '<td class="muted">' + escapeHtml(it.specs || '-') + '</td>' +
-        '<td class="text-right">' + qty + '</td>' +
-        '<td class="text-right">' + (price ? cur + ' ' + price.toFixed(2) : '-') + '</td>' +
-        '<td class="text-right"><strong>' + (price ? cur + ' ' + sub : '-') + '</strong></td>' +
-      '</tr>';
-    }).join('') +
-    '</tbody></table>';
-}
-
 function renderQuotations() {
   document.getElementById('pageTitle').textContent = '报价单';
   document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editQuotation()">+ 新建报价</button>`;
@@ -2474,18 +2411,12 @@ function renderQuotations() {
       ${list.length === 0 ? '<div class="empty">暂无报价单</div>' : `
       <table>
         <thead><tr>
-          <th style="width:30px;"></th>
           <th>报价编号</th><th>日期</th><th>客户</th><th>项数</th><th class="text-right">总金额</th>
           <th>状态</th><th>有效期</th><th class="text-right">操作</th>
         </tr></thead>
         <tbody>
-        ${list.map(q => {
-          const expanded = _expandedQuotations.has(q.id);
-          return `
+        ${list.map(q => `
           <tr>
-            <td class="text-center" style="cursor:pointer;user-select:none;" onclick="toggleQuotationExpand('${q.id}')" title="${expanded?'收起':'展开'}产品明细">
-              <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
-            </td>
             <td class="code no-wrap">${escapeHtml(q.code || '')}</td>
             <td class="no-wrap">${fmtDate(q.date)}</td>
             <td>${customerNameWithFlag(q.customerId)}</td>
@@ -2503,8 +2434,7 @@ function renderQuotations() {
               <button class="btn-link danger" onclick="deleteQuotation('${q.id}')">删除</button>
             </td>
           </tr>
-          ${expanded ? `<tr><td colspan="9" style="padding:8px 16px;background:#fafbfc;">${renderQuotationExpandedItems(q)}</td></tr>` : ''}
-        `;}).join('')}
+        `).join('')}
         </tbody>
       </table>`}
     </div>

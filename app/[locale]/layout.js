@@ -20,14 +20,16 @@ const sans = Plus_Jakarta_Sans({
   preload: true,
 });
 
-// Display font — variable serif. Used only for hero H1s and big blog headings.
-// Single weight 800 (was full variable) — saves ~120 KB and ~200ms.
+// Display font — variable serif. Used in EVERY hero H1 (home, landing pages,
+// blog post titles), so it IS above the fold and must preload to avoid the
+// FOIT/FOUT flash on the LCP element. Combined with display:'swap' the body
+// renders immediately and the H1 gets its real font as soon as the woff2 lands.
 const display = Fraunces({
   subsets: ['latin'],
   weight: ['800'],
   display: 'swap',
   variable: '--font-display',
-  preload: false,        // Not above the fold for most pages, lazy-load
+  preload: true,
 });
 
 // Global Organization + WebSite structured data (rendered on every page).

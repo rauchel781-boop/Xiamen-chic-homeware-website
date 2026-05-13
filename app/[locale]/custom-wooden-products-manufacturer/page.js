@@ -136,6 +136,7 @@ export default function Page({ params }) {
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
                 priority
+                fetchPriority="high"
                 className="object-cover"
               />
             </div>
