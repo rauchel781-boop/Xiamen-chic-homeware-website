@@ -25,7 +25,7 @@ const PRODUCT_GROUPS = [
     items: [
       { label: 'Wooden Storage Box With Lid', href: '/products/wooden-storage-box-with-lid' },
       { label: 'Wooden Bathroom Organizer',   href: '/products/wooden-bathroom-organizer' },
-      { label: 'Bamboo Bathtub Caddy Tray',   href: '/products/bamboo-bathtub-caddy-tray' },
+      { label: 'Wooden Bathtub Caddy Tray',   href: '/products/wooden-bathtub-caddy-tray' },
       { label: 'Wooden Keepsake Boxes',       href: '/products/wooden-keepsake-boxes' },
       { label: 'Wooden Pantry Organizers',    href: '/products/wooden-pantry-organizers' },
       { label: 'Wooden Sofa Tray',            href: '/products/wooden-sofa-tray' },
