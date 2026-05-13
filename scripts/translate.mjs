@@ -212,6 +212,37 @@ function countStrings(obj) {
   return 0;
 }
 
+// Surgical: translate ONLY the `productContent` namespace and merge into
+// existing locale JSONs without touching any other keys. Use this when
+// you've added new keys to productContent and don't want to retranslate
+// (and potentially overwrite manual fixes in) the rest of the file.
+async function cmdProductContent() {
+  const en = JSON.parse(await readFile(path.join(ROOT, 'messages/en.json'), 'utf8'));
+  const sourceBlock = en.productContent;
+  if (!sourceBlock) {
+    throw new Error('en.json has no `productContent` namespace.');
+  }
+  const totalStrings = countStrings(sourceBlock);
+  console.log(`productContent has ${totalStrings} strings × ${LANGS.length} languages = ${totalStrings * LANGS.length} translations.\n`);
+
+  for (const lang of LANGS) {
+    process.stdout.write(`→ ${lang.toUpperCase()}: `);
+    let n = 0;
+    const translatedBlock = await translateJson(sourceBlock, lang, () => {
+      n++;
+      process.stdout.write(`\r→ ${lang.toUpperCase()}: ${n}/${totalStrings}`);
+    });
+    // Merge into the existing locale json — preserve everything else
+    const existingPath = path.join(ROOT, `messages/${lang}.json`);
+    const existing = JSON.parse(await readFile(existingPath, 'utf8'));
+    existing.productContent = translatedBlock;
+    await writeFile(existingPath, JSON.stringify(existing, null, 2) + '\n');
+    await saveCache();
+    console.log(`  ✓ messages/${lang}.json (productContent merged)`);
+  }
+  console.log('\n✓ productContent translation done.');
+}
+
 // ── Inline overview generator ─────────────────────────────────────────
 // Mirror of lib/product-content.js — kept inline because that file is
 // ESM-without-extensions (works in Next.js webpack, but not in pure Node).
@@ -663,13 +694,14 @@ async function cmdCount() {
 const cmd = process.argv[2];
 try {
   switch (cmd) {
-    case 'test':     await cmdTest();     break;
-    case 'count':    await cmdCount();    break;
-    case 'ui':       await cmdUi();       break;
-    case 'products': await cmdProducts(); break;
-    case 'blogs':    await cmdBlogs();    break;
+    case 'test':           await cmdTest();           break;
+    case 'count':          await cmdCount();          break;
+    case 'ui':             await cmdUi();             break;
+    case 'productContent': await cmdProductContent(); break;
+    case 'products':       await cmdProducts();       break;
+    case 'blogs':          await cmdBlogs();          break;
     default:
-      console.log('Usage: node scripts/translate.mjs <test|count|ui|products|blogs>');
+      console.log('Usage: node scripts/translate.mjs <test|count|ui|productContent|products|blogs>');
       process.exit(1);
   }
 } catch (e) {

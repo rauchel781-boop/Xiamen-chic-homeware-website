@@ -210,6 +210,7 @@ function CategoryView({ cat, locale }) {
 
 function ProductView({ p, locale }) {
   const t = useTranslations('productDetail');
+  const tPc = useTranslations('productContent');
   const tCta = useTranslations('cta');
   const related = wpProducts()
     .filter(x => x.id !== p.id && x.categories?.some(c => p.categories?.some(pc => pc.slug === c.slug)))
@@ -226,20 +227,28 @@ function ProductView({ p, locale }) {
   crumbs.push({ name: stripHtml(p.title) });
   const breadcrumb = breadcrumbLd(crumbs);
 
-  // Use generated overview as fallback description — much richer + more
-  // keyword-dense than the often-empty excerpt or raw spec dump.
-  // If a translated overview exists for this locale, use that instead.
-  const generated = generateProductContent(p);
-  if (p._localizedOverview) {
-    generated.overview = p._localizedOverview;
-  }
+  // Build the locale-aware overview from the detected material/template +
+  // an ICU MessageFormat template. If a hand-curated translated overview
+  // exists for this locale (messages/products.{locale}.json) we prefer that.
+  const c = generateProductContent(p);
+  const materialName = c.materialKey ? tPc(`materials.${c.materialKey}Name`) : '';
+  const productType  = tPc(`templates.${c.templateKey}Type`);
+  const tplApp1 = tPc(`templates.${c.templateKey}App1`);
+  const tplApp2 = tPc(`templates.${c.templateKey}App2`);
+  const tplApp3 = tPc(`templates.${c.templateKey}App3`);
+  const overview = p._localizedOverview || (
+    c.materialKey
+      ? tPc('overviewWithMaterial', { title: c.title, productType, materialName, app1: tplApp1, app2: tplApp2, app3: tplApp3 })
+      : tPc('overviewNoMaterial',  { title: c.title, productType, app1: tplApp1, app2: tplApp2 })
+  );
+
   const productLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: stripHtml(p.title),
     description: (stripHtml(p.excerpt).length > 80
       ? stripHtml(p.excerpt)
-      : generated.overview).slice(0, 5000),
+      : overview).slice(0, 5000),
     image: [p.featured_image, ...(p.gallery || [])].filter(Boolean).slice(0, 6).map((u) => u.startsWith('http') ? u : `${SITE.siteUrl}${u}`),
     sku: p.sku || String(p.id),
     brand: { '@type': 'Brand', name: SITE.company.brand },
@@ -358,8 +367,9 @@ function ProductView({ p, locale }) {
             Auto-generated overview / features / material / customization /
             applications / FAQ sections — gives each product page 600-1000+
             words of unique, keyword-rich content built from its title and
-            category metadata. */}
-        <ProductSEOSections product={p} />
+            category metadata. All strings come from productContent.* i18n
+            keys, so each locale gets fully translated content. */}
+        <ProductSEOSections product={p} overview={overview} />
 
         {/* Original WP content — cleaned of Elementor cruft, only renders if
             substantial content exists beyond what's auto-generated above. */}
@@ -430,15 +440,53 @@ function ProductView({ p, locale }) {
 }
 
 // ─── SEO-enriched product content sections ──────────────────────────────
-function ProductSEOSections({ product }) {
-  const t = useTranslations('productDetail');
-  const c = generateProductContent(product);
+// Renders Overview / Features / Material / Customization / Applications /
+// Why CHIC / FAQ sections. All strings come from the productContent.*
+// namespace so the user sees content in their own locale (de/es/fr/ja).
+//
+// The shape returned by generateProductContent is pure keys + params; this
+// component is responsible for converting those keys to localized strings.
+function ProductSEOSections({ product, overview }) {
+  const t   = useTranslations('productDetail');
+  const tPc = useTranslations('productContent');
+  const c   = generateProductContent(product);
+
+  const productType   = tPc(`templates.${c.templateKey}Type`);
+  const materialName  = c.materialKey ? tPc(`materials.${c.materialKey}Name`) : null;
+  const materialDesc  = c.materialKey ? tPc(`materials.${c.materialKey}Desc`) : null;
+  const materialBest  = c.materialKey ? tPc(`materials.${c.materialKey}BestFor`) : null;
+  const materialTitle = materialName ? tPc('materialSectionTitle', { materialName }) : null;
+
+  // Applications — 4 per template
+  const applications = [1, 2, 3, 4].map(n => tPc(`templates.${c.templateKey}App${n}`));
+
+  // Features — translate each detected feature key
+  const features = c.featureKeys.map(k => tPc(`features.${k}`));
+
+  // Customization — 6 fixed slots
+  const customization = ['1', '2', '3', '4', '5', '6'].map(n => tPc(`customization.${n}`));
+
+  // FAQ = template-specific (0-2) + universal (4)
+  const templateFaqs = [];
+  for (let i = 1; i <= c.templateFaqCount; i++) {
+    templateFaqs.push({
+      q: tPc(`templates.${c.templateKey}Faq${i}Q`),
+      a: tPc(`templates.${c.templateKey}Faq${i}A`),
+    });
+  }
+  const universalFaqs = [
+    { q: tPc('universalFaq.moqQ'),      a: tPc('universalFaq.moqA') },
+    { q: tPc('universalFaq.logoQ'),     a: tPc('universalFaq.logoA') },
+    { q: tPc('universalFaq.leadTimeQ'), a: tPc('universalFaq.leadTimeA') },
+    { q: tPc('universalFaq.fbaQ'),      a: tPc('universalFaq.fbaA') },
+  ];
+  const faqs = [...templateFaqs, ...universalFaqs];
 
   // Emit a FAQPage JSON-LD so Google can show the FAQ accordion in results
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: c.faqs.map(f => ({
+    mainEntity: faqs.map(f => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -454,20 +502,20 @@ function ProductSEOSections({ product }) {
         <div className="max-w-4xl">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('overviewEyebrow')}</p>
           <p className="text-lg text-brand-ink leading-relaxed">
-            {c.overview}
+            {overview}
           </p>
         </div>
       </section>
 
       {/* ── Key Features ─────────────────────────────────── */}
-      {c.features.length > 0 && (
+      {features.length > 0 && (
         <section className="mt-12">
           <div className="max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-6">
               {t('keyFeaturesTitle')}
             </h2>
             <ul className="grid sm:grid-cols-2 gap-3">
-              {c.features.map((f, i) => (
+              {features.map((f, i) => (
                 <li key={i} className="flex items-start gap-3 bg-brand-cream rounded-xl p-4">
                   <svg width="22" height="22" viewBox="0 0 16 16" fill="none" className="text-brand-green flex-shrink-0 mt-0.5">
                     <circle cx="8" cy="8" r="8" fill="#E8F0EA" />
@@ -482,18 +530,18 @@ function ProductSEOSections({ product }) {
       )}
 
       {/* ── Material spotlight ──────────────────────────── */}
-      {c.materialSection && (
+      {c.materialKey && (
         <section className="mt-12 bg-brand-cream rounded-2xl px-6 py-8 lg:px-10 lg:py-10">
           <div className="max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('materialEyebrow')}</p>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-4">
-              {c.materialSection.title}
+              {materialTitle}
             </h2>
             <p className="text-[16px] text-brand-ink/85 leading-relaxed mb-4">
-              {c.materialSection.body}
+              {materialDesc}
             </p>
             <p className="text-sm text-brand-mute">
-              <span className="font-semibold text-brand-green">{t('materialBestFor')}</span> {c.materialSection.bestFor}
+              <span className="font-semibold text-brand-green">{t('materialBestFor')}</span> {materialBest}
             </p>
           </div>
         </section>
@@ -509,7 +557,7 @@ function ProductSEOSections({ product }) {
             {t('oemIntro')}
           </p>
           <ul className="space-y-3">
-            {c.customization.map((item, i) => (
+            {customization.map((item, i) => (
               <li key={i} className="flex items-start gap-3 text-brand-ink">
                 <span className="shrink-0 w-7 h-7 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center text-xs font-bold mt-0.5">
                   {String(i + 1).padStart(2, '0')}
@@ -528,7 +576,7 @@ function ProductSEOSections({ product }) {
             {t('applicationsTitle')}
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
-            {c.applications.map((a, i) => (
+            {applications.map((a, i) => (
               <div key={i} className="bg-white border border-brand-line rounded-xl p-5 hover:border-brand-green/40 hover:shadow-md transition">
                 <div className="text-2xl font-extrabold text-brand-green/30 leading-none mb-2">
                   {String(i + 1).padStart(2, '0')}
@@ -547,7 +595,7 @@ function ProductSEOSections({ product }) {
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink mb-4">
             {t('whyChicTitle')}
           </h2>
-          <p className="text-brand-ink/85 leading-relaxed">{c.whyChic}</p>
+          <p className="text-brand-ink/85 leading-relaxed">{tPc('whyChic')}</p>
         </div>
       </section>
 
@@ -559,7 +607,7 @@ function ProductSEOSections({ product }) {
             {t('faqTitle')}
           </h2>
           <div className="space-y-3">
-            {c.faqs.map((f, i) => (
+            {faqs.map((f, i) => (
               <details key={i} className="group bg-white border border-brand-line rounded-xl hover:border-brand-green/40 transition overflow-hidden">
                 <summary className="flex items-start justify-between cursor-pointer p-5 gap-4 list-none">
                   <span className="font-semibold text-brand-ink leading-snug">{f.q}</span>
