@@ -87,6 +87,17 @@ export const SITE = {
     newsletterTemplateId:'template_51pc4th',
   },
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Google Analytics 4 — site-wide page-view + event tracking.
+  // The measurement ID lives in GA4 dashboard → Admin → Data streams.
+  // GA4 auto-tracks SPA route changes via Enhanced Measurement, so the
+  // basic gtag.js install is enough — no manual router.events wiring.
+  // Set measurementId to '' to disable GA entirely (useful for dev/staging).
+  // ─────────────────────────────────────────────────────────────────────
+  googleAnalytics: {
+    measurementId: 'G-3B2XSYMNC6',
+  },
+
   // Bump this date whenever we re-run scripts/translate.mjs to regenerate
   // de/es/fr/ja content. It becomes the BlogPosting.dateModified value on
   // translated locale variants and the basis for honest "freshness" signals.
