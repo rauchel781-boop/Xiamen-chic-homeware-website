@@ -57,7 +57,7 @@ const ORG_LD = {
   image: `${SITE.siteUrl}/logo.png`,
   email: SITE.email,
   telephone: `+${SITE.whatsapp.number}`,
-  foundingDate: '2010',
+  foundingDate: '2017',
   slogan: 'Wooden Expert — OEM & ODM Manufacturer',
   knowsAbout: [
     'Wooden Boxes', 'Wooden Gift Boxes', 'Wooden Storage Boxes',

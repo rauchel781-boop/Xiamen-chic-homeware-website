@@ -1952,11 +1952,11 @@
     "metaDesc": "Las personas detrás de CHIC: el fundador Chuan Pu, el líder de ventas Cassie Zhang, el líder de producción Yucheng Lu, el líder de diseño Vivi Cheng y el líder de calidad Lingling Zhang.",
     "pageEyebrow": "Conoce al equipo",
     "pageTitle": "La gente detrás de cada envío.",
-    "pageIntro": "CHIC es una fábrica real dirigida por personas reales. A continuación se presentan los cinco que lideran nuestro trabajo diario, desde el fundador que comenzó la empresa hace quince años, hasta los miembros del equipo con los que hablará y le contestará por correo electrónico una vez que comience un proyecto con nosotros.",
+    "pageIntro": "CHIC es una fábrica de verdad, dirigida por personas de verdad. A continuación se presentan los cinco que lideran nuestro trabajo diario, desde el fundador que estableció nuestra base de fabricación en 2017, hasta los miembros del equipo con los que hablará y le contestará por correo electrónico una vez que comience un proyecto con nosotros.",
     "breadcrumb": "Equipo",
     "viewAllRoles": "Ver equipo",
     "chuanRole": "Fundador y CEO",
-    "chuanBio": "Chuan Pu fundó CHIC en 2010 después de más de una década trabajando en la cadena de suministro de productos de madera de China, desde el abastecimiento de madera en bruto en el condado de Cao hasta los programas de exportación terminados para marcas globales. Su experiencia práctica informa cómo CHIC aborda la selección de materiales y ayuda a los compradores a combinar la madera correcta con el proyecto correcto. Chuan cree que los compradores mejor informados hacen mejores productos, y que la madera de origen sostenible, bien elaborada, superará a una madera dura genérica en todo momento.",
+    "chuanBio": "Chuan Pu fundó la fábrica de CHIC en 2017 después de años trabajando en la cadena de suministro de productos de madera de China, desde el abastecimiento de madera en bruto en el condado de Cao hasta programas de exportación terminados para marcas globales. En 2020 registró Xiamen Chic Homeware Co., Ltd. para llevar los productos de la compañía directamente a la exportación. Su experiencia práctica orienta el enfoque de CHIC en la selección de materiales y ayuda a los compradores a elegir la madera adecuada para cada proyecto. Chuan cree que los compradores mejor informados eligen mejores productos y que la madera de origen sostenible, bien elaborada, superará a cualquier madera dura genérica en todo momento.",
     "cassieRole": "Jefe de Ventas",
     "cassieBio": "Cassie lidera el equipo de ventas y es el primer punto de contacto para la mayoría de nuestros socios a largo plazo. Con muchos años en el comercio exterior y la exportación B2B, es conocida por una comunicación clara, un cambio rápido en las cotizaciones y muestras, y un enfoque sin atajos para la resolución de problemas, ya sea que eso signifique desenredar un cambio repentino de especificación a mitad de producción o coordinar un envío urgente de FBA. Su punto de vista: el proveedor que toma la propiedad cuando algo sale mal es el proveedor que vale la pena mantener.",
     "yuchengRole": "Gerente de Producción",
@@ -1973,7 +1973,7 @@
     "p2": "Muchos de nuestros compradores-brillantes diseñadores de productos, marcas establecidas de utensilios de cocina, vendedores talentosos de Amazon-no entendían completamente las compensaciones entre los diferentes materiales de madera. Especificarían el nogal para una caja de almacenamiento de línea de presupuesto, o el pino para una bandeja de servicio premium, y el resultado fue un costo de ingeniería excesiva o una calidad inferior a la entregada.",
     "p3": "En el lado de la fábrica, los proveedores a menudo simplemente tomaron el pedido sin marcar el desajuste. Es más fácil citar lo que el comprador pidió que explicar por qué una madera diferente funcionaría mejor.",
     "p4": "CHIC fue construido para cerrar esa brecha. Tratamos la educación material como parte de nuestro servicio: le diremos cuándo la paulownia tiene más sentido que el pino, o cuando un nogal de acacia de dos tonos ofrece más valor visual que el nogal sólido al mismo precio de venta. Invertimos en el abastecimiento responsable y publicamos una guía de materiales detallada porque los compradores mejor informados hacen mejores productos y desperdician menos madera al hacerlo.",
-    "p5": "Quince años después, ese sigue siendo el trabajo: combinar la madera correcta con el proyecto correcto, hacerlo bien y ser honesto sobre lo que cada opción puede y no puede hacer.",
+    "p5": "Casi una década después de dirigir nuestra propia fábrica, ese sigue siendo el trabajo: combinar la madera correcta con el proyecto correcto, hacerla bien y ser honestos sobre lo que cada opción puede y no puede hacer.",
     "signoff": "Chuan Pu, Fundador",
     "ctaText": "Conoce al resto del equipo",
     "ctaHref": "/Sobre/equipo"
@@ -1981,5 +1981,34 @@
   "alibaba": {
     "badgeLabel": "Proveedor del oro de Alibaba",
     "badgeYearPrefix": "Desde"
+  },
+  "timeline": {
+    "eyebrow": "Nuestro viaje",
+    "title": "Desde el piso de la fábrica hasta el socio B2B global.",
+    "intro": "Construido paso a paso durante casi una década, cada hito refleja el trabajo del equipo, nuestros socios y un compromiso continuo para fabricar mejores productos de madera.",
+    "m1Year": "2017",
+    "m1Title": "Fábrica fundada",
+    "m1Body": "La base de fabricación de CHIC se establece en el condado de Cao, Shandong, uno de los grupos de productos de madera más establecidos de China. La producción comienza con utensilios de cocina y cajas de almacenamiento para marcas nacionales.",
+    "m2Year": "2020",
+    "m2Title": "Empresa de exportación de Xiamen establecida",
+    "m2Body": "Xiamen Chic Homeware Co., Ltd. se registra para manejar el negocio de exportación directamente. Esto desbloquea el envío a los Estados Unidos, la UE, el Reino Unido, Japón y Australia bajo nuestra propia marca y como OEM para socios globales.",
+    "m3Year": "2025",
+    "m3Title": "Los ingresos anuales supera los 20M RMB",
+    "m3Body": "Los resultados de fin de año cruzan 20.000.000 RMB (~ 2,8 M USD) en ventas de exportación, impulsados por pedidos repetidos de socios B2B de 4 años en seis países.",
+    "m4Year": "2025",
+    "m4Title": "Proveedor del oro de Alibaba",
+    "m4Body": "CHIC se verifica como un proveedor de oro de Alibaba, una señal de confianza pública de terceros para compradores internacionales que se abastecen de nuestro catálogo en línea.",
+    "m5Year": "2026",
+    "m5Title": "En camino a duplicar los ingresos",
+    "m5Body": "Con una mayor capacidad de producción, programas OEM adicionales y un nuevo sitio web B2B multilingüe (este), el equipo está en camino de duplicar aproximadamente los ingresos anuales en comparación con 2025.",
+    "todayLabel": "Donde estamos hoy"
+  },
+  "processVideos": {
+    "eyebrow": "Producción en movimiento",
+    "title": "Ver el trabajo, no sólo las palabras.",
+    "intro": "Clips cortos de nuestro piso de fábrica: lijado, acabado y ensamblaje capturados a medida que ocurren. Estos se ejecutan en su navegador sin salir de la página; haga clic para jugar.",
+    "v1Title": "Lijado y preparación de la superficie",
+    "v2Title": "Línea de acabado",
+    "v3Title": "Montaje final y control de calidad"
   }
 }

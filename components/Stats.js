@@ -1,6 +1,6 @@
 // Quick numeric trust strip — placeholder values, user should update them.
 const STATS = [
-  { n: '15+',     label: 'Years OEM Experience' },
+  { n: '8+',      label: 'Years OEM Experience' },
   { n: '60+',     label: 'Export Countries' },
   { n: '500+',    label: 'SKUs Manufactured' },
   { n: '20,000㎡', label: 'Factory Floor Space' },

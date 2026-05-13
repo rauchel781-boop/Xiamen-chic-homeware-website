@@ -6,7 +6,7 @@ export default function TrustBar() {
   const t = useTranslations('home.trustBar');
   // Numbers stay locale-neutral; labels/subs come from i18n messages.
   const STATS = [
-    { n: '15+',     label: t('stat1Label'), sub: t('stat1Sub') },
+    { n: '8+',      label: t('stat1Label'), sub: t('stat1Sub') },
     { n: '60+',     label: t('stat2Label'), sub: t('stat2Sub') },
     { n: '500+',    label: t('stat3Label'), sub: t('stat3Sub') },
     { n: '20,000㎡', label: t('stat4Label'), sub: t('stat4Sub') },

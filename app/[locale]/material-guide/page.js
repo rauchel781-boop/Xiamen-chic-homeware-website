@@ -12,6 +12,7 @@ import { SITE } from '@/data/site-config';
 import { wpPosts } from '@/lib/wp-data';
 import { hreflangFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
+import ProcessVideos from '@/components/ProcessVideos';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'materialGuide' });
@@ -310,6 +311,10 @@ export default function MaterialsGuide({ params: { locale } }) {
       <HardnessChart />
       <FinishesSection />
       <BrandingSection />
+      {/* Production-floor videos sit between Finishes/Branding (what we
+          apply) and Compliance (what we test) — natural place to show
+          the actual work happening. Lazy-loaded, no LCP impact. */}
+      <ProcessVideos locale={locale} />
       <ComplianceSection />
       <CareSection />
       <SourcingChecklist />

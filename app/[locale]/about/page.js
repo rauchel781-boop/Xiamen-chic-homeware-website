@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import CaseStudies from '@/components/CaseStudies';
+import Timeline from '@/components/Timeline';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -42,7 +43,7 @@ export default function AboutPage({ params: { locale } }) {
   const tNav = useTranslations('nav');
 
   const STATS = [
-    { n: '15+',     label: t('stat1Label') },
+    { n: '8+',      label: t('stat1Label') },
     { n: '60+',     label: t('stat2Label') },
     { n: '500+',    label: t('stat3Label') },
     { n: '20,000㎡', label: t('stat4Label') },
@@ -216,6 +217,12 @@ export default function AboutPage({ params: { locale } }) {
           the full /about/team page so curious visitors can verify the
           rest of the leadership exists too. */}
       <FounderSection />
+
+      {/* ── Company timeline ──
+          5 dated milestones (2017 factory → 2026 projected doubling).
+          Concrete, verifiable history beats vague "decades of experience"
+          claims for E-E-A-T Experience + Trustworthiness. */}
+      <Timeline />
 
       {/* ── Factory tour video ── */}
       <section className="py-20 lg:py-24 bg-white border-b border-brand-line">
