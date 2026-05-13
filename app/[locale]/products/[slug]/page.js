@@ -352,12 +352,25 @@ function ProductView({ p, locale }) {
                 ))}
               </div>
             )}
-            {p.excerpt && (
-              <div className="mt-6 text-brand-ink/85 wp-content" dangerouslySetInnerHTML={{__html: p.excerpt}} />
-            )}
+            {/* Hero blurb — prefer the real excerpt on the default locale
+                (English source); on translated locales fall back to the
+                first ~2 sentences of the localized overview so visitors
+                always see language-appropriate hero copy. */}
+            {(() => {
+              const isDefault = locale === routing.defaultLocale;
+              const localizedBlurb = overview
+                ? overview.split(/(?<=\. )/).slice(0, 2).join('').trim()
+                : null;
+              const blurbHtml = isDefault
+                ? (p.excerpt && stripHtml(p.excerpt).length > 20 ? p.excerpt : (localizedBlurb ? `<p>${localizedBlurb}</p>` : null))
+                : (localizedBlurb ? `<p>${localizedBlurb}</p>` : null);
+              return blurbHtml ? (
+                <div className="mt-6 text-brand-ink/85 wp-content" dangerouslySetInnerHTML={{__html: blurbHtml}} />
+              ) : null;
+            })()}
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/contact"
+                href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition"
               >
                 {t('getQuote')}
@@ -438,7 +451,7 @@ function ProductView({ p, locale }) {
               </p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              <Link href="/contact" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">{tCta('getFreeQuote')}</Link>
+              <Link href="/contact#form" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">{tCta('getFreeQuote')}</Link>
               <Link href="/about" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">{t('ctaAboutFactory')}</Link>
             </div>
           </div>
