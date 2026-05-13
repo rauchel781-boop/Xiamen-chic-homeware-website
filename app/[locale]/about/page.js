@@ -6,6 +6,7 @@ import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
+import CaseStudies from '@/components/CaseStudies';
 import { SITE } from '@/data/site-config';
 import { hreflangFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -465,6 +466,13 @@ export default function AboutPage({ params: { locale } }) {
           </div>
         </div>
       </section>
+
+      {/* ── Long-term partnerships / Case studies ──
+          6 anonymized case studies (US/UK/DE/CA/JP/AU) anchoring the
+          Authoritativeness leg of E-E-A-T. Placed before the final CTA
+          so it builds trust right where the visitor is most likely to
+          convert. */}
+      <CaseStudies />
 
       {/* ── CTA ── */}
       <section className="py-20 lg:py-24">
