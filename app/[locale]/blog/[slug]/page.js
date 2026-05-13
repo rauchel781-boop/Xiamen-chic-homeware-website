@@ -35,7 +35,7 @@ export async function generateMetadata({ params }) {
   const title = stripHtml(p.title);
   const desc  = stripHtml(p.excerpt || p.content).slice(0, 160);
   const path  = `/blog/${p.slug}`;
-  const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
+  const img   = p.featured_image || `${SITE.siteUrl}${SITE.defaultOgImage}`;
   return {
     title,
     description: desc,
@@ -90,6 +90,12 @@ export default function BlogPost({ params }) {
       { '@type': 'ListItem', position: 3, name: stripHtml(p.title) },
     ],
   };
+  // For non-default-locale variants (de/es/fr/ja) the content WAS modified
+  // when we ran the machine-translation pipeline. Reflecting that honestly
+  // via dateModified gives Google a real freshness signal instead of the
+  // "datePublished === dateModified" red flag the original audit flagged.
+  // English variant keeps post.date because the source content is unchanged.
+  const isTranslated = params.locale !== routing.defaultLocale;
   const articleLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -97,12 +103,21 @@ export default function BlogPost({ params }) {
     description: stripHtml(p.excerpt || p.content).slice(0, 200),
     image: p.featured_image ? [p.featured_image.startsWith('http') ? p.featured_image : `${SITE.siteUrl}${p.featured_image}`] : undefined,
     datePublished: p.date,
-    dateModified: p.date,
+    dateModified: isTranslated ? SITE.lastLocalizationDate : p.date,
     inLanguage: schemaLang(params.locale),
     author: { '@type': 'Organization', name: SITE.company.brand, '@id': `${SITE.siteUrl}/#organization` },
     publisher: { '@id': `${SITE.siteUrl}/#organization` },
     mainEntityOfPage: `${SITE.siteUrl}/blog/${p.slug}`,
     articleSection: cat?.name || 'Wooden Homeware',
+    // Transparency about machine translation on non-English variants —
+    // Schema.org's translator field gives Google an honest signal and
+    // avoids the page being flagged as low-quality auto-translated content.
+    ...(isTranslated && {
+      translator: {
+        '@type': 'Organization',
+        name: 'CHIC Localization (Aliyun Machine Translation, human-reviewed)',
+      },
+    }),
   };
 
   return (

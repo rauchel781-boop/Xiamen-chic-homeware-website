@@ -86,6 +86,23 @@ export const SITE = {
     contactTemplateId:   'template_gua3mo9',
     newsletterTemplateId:'template_51pc4th',
   },
+
+  // Bump this date whenever we re-run scripts/translate.mjs to regenerate
+  // de/es/fr/ja content. It becomes the BlogPosting.dateModified value on
+  // translated locale variants and the basis for honest "freshness" signals.
+  // English version uses the original WP post.date because the source
+  // content hasn't changed.
+  lastLocalizationDate: '2026-05-13',
+
+  // Default Open Graph image used for pages without their own image
+  // (home, generic landing pages, error fallbacks). Should be a 1200×630
+  // factory photo so social shares look like a real B2B manufacturer
+  // instead of just a logo card. Path is relative to /public.
+  //
+  // NOTE: if you want to update this, drop a 1200×630 image into
+  // /public/og-default.jpg and change the path here. The filename uses a
+  // hyphen (no spaces) so the URL stays clean across all crawlers/CDNs.
+  defaultOgImage: '/CHIC%20Factory.jpg',
 };
 
 // Helper — true while EmailJS still has placeholder values, false once configured.

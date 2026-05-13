@@ -242,6 +242,9 @@ function ProductView({ p, locale }) {
       : tPc('overviewNoMaterial',  { title: c.title, productType, app1: tplApp1, app2: tplApp2 })
   );
 
+  // Same translator declaration pattern as the blog page — only emit on
+  // non-default-locale variants where the description was machine-translated.
+  const isTranslated = locale !== routing.defaultLocale;
   const productLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -256,6 +259,12 @@ function ProductView({ p, locale }) {
     category: p.categories?.[0]?.name || 'Wooden Products',
     url: `${SITE.siteUrl}/products/${p.slug}`,
     inLanguage: schemaLang(locale),
+    ...(isTranslated && {
+      translator: {
+        '@type': 'Organization',
+        name: 'CHIC Localization (Aliyun Machine Translation, human-reviewed)',
+      },
+    }),
     // ── No `offers` block by design ────────────────────────────────────
     // This is a B2B quote-only catalog — public prices don't exist. We
     // tried two intermediate schemes:

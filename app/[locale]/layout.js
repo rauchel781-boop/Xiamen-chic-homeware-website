@@ -205,13 +205,13 @@ export async function generateMetadata({ params: { locale } }) {
       siteName: SITE_NAME,
       title,
       description,
-      images: [{ url: '/logo.png', width: 1200, height: 630, alt: SITE_NAME }],
+      images: [{ url: SITE.defaultOgImage, width: 1200, height: 630, alt: `${SITE_NAME} — factory` }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/logo.png'],
+      images: [SITE.defaultOgImage],
     },
     robots: {
       index: true,
