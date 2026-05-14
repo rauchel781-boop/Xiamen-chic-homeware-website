@@ -11,7 +11,7 @@ import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts, wpPostBySlug, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
-import { routing } from '@/i18n/routing';
+import { routing, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 
 // Pick a blog author deterministically from SITE.blogAuthors based on a
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description: desc,
-    alternates: { canonical: path, languages: buildBlogAlternates(path) },
+    alternates: { canonical: canonicalFor(params.locale, path), languages: buildBlogAlternates(path) },
     openGraph: {
       type: 'article',
       url: `${SITE.siteUrl}${path}`,

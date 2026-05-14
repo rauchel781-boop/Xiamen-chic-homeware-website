@@ -3,14 +3,14 @@ import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'capabilities' });
   return {
     title: t('metaTitle'),
     description: t('metaDesc'),
-    alternates: { canonical: '/capabilities', languages: hreflangFor(SITE.siteUrl, '/capabilities') },
+    alternates: { canonical: canonicalFor(locale, '/capabilities'), languages: hreflangFor(SITE.siteUrl, '/capabilities') },
   };
 }
 

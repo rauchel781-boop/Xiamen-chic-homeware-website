@@ -10,7 +10,7 @@ import JsonLd from '@/components/JsonLd';
 import CaseStudies from '@/components/CaseStudies';
 import Timeline from '@/components/Timeline';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 
 export async function generateMetadata({ params: { locale } = {} }) {
@@ -19,7 +19,7 @@ export async function generateMetadata({ params: { locale } = {} }) {
   const description = t('metaDesc');
   return {
     title, description,
-    alternates: { canonical: `/about`, languages: hreflangFor(SITE.siteUrl, '/about') },
+    alternates: { canonical: canonicalFor(locale, '/about'), languages: hreflangFor(SITE.siteUrl, '/about') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/about`,

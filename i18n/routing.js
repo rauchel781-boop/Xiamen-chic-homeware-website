@@ -48,3 +48,17 @@ export function hreflangFor(siteUrl, path = '') {
   langs['x-default'] = `${siteUrl}${path}`;
   return langs;
 }
+
+// Build the SELF canonical path for a given locale + page path.
+// Each locale variant must self-canonical (e.g., /de/about → canonical /de/about)
+// or Google will treat translated versions as duplicates of the English source
+// and drop them from the index. Pair this with hreflangFor() for the alternates.
+//
+// Examples (path = '/about'):
+//   canonicalFor('en', '/about')  →  '/about'
+//   canonicalFor('de', '/about')  →  '/de/about'
+//   canonicalFor('ja', '/about')  →  '/ja/about'
+export function canonicalFor(locale, path = '') {
+  const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
+  return `${prefix}${path}`;
+}

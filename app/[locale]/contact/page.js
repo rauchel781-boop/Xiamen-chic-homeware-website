@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { hreflangFor, routing } from '@/i18n/routing';
+import { hreflangFor, canonicalFor, routing } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import ContactClient from './ContactClient';
 
@@ -18,7 +18,7 @@ export async function generateMetadata({ params: { locale } = {} }) {
   const description = t('metaDesc');
   return {
     title, description,
-    alternates: { canonical: `/contact`, languages: hreflangFor(SITE.siteUrl, '/contact') },
+    alternates: { canonical: canonicalFor(locale, '/contact'), languages: hreflangFor(SITE.siteUrl, '/contact') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/contact`,

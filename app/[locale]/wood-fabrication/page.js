@@ -3,14 +3,14 @@ import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'woodFabrication' });
   return {
     title: t('metaTitle'),
     description: t('metaDesc'),
-    alternates: { canonical: '/wood-fabrication', languages: hreflangFor(SITE.siteUrl, '/wood-fabrication') },
+    alternates: { canonical: canonicalFor(locale, '/wood-fabrication'), languages: hreflangFor(SITE.siteUrl, '/wood-fabrication') },
   };
 }
 

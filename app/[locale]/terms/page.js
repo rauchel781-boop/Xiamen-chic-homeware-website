@@ -5,7 +5,7 @@
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { SITE } from '@/data/site-config';
-import { hreflangFor, routing } from '@/i18n/routing';
+import { hreflangFor, canonicalFor, routing } from '@/i18n/routing';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'terms' });
@@ -14,7 +14,7 @@ export async function generateMetadata({ params: { locale } = {} }) {
   return {
     title,
     description,
-    alternates: { canonical: '/terms', languages: hreflangFor(SITE.siteUrl, '/terms') },
+    alternates: { canonical: canonicalFor(locale, '/terms'), languages: hreflangFor(SITE.siteUrl, '/terms') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/terms`,

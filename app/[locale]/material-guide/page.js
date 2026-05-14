@@ -10,7 +10,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts } from '@/lib/wp-data';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import ProcessVideos from '@/components/ProcessVideos';
 
@@ -20,7 +20,7 @@ export async function generateMetadata({ params: { locale } = {} }) {
   const description = t('metaDesc');
   return {
     title, description,
-    alternates: { canonical: `/material-guide`, languages: hreflangFor(SITE.siteUrl, '/material-guide') },
+    alternates: { canonical: canonicalFor(locale, '/material-guide'), languages: hreflangFor(SITE.siteUrl, '/material-guide') },
     openGraph: {
       type: 'article',
       url: `${SITE.siteUrl}/material-guide`,

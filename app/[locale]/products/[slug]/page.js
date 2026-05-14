@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { routing } from '@/i18n/routing';
+import { routing, canonicalFor } from '@/i18n/routing';
 import {
   wpCategoryBySlug,
   wpProductBySlug,
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }) {
     return {
       title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`,
       description: desc,
-      alternates: { canonical: path, languages: buildAlternates(path) },
+      alternates: { canonical: canonicalFor(params.locale, path), languages: buildAlternates(path) },
       openGraph: {
         type: 'website',
         url: `${SITE.siteUrl}${path}`,
@@ -74,7 +74,7 @@ export async function generateMetadata({ params }) {
     return {
       title,
       description: desc,
-      alternates: { canonical: path, languages: buildAlternates(path) },
+      alternates: { canonical: canonicalFor(params.locale, path), languages: buildAlternates(path) },
       openGraph: {
         type: 'website',
         url: `${SITE.siteUrl}${path}`,

@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 
 export async function generateMetadata({ params: { locale } = {} }) {
@@ -21,7 +21,7 @@ export async function generateMetadata({ params: { locale } = {} }) {
   return {
     title,
     description,
-    alternates: { canonical: '/about/team', languages: hreflangFor(SITE.siteUrl, '/about/team') },
+    alternates: { canonical: canonicalFor(locale, '/about/team'), languages: hreflangFor(SITE.siteUrl, '/about/team') },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/about/team`,

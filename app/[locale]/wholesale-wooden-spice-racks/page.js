@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { buildServiceLd } from '@/lib/service-schema';
 
 const SLUG = 'wholesale-wooden-spice-racks';
@@ -27,7 +27,7 @@ export async function generateMetadata({ params: { locale } }) {
   return {
     title: t('metaTitle'),
     description,
-    alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
+    alternates: { canonical: canonicalFor(locale, `/${SLUG}`), languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/${SLUG}`,

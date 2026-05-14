@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor } from '@/i18n/routing';
 
 const SLUG = 'custom-wooden-storage-boxes-wholesale';
 const HERO_IMAGE = '/wp-images/2026/03/natural-wood-box-4.png';
@@ -32,7 +32,7 @@ export async function generateMetadata({ params: { locale } }) {
   return {
     title: t('metaTitle'),
     description,
-    alternates: { canonical: `/${SLUG}`, languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
+    alternates: { canonical: canonicalFor(locale, `/${SLUG}`), languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
     openGraph: {
       type: 'website',
       url: `${SITE.siteUrl}/${SLUG}`,
