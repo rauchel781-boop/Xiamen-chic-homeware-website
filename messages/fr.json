@@ -316,7 +316,7 @@
     "categoryWholesaleManufacturer": "Fabricant en gros",
     "categoryNoProducts": "Aucun produit dans cette catégorie pour le moment.",
     "categoryBrowseAll": "Parcourir tous les produits",
-    "categoryProductCount": "{Count} produits dans cette catégorie",
+    "categoryProductCount": "{count} produits dans cette catégorie",
     "categoryFallbackDesc": "Custom {category} -fabrication en gros en bois et en bambou pour les détaillants et les marques."
   },
   "capabilities": {

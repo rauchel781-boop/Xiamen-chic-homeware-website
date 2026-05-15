@@ -316,7 +316,7 @@
     "categoryWholesaleManufacturer": "Großhandel Hersteller",
     "categoryNoProducts": "Noch keine Produkte in dieser Kategorie.",
     "categoryBrowseAll": "Alle Produkte durchsuchen",
-    "categoryProductCount": "{Count} Produkte in dieser Kategorie",
+    "categoryProductCount": "{count} Produkte in dieser Kategorie",
     "categoryFallbackDesc": "Custom {category} -Großhandel aus Holz und Bambus für Einzel händler und Marken."
   },
   "capabilities": {

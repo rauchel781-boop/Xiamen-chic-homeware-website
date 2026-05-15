@@ -2,6 +2,7 @@
 // showcase, material chips, sticky sidebar and rich product cards.
 
 import { unstable_setRequestLocale } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';

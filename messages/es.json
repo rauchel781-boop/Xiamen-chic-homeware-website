@@ -316,7 +316,7 @@
     "categoryWholesaleManufacturer": "Venta al por mayor Fabricante",
     "categoryNoProducts": "No hay productos en esta categoría todavía.",
     "categoryBrowseAll": "Examinar todos los productos",
-    "categoryProductCount": "{Count} productos de esta categoría",
+    "categoryProductCount": "{count} productos de esta categoría",
     "categoryFallbackDesc": "Custom {category} -fabricación al por mayor de madera y bambú para minoristas y marcas."
   },
   "capabilities": {
