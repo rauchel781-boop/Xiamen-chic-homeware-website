@@ -11,6 +11,12 @@ export default function ContactClient() {
   const [status, setStatus] = useState('idle');     // idle | sending | sent | error
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Anti-bot timestamp: when the form first mounted. Real users take at
+  // least a few seconds to read + fill out a B2B inquiry form; bots fire
+  // in milliseconds. The /api/contact route compares this against a 3s
+  // floor and silently drops faster submissions.
+  const loadedAtRef = useRef(typeof window !== 'undefined' ? Date.now() : 0);
+
   async function onSubmit(e) {
     e.preventDefault();
     setStatus('sending');
@@ -23,6 +29,11 @@ export default function ContactClient() {
       email:   fd.get('email'),
       phone:   fd.get('phone'),
       message: fd.get('message'),
+      // Anti-bot pair (server-side validated):
+      //   website_url → honeypot field (real users can't see it, bots autofill)
+      //   elapsed_ms  → time from page-load to submit
+      website_url: fd.get('website_url') || '',
+      elapsed_ms:  Date.now() - (loadedAtRef.current || 0),
     };
 
     try {
@@ -62,6 +73,29 @@ export default function ContactClient() {
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="grid sm:grid-cols-2 gap-4">
+      {/* ── HONEYPOT ──
+          Hidden field that real visitors never see or fill. Naive crawlers
+          / form-stuffing bots autofill every input on the page → the field
+          gets a value → server silently rejects the submission. We use
+          position:absolute+offscreen instead of display:none because some
+          smarter bots skip display:none traps. tabIndex={-1} + aria-hidden
+          keep this invisible to keyboard users and screen readers, and
+          autoComplete="off" prevents password managers from filling it. */}
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] top-auto w-px h-px overflow-hidden"
+      >
+        <label htmlFor="website_url">Website URL (leave this empty)</label>
+        <input
+          type="text"
+          id="website_url"
+          name="website_url"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
+
       <Field label="Your Name *" name="name" required />
       <Field label="Company" name="company" />
       <Field label="Email *" name="email" type="email" required />

@@ -426,3 +426,151 @@ async function cloudUploadImage(dataUrl, filename) {
   const { data } = cloudClient.storage.from('images').getPublicUrl(path);
   return data.publicUrl;
 }
+
+
+// ============================================================
+// 邮件 CRUD + Edge Function 调用
+// ============================================================
+const EMAIL_FIELDS = {
+  customer_id: 'customerId', direction: 'direction',
+  message_id: 'messageId', thread_id: 'threadId', in_reply_to: 'inReplyTo',
+  subject: 'subject', from_addr: 'fromAddr', from_name: 'fromName',
+  to_addrs: 'toAddrs', cc_addrs: 'ccAddrs', bcc_addrs: 'bccAddrs',
+  body_text: 'bodyText', body_html: 'bodyHtml', snippet: 'snippet',
+  sent_at: 'sentAt', received_at: 'receivedAt',
+  tracking_id: 'trackingId', opened_at: 'openedAt',
+  open_count: 'openCount', last_opened_at: 'lastOpenedAt',
+  attachments: 'attachments',
+  is_read: 'isRead', is_starred: 'isStarred', is_handled: 'isHandled', folder: 'folder',
+};
+
+function emailToDb(e) {
+  const r = genericToDb(e, 'id', EMAIL_FIELDS);
+  // customer_id 非 UUID 时清空
+  if (r.customer_id && !isUuid(r.customer_id)) r.customer_id = null;
+  delete r.data;  // 邮件不用 data jsonb
+  return r;
+}
+function emailFromDb(row) {
+  const o = {};
+  o.id = row.id;
+  for (const [col, key] of Object.entries(EMAIL_FIELDS)) {
+    if (row[col] !== null && row[col] !== undefined) o[key] = row[col];
+  }
+  if (row.created_at) o.createdAt = row.created_at;
+  if (row.updated_at) o.updatedAt = row.updated_at;
+  return o;
+}
+
+async function cloudListEmails(limit) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  // 拉最近 N 条（默认 500）
+  const max = limit || 500;
+  const { data, error } = await cloudClient.from('emails').select('*')
+    .order('sent_at', { ascending: false, nullsFirst: false })
+    .limit(max);
+  if (error) throw error;
+  return (data || []).map(emailFromDb);
+}
+
+async function cloudUpdateEmail(id, patch) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { data, error } = await cloudClient.from('emails').update(patch).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function cloudDeleteEmail(id) {
+  return await cloudDelete('emails', id);
+}
+
+// 调用 Edge Function（用 fetch 直接调用，错误时能读到响应体的具体原因）
+async function _cloudCallFn(name, body) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { data: { session } } = await cloudClient.auth.getSession();
+  if (!session) throw new Error('登录已过期，请重新登录');
+  const url = SUPABASE_CONFIG.url + '/functions/v1/' + name;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session.access_token,
+      'apikey': SUPABASE_CONFIG.key,
+    },
+    body: JSON.stringify(body || {}),
+  });
+  let respBody;
+  try { respBody = await resp.json(); }
+  catch (_) { respBody = { error: '响应解析失败 (HTTP ' + resp.status + ')' }; }
+  if (!resp.ok) {
+    const msg = (respBody && respBody.error) || ('HTTP ' + resp.status);
+    let detail = '';
+    if (respBody && respBody.detail) {
+      const d = typeof respBody.detail === 'string' ? respBody.detail : JSON.stringify(respBody.detail);
+      detail = ' [' + d.slice(0, 200) + ']';
+    }
+    const err = new Error(msg + detail);
+    err.status = resp.status;
+    err.body = respBody;
+    throw err;
+  }
+  if (respBody && respBody.error) throw new Error(respBody.error);
+  return respBody;
+}
+
+async function cloudSendEmail(payload) {
+  return await _cloudCallFn('send-email', payload);
+}
+
+async function cloudFetchNewEmails(days) {
+  return await _cloudCallFn('fetch-emails', { days: days || 7 });
+}
+
+// 查询某邮件的所有打开事件
+async function cloudListEmailOpens(emailId) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { data, error } = await cloudClient.from('email_opens').select('*')
+    .eq('email_id', emailId).order('opened_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+
+// ============================================================
+// 邮件别名表（归并功能用）
+// ============================================================
+async function cloudUpsertEmailAlias(email, customerId) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { data, error } = await cloudClient.from('email_aliases').upsert({
+    email: (email || '').toLowerCase().trim(),
+    customer_id: customerId,
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function cloudDeleteEmailAlias(email) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { error } = await cloudClient.from('email_aliases').delete()
+    .eq('email', (email||'').toLowerCase().trim());
+  if (error) throw error;
+  return true;
+}
+
+async function cloudListEmailAliases() {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { data, error } = await cloudClient.from('email_aliases').select('*');
+  if (error) throw error;
+  return data || [];
+}
+
+// 批量更新 emails.customer_id（归并某发件人的所有邮件）
+async function cloudBulkAssignEmailsByFrom(fromAddr, customerId) {
+  if (!cloudClient) throw new Error('Supabase 未初始化');
+  const { data, error } = await cloudClient.from('emails')
+    .update({ customer_id: customerId })
+    .eq('from_addr', (fromAddr||'').toLowerCase().trim())
+    .select('id');
+  if (error) throw error;
+  return data || [];
+}

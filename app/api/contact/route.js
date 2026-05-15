@@ -22,7 +22,37 @@ export async function POST(req) {
     return Response.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { name, company, email, phone, message } = data || {};
+  const { name, company, email, phone, message, website_url, elapsed_ms } = data || {};
+
+  // ── Anti-bot layer 1: HONEYPOT ────────────────────────────────────
+  // `website_url` is a hidden form field that real humans cannot see.
+  // Naive form-stuffing bots autofill every input on the page; if this
+  // field has any value, the submitter is almost certainly a bot.
+  // We respond with 200 OK so the bot thinks the submission worked and
+  // doesn't retry — but we never actually send the email.
+  if (website_url && String(website_url).trim() !== '') {
+    console.warn('[contact] BLOCKED honeypot triggered', {
+      ts: new Date().toISOString(),
+      ip: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
+      email,
+      honeypot: String(website_url).slice(0, 80),
+    });
+    return Response.json({ ok: true, _blocked: 'honeypot' });
+  }
+
+  // ── Anti-bot layer 2: SUBMIT-TIME FLOOR ───────────────────────────
+  // Real B2B buyers take at least a few seconds to fill the form. Bots
+  // submit in milliseconds. A 3-second floor catches the majority of
+  // automated form-stuffing without inconveniencing any real user.
+  if (typeof elapsed_ms === 'number' && elapsed_ms >= 0 && elapsed_ms < 3000) {
+    console.warn('[contact] BLOCKED submitted too fast', {
+      ts: new Date().toISOString(),
+      ip: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
+      email,
+      elapsed_ms,
+    });
+    return Response.json({ ok: true, _blocked: 'too_fast' });
+  }
 
   // Basic validation
   if (!name || !email || !message) {
