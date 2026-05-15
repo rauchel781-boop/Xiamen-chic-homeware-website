@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import PageFAQ from '@/components/PageFAQ';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'capabilities' });
@@ -77,6 +78,25 @@ export default function CapabilitiesPage({ params }) {
           </div>
         </div>
       </section>
+
+      {/* ── Capabilities FAQ ── */}
+      <CapabilitiesFaq />
     </article>
+  );
+}
+
+function CapabilitiesFaq() {
+  const t = useTranslations('pageFaqs');
+  const ITEMS = [1, 2, 3, 4, 5, 6, 7].map((i) => ({
+    q: t(`capabilitiesQ${i}`),
+    a: t(`capabilitiesA${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={t('capabilitiesTitle')}
+      intro={t('capabilitiesIntro')}
+      items={ITEMS}
+      background="bg-brand-cream"
+    />
   );
 }

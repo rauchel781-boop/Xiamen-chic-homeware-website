@@ -9,6 +9,7 @@ import { SITE } from '@/data/site-config';
 import { wpProducts, wpProductCategories, wpProductCategoryTree } from '@/lib/wp-data';
 import { localizeProduct } from '@/lib/translated-content';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import PageFAQ from '@/components/PageFAQ';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   return {
@@ -304,7 +305,26 @@ export default function ProductsIndex({ params: { locale } }) {
           </div>
         </div>
       </section>
+
+      {/* ── Products / Sourcing FAQ ── */}
+      <ProductsFaq />
     </article>
+  );
+}
+
+function ProductsFaq() {
+  const t = useTranslations('pageFaqs');
+  const ITEMS = [1, 2, 3, 4, 5, 6, 7].map((i) => ({
+    q: t(`productsQ${i}`),
+    a: t(`productsA${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={t('productsTitle')}
+      intro={t('productsIntro')}
+      items={ITEMS}
+      background="bg-brand-cream"
+    />
   );
 }
 

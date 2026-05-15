@@ -3,8 +3,10 @@
 // Browse by topic · Newsletter band · CTA
 
 import { unstable_setRequestLocale } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
+import PageFAQ from '@/components/PageFAQ';
 import { SITE } from '@/data/site-config';
 import { wpPosts, wpPostCategories, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
@@ -299,7 +301,26 @@ export default function BlogIndex({ params: { locale } }) {
           </div>
         </div>
       </section>
+
+      {/* ── Blog FAQ ── */}
+      <BlogFaq />
     </article>
+  );
+}
+
+function BlogFaq() {
+  const t = useTranslations('pageFaqs');
+  const ITEMS = [1, 2, 3, 4, 5].map((i) => ({
+    q: t(`blogQ${i}`),
+    a: t(`blogA${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={t('blogTitle')}
+      intro={t('blogIntro')}
+      items={ITEMS}
+      background="bg-brand-cream"
+    />
   );
 }
 

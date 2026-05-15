@@ -9,6 +9,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import CaseStudies from '@/components/CaseStudies';
 import Timeline from '@/components/Timeline';
+import PageFAQ from '@/components/PageFAQ';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -483,6 +484,12 @@ export default function AboutPage({ params: { locale } }) {
         </div>
       </section>
 
+      {/* ── About FAQ ──
+          Unique Q&A focused on company history, credentials and trust
+          signals — content distinct from /contact, /home and
+          /material-guide FAQs to avoid keyword cannibalisation. */}
+      <AboutFaq />
+
       {/* ── Long-term partnerships / Case studies ──
           6 anonymized case studies (US/UK/DE/CA/JP/AU) anchoring the
           Authoritativeness leg of E-E-A-T. Placed before the final CTA
@@ -523,6 +530,25 @@ export default function AboutPage({ params: { locale } }) {
 }
 
 // ── helpers ──────────────────────────────────────────────────────
+
+// AboutFaq — 7 SEO Q&As covering company history, factory location,
+// export markets, manufacturer vs trading, leadership, Alibaba status
+// and factory visits. Distinct keyword set from other site FAQs.
+function AboutFaq() {
+  const t = useTranslations('pageFaqs');
+  const ITEMS = [1, 2, 3, 4, 5, 6, 7].map((i) => ({
+    q: t(`aboutQ${i}`),
+    a: t(`aboutA${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={t('aboutTitle')}
+      intro={t('aboutIntro')}
+      items={ITEMS}
+      background="bg-white"
+    />
+  );
+}
 
 // FounderSection — personal-voice block humanizing the company.
 // Pulls Chuan's photo from site-config so it stays in sync with the

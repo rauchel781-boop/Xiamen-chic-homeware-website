@@ -22,6 +22,28 @@ import {
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
 import { localizeProduct } from '@/lib/translated-content';
 import { schemaLang } from '@/i18n/seo';
+import PageFAQ from '@/components/PageFAQ';
+
+// Map category slug → which FAQ template applies. Wider matches than the
+// product-content.js TEMPLATE_KEYS because category slugs are themselves
+// the categorical grouping (e.g. "wooden-sofa-tray" is a serving-tray
+// type even though the product templates split them out for variety).
+function detectCategoryFaqKey(slug) {
+  const s = (slug || '').toLowerCase();
+  if (s.includes('cheese-board') || s.includes('charcuterie'))                                                     return 'cheeseBoard';
+  if (s.includes('cutting-board') || s.includes('chopping-board') || s.includes('bread-board'))                    return 'cuttingBoard';
+  if (s.includes('serving-tray') || s.includes('sofa-tray') || s.includes('ottoman-tray') ||
+      s.includes('breakfast-tray') || s.includes('vanity-tray') || s.includes('amenity-tray') ||
+      s.includes('welcome-tray'))                                                                                  return 'servingTray';
+  if (s.includes('spice-rack')   || s.includes('spice-organizer'))                                                 return 'spiceRack';
+  if (s.includes('jewelry-box')  || s.includes('ring-box'))                                                        return 'jewelryBox';
+  if (s.includes('wine-box')     || s.includes('wine-case'))                                                       return 'wineBox';
+  if (s.includes('tea-box'))                                                                                       return 'teaBox';
+  if (s.includes('gift-box')     || s.includes('keepsake-box')      || s.includes('memory-box'))                   return 'giftBox';
+  if (s.includes('storage-box')  || s.includes('organizer')         || s.includes('stash-box') ||
+      s.includes('bath-caddy')   || s.includes('caddy-tray'))                                                      return 'storageBox';
+  return 'default';
+}
 
 // Build hreflang map for a path — used in metadata.alternates.languages.
 // With localePrefix:'as-needed', the default locale (en) has NO prefix.
@@ -115,6 +137,28 @@ function breadcrumbLd(crumbs) {
   };
 }
 
+// CategoryFaq — pulls 5 category-specific Q&As from the pageFaqs.category
+// namespace based on the category slug. Falls back to "default" set if the
+// slug doesn't match a known category type. Result: every one of the 45+
+// product category pages gets a unique FAQPage schema + visible accordion
+// without writing 225 individual Q&As.
+function CategoryFaq({ cat }) {
+  const t = useTranslations('pageFaqs');
+  const key = detectCategoryFaqKey(cat.slug);
+  const ITEMS = [1, 2, 3, 4, 5].map((i) => ({
+    q: t(`category.${key}Q${i}`),
+    a: t(`category.${key}A${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={`${cat.name} — Sourcing FAQ`}
+      intro={t(`category.${key}Intro`)}
+      items={ITEMS}
+      background="bg-white"
+    />
+  );
+}
+
 function CategoryView({ cat, locale }) {
   const t = useTranslations('productDetail');
   const items = wpProductsByCategory(cat.slug).map((p) => localizeProduct(p, locale));
@@ -204,6 +248,12 @@ function CategoryView({ cat, locale }) {
           </div>
         )}
       </div>
+
+      {/* ── Category-specific FAQ ──
+          Auto-selected based on category slug. Adds FAQPage schema +
+          visible Q&A accordion so each of the 45+ category landing pages
+          has unique long-tail keyword coverage. */}
+      <CategoryFaq cat={cat} />
     </div>
   );
 }

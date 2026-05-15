@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import PageFAQ from '@/components/PageFAQ';
 
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'woodFabrication' });
@@ -77,6 +78,25 @@ export default function WoodFabricationPage({ params }) {
           </div>
         </div>
       </section>
+
+      {/* ── Wood Fabrication FAQ ── */}
+      <WoodFabricationFaq />
     </article>
+  );
+}
+
+function WoodFabricationFaq() {
+  const t = useTranslations('pageFaqs');
+  const ITEMS = [1, 2, 3, 4, 5, 6].map((i) => ({
+    q: t(`woodFabricationQ${i}`),
+    a: t(`woodFabricationA${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={t('woodFabricationTitle')}
+      intro={t('woodFabricationIntro')}
+      items={ITEMS}
+      background="bg-brand-cream"
+    />
   );
 }

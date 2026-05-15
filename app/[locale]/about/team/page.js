@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
+import PageFAQ from '@/components/PageFAQ';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -134,6 +135,27 @@ export default function TeamPage({ params: { locale } }) {
           </div>
         </div>
       </section>
+
+      {/* ── Team FAQ ──
+          5 Q&As specifically about communication, languages, founder
+          access and working hours. Distinct from /contact FAQ. */}
+      <TeamFaq />
     </article>
+  );
+}
+
+function TeamFaq() {
+  const t = useTranslations('pageFaqs');
+  const ITEMS = [1, 2, 3, 4, 5].map((i) => ({
+    q: t(`teamQ${i}`),
+    a: t(`teamA${i}`),
+  }));
+  return (
+    <PageFAQ
+      title={t('teamTitle')}
+      intro={t('teamIntro')}
+      items={ITEMS}
+      background="bg-brand-cream"
+    />
   );
 }
