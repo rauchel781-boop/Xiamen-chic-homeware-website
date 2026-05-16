@@ -22,6 +22,7 @@ import {
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
 import { localizeProduct } from '@/lib/translated-content';
 import { schemaLang } from '@/i18n/seo';
+import { getPriceRangeForProduct } from '@/lib/product-pricing';
 import PageFAQ from '@/components/PageFAQ';
 
 // Map category slug → which FAQ template applies. Wider matches than the
@@ -295,6 +296,13 @@ function ProductView({ p, locale }) {
   // Same translator declaration pattern as the blog page — only emit on
   // non-default-locale variants where the description was machine-translated.
   const isTranslated = locale !== routing.defaultLocale;
+
+  // Resolve B2B FOB price range for this product, driven by its leaf
+  // category. See lib/product-pricing.js for the full per-category table.
+  // Using AggregateOffer (not Offer) is the honest way to surface a
+  // wholesale MOQ-tiered band without committing to a single number.
+  const pricing = getPriceRangeForProduct(p);
+
   const productLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -315,22 +323,29 @@ function ProductView({ p, locale }) {
         name: 'CHIC Localization (Aliyun Machine Translation, human-reviewed)',
       },
     }),
-    // ── No `offers` block by design ────────────────────────────────────
-    // This is a B2B quote-only catalog — public prices don't exist. We
-    // tried two intermediate schemes:
-    //   1. price: '0'                  → Google flagged "Invalid price"
-    //   2. PriceSpecification w/o price → Google flagged "Missing price"
-    //
-    // Both broke Product rich-result eligibility site-wide. Cleanest fix
-    // is to omit `offers` entirely. Trade-off: no "Merchant listing"
-    // price snippet in SERP, but all other rich results (BreadcrumbList,
-    // FAQPage, Organization knowledge panel) keep working — and a
-    // "$3 starting from" snippet would actually hurt B2B credibility
-    // for an OEM/ODM factory anyway.
-    //
-    // To re-enable Product rich results later: add `aggregateRating`
-    // (from real customer reviews) or switch to `AggregateOffer` with
-    // honest lowPrice/highPrice that reflects MOQ-based wholesale ranges.
+    // ── AggregateOffer ─────────────────────────────────────────────────
+    // Wholesale FOB price band rather than a single price.
+    //   - lowPrice / highPrice = MOQ-tiered FOB Xiamen range
+    //   - eligibleQuantity.minValue = MOQ (unit code C62 = "piece" per UN/CEFACT)
+    //   - businessFunction = Sell (B2B sale, not lease)
+    //   - seller = the factory Organization @id we register globally
+    // This unlocks Product rich results in Google search without
+    // misrepresenting the price as a fixed retail figure.
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'USD',
+      lowPrice: pricing.lowPrice.toFixed(2),
+      highPrice: pricing.highPrice.toFixed(2),
+      availability: 'https://schema.org/InStock',
+      businessFunction: 'https://schema.org/Sell',
+      seller: { '@id': `${SITE.siteUrl}/#organization` },
+      url: `${SITE.siteUrl}/products/${p.slug}`,
+      eligibleQuantity: {
+        '@type': 'QuantitativeValue',
+        minValue: pricing.moq,
+        unitCode: 'C62',
+      },
+    },
   };
 
   return (
