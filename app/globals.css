@@ -402,3 +402,184 @@ a {
   background: #2C5E3F;
   color: #ffffff !important;
 }
+
+/* ─────────────────────────────────────────────
+   Inline FAQ block — used inside long-form blog posts. Authors mark
+   up FAQ sections in WP content as:
+     <div class="blog-faq">
+       <details><summary>Q?</summary><div>A.</div></details>
+       ...
+     </div>
+   The FAQPage schema is emitted separately by the blog page based on
+   the same data shape.
+   ───────────────────────────────────────────── */
+.blog-faq {
+  margin: 2.5rem 0;
+  border-top: 1px solid #E5E7EB;
+}
+.blog-faq details {
+  border-bottom: 1px solid #E5E7EB;
+  padding: 0;
+}
+.blog-faq details > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 1.1rem 2.5rem 1.1rem 0;
+  font-weight: 700;
+  color: #1A1A1A;
+  font-size: 1.05rem;
+  position: relative;
+}
+.blog-faq details > summary::-webkit-details-marker { display: none; }
+.blog-faq details > summary::after {
+  content: '+';
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: #2C5E3F;
+  font-weight: 400;
+  transition: transform 0.2s ease;
+}
+.blog-faq details[open] > summary::after {
+  content: '−';
+}
+.blog-faq details > div,
+.blog-faq details > p {
+  padding: 0 0 1.2rem;
+  color: #374151;
+  line-height: 1.75;
+}
+
+/* ─────────────────────────────────────────────
+   Comparison table emphasis — for blog "this vs that" tables, authors
+   add class="blog-compare" so we can give the first column a stronger
+   visual weight (sticky-feeling left rail).
+   ───────────────────────────────────────────── */
+.wp-content table.blog-compare th:first-child,
+.wp-content table.blog-compare td:first-child {
+  background: #F5F1E8;
+  font-weight: 700;
+  color: #1A1A1A;
+  width: 28%;
+}
+
+/* ─────────────────────────────────────────────
+   Print stylesheet — triggered when the user clicks the PrintButton
+   (or Ctrl/Cmd+P). Goal: a clean, readable A4 print of the article
+   body, no navigation, no sidebar, no CTAs.
+   ───────────────────────────────────────────── */
+@media print {
+  /* Page setup — generous margins, no headers/footers */
+  @page {
+    margin: 18mm 16mm;
+    size: A4;
+  }
+  html, body {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    font-size: 11pt !important;
+    line-height: 1.55 !important;
+  }
+  /* Hide chrome: header, footer, all sidebars, CTAs, related, JS toggles */
+  header.bg-brand-cream nav,
+  header[role="banner"],
+  nav[aria-label="Breadcrumb"],
+  footer,
+  aside,
+  .print\:hidden,
+  [data-print-hide],
+  iframe,
+  video,
+  button {
+    display: none !important;
+  }
+  /* Expand the article to full page width */
+  article, main, section {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  /* Grid → single column for article + sidebar layout */
+  .grid {
+    display: block !important;
+  }
+  /* Print-friendly headings (no green underline bar, no oversized type) */
+  .blog-prose h1, .wp-content h1 {
+    font-size: 22pt !important;
+    margin: 0 0 10pt !important;
+    color: #000 !important;
+  }
+  .blog-prose h2, .wp-content h2 {
+    font-size: 15pt !important;
+    margin: 18pt 0 6pt !important;
+    page-break-after: avoid;
+    color: #000 !important;
+    padding-bottom: 0 !important;
+  }
+  .blog-prose h2::after, .wp-content h2::after { display: none !important; }
+  .blog-prose h3, .wp-content h3 {
+    font-size: 12pt !important;
+    margin: 12pt 0 4pt !important;
+    page-break-after: avoid;
+    border-left: 2px solid #555 !important;
+    padding-left: 6pt !important;
+    color: #000 !important;
+  }
+  /* Avoid drop cap in print — looks weird at 11pt */
+  .blog-prose > p:first-of-type::first-letter {
+    float: none !important;
+    font-size: inherit !important;
+    color: inherit !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: inherit !important;
+  }
+  /* Images: keep on page, don't break, smaller max */
+  .wp-content img, .blog-prose img {
+    max-width: 100% !important;
+    max-height: 16cm !important;
+    page-break-inside: avoid;
+    margin: 8pt auto !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+  /* Tables: don't break mid-row */
+  .wp-content table, .blog-prose table {
+    page-break-inside: auto;
+    font-size: 9.5pt !important;
+  }
+  .wp-content tr, .blog-prose tr { page-break-inside: avoid; }
+  /* Links: show URL after text so print reader can follow */
+  .blog-prose a[href^="http"]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #555;
+    word-break: break-all;
+  }
+  /* But not for image-wrapping anchors or in-page anchors */
+  .blog-prose a[href^="#"]::after,
+  .blog-prose a:has(img)::after { content: '' !important; }
+  /* Blockquote: simpler in print */
+  .blog-prose blockquote, .wp-content blockquote {
+    background: none !important;
+    border-left: 3px solid #555 !important;
+    padding: 4pt 10pt !important;
+    margin: 10pt 0 !important;
+    color: #000 !important;
+    font-style: italic !important;
+  }
+  .blog-prose blockquote::before { display: none !important; }
+  /* FAQ — expand all <details> in print */
+  details { display: block !important; }
+  details > summary { font-weight: 700 !important; padding: 6pt 0 !important; }
+  details > summary::after { display: none !important; }
+  /* No background colors on cards/CTAs in print */
+  .bg-brand-cream, .bg-brand-green, .bg-white {
+    background: #ffffff !important;
+    color: #000 !important;
+  }
+}

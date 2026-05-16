@@ -8,11 +8,15 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
+import TableOfContents from '@/components/TableOfContents';
+import PrintButton from '@/components/PrintButton';
+import MermaidLoader from '@/components/MermaidLoader';
 import { SITE } from '@/data/site-config';
 import { wpPosts, wpPostBySlug, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
 import { routing, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
+import { enhanceArticle } from '@/lib/article-enhance';
 
 // Pick a blog author deterministically from SITE.blogAuthors based on a
 // simple hash of the post slug. Same slug always picks the same author,
@@ -102,6 +106,17 @@ export default function BlogPost({ params }) {
   const date = new Date(p.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const cat = p.categories?.[0];
 
+  // Server-side enhance: inject h2/h3 ids for TOC anchors, add
+  // target="_blank" rel="noopener nofollow" on every external link,
+  // and count externals (build-time warning if >10). The TOC array
+  // is fed to the <TableOfContents> component below.
+  const { html: enhancedHtml, toc } = enhanceArticle(p.content);
+
+  // Optional FAQ data attached to a post — used to emit FAQPage schema
+  // and visible FAQ block in the article. Authors include this in
+  // wp-data/posts.json as: { ..., faq: [{ q: "...", a: "..." }, ...] }
+  const faqItems = Array.isArray(p.faq) ? p.faq : [];
+
   // JSON-LD
   const breadcrumb = {
     '@context': 'https://schema.org',
@@ -153,10 +168,29 @@ export default function BlogPost({ params }) {
     }),
   };
 
+  // FAQPage schema — separate Schema.org block, surfaces in Google as
+  // rich-result accordion. Only emitted if the post has faq[] data.
+  const faqLd = faqItems.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqItems.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: stripHtml(f.a),
+          },
+        })),
+      }
+    : null;
+
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumb} />
       <JsonLd data={articleLd} />
+      {faqLd && <JsonLd data={faqLd} />}
+      <MermaidLoader />
 
       {/* ── HERO ── */}
       <header className="bg-brand-cream border-b border-brand-line">
@@ -207,6 +241,9 @@ export default function BlogPost({ params }) {
               </svg>
               By <Link href="/about/team" className="hover:text-brand-green underline-offset-2 hover:underline">{author.name}</Link>
             </span>
+            <span className="ml-auto print:hidden">
+              <PrintButton label="Print / Save PDF" />
+            </span>
           </div>
         </div>
       </header>
@@ -233,10 +270,37 @@ export default function BlogPost({ params }) {
           <div className="grid lg:grid-cols-[1fr_280px] gap-10 lg:gap-14">
             {/* MAIN ARTICLE */}
             <div className="min-w-0">
+              {/* Mobile-only TOC accordion (the desktop TOC lives in the sidebar) */}
+              {toc.length >= 3 && (
+                <TableOfContents toc={toc} title="On this page" />
+              )}
+
               <div
                 className="wp-content blog-prose"
-                dangerouslySetInnerHTML={{ __html: p.content }}
+                dangerouslySetInnerHTML={{ __html: enhancedHtml }}
               />
+
+              {/* Inline FAQ block — visible Q&A list. Companion FAQPage
+                  schema is emitted at the top of the page so Google can
+                  surface these in rich results. */}
+              {faqItems.length > 0 && (
+                <section id="faq" className="mt-12 pt-8 border-t border-brand-line">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-2">
+                    Frequently asked questions
+                  </p>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-brand-ink leading-tight mb-6">
+                    Questions buyers ask before placing an order
+                  </h2>
+                  <div className="blog-faq">
+                    {faqItems.map((f, i) => (
+                      <details key={i} {...(i === 0 ? { open: true } : {})}>
+                        <summary>{f.q}</summary>
+                        <div dangerouslySetInnerHTML={{ __html: f.a }} />
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Mid-article CTA card */}
               <aside className="mt-10 mb-2 bg-brand-cream border border-brand-line rounded-2xl p-6 lg:p-7 flex flex-col sm:flex-row sm:items-center gap-5">
@@ -281,6 +345,15 @@ export default function BlogPost({ params }) {
 
             {/* SIDEBAR */}
             <aside className="lg:sticky lg:top-24 lg:self-start space-y-5">
+              {/* TOC — desktop only, hides on mobile (the article body
+                  renders a mobile accordion instead). Only shows when
+                  the article has at least 3 headings. */}
+              {toc.length >= 3 && (
+                <div className="bg-white border border-brand-line rounded-2xl p-5 print:hidden">
+                  <TableOfContents toc={toc} title="On this page" />
+                </div>
+              )}
+
               {/* Author card — named Person from /about/team */}
               <div className="bg-brand-cream border border-brand-line rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
