@@ -109,7 +109,6 @@ const nextConfig = {
       { source: '/feed',                                       destination: '/blog',             permanent: true },
       { source: '/feed/:rest*',                                destination: '/blog',             permanent: true },
       { source: '/comments/feed',                              destination: '/blog',             permanent: true },
-      { source: '/?feed=:rest*',                               destination: '/blog',             permanent: true },
 
       // ── Locale clean-up redirects ──────────────────────────────────
       // /en → / (English is the no-prefix canonical, localePrefix: 'as-needed')
