@@ -17,6 +17,7 @@ import { localizePost } from '@/lib/translated-content';
 import { routing, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import { enhanceArticle } from '@/lib/article-enhance';
+import { buildSourcingHowTo } from '@/lib/howto-schema';
 
 // Pick a blog author deterministically from SITE.blogAuthors based on a
 // simple hash of the post slug. Same slug always picks the same author,
@@ -185,11 +186,18 @@ export default function BlogPost({ params }) {
       }
     : null;
 
+  // HowTo schema — auto-emitted for any sourcing-guide tagged article.
+  // Google retired the visual step-card rich result in late 2023 but the
+  // schema still feeds the Knowledge Panel and AI Overviews pipelines.
+  // Shared 9-step factory workflow lives in lib/howto-schema.js.
+  const howtoLd = buildSourcingHowTo(p, schemaLang(params.locale));
+
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumb} />
       <JsonLd data={articleLd} />
       {faqLd && <JsonLd data={faqLd} />}
+      {howtoLd && <JsonLd data={howtoLd} />}
       <MermaidLoader />
 
       {/* ── HERO ── */}
