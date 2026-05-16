@@ -71,6 +71,46 @@ const nextConfig = {
       { source: '/:locale(de|es|fr|ja)/%E5%BF%83%E6%84%BF%E5%8D%95', destination: '/:locale', permanent: true },
       { source: '/:locale(de|es|fr|ja)/%e5%bf%83%e6%84%bf%e5%8d%95', destination: '/:locale', permanent: true },
 
+      // ── Legacy WP / WooCommerce URL cleanup ────────────────────────
+      // Common URLs Google may still have indexed from the old WordPress site
+      // (about-us, contact-us, shop, sample-page, WooCommerce my-account/cart/
+      // wishlist, etc.) plus the specific /custom-wooden-products-manufacturer/
+      // marketing landing page that was a top WP entry. All 301'd to the
+      // closest equivalent on the new site so we don't lose link equity.
+      { source: '/custom-wooden-products-manufacturer',       destination: '/',                 permanent: true },
+      { source: '/custom-wooden-products-manufacturer/:rest*', destination: '/',                 permanent: true },
+      { source: '/about-us',                                   destination: '/about',            permanent: true },
+      { source: '/about-us/:rest*',                            destination: '/about',            permanent: true },
+      { source: '/contact-us',                                 destination: '/contact',          permanent: true },
+      { source: '/contact-us/:rest*',                          destination: '/contact',          permanent: true },
+      { source: '/shop',                                       destination: '/products',         permanent: true },
+      { source: '/shop/:rest*',                                destination: '/products',         permanent: true },
+      { source: '/sample-page',                                destination: '/',                 permanent: true },
+      { source: '/home',                                       destination: '/',                 permanent: true },
+      { source: '/index.html',                                 destination: '/',                 permanent: true },
+      { source: '/index.php',                                  destination: '/',                 permanent: true },
+      { source: '/blog-2',                                     destination: '/blog',             permanent: true },
+      // WooCommerce shop scaffolding — no equivalent on a quote-only site,
+      // 301 to the closest analogue so Google retires these.
+      { source: '/my-account',                                 destination: '/contact',          permanent: true },
+      { source: '/my-account/:rest*',                          destination: '/contact',          permanent: true },
+      { source: '/cart',                                       destination: '/contact',          permanent: true },
+      { source: '/cart/:rest*',                                destination: '/contact',          permanent: true },
+      { source: '/checkout',                                   destination: '/contact',          permanent: true },
+      { source: '/checkout/:rest*',                            destination: '/contact',          permanent: true },
+      { source: '/wishlist',                                   destination: '/products',         permanent: true },
+      { source: '/wishlist/:rest*',                            destination: '/products',         permanent: true },
+      // WP default category permalink shape: /product-category/<slug>/ →
+      // mirror this to our /products/<slug>/ category landing page.
+      { source: '/product-category/:slug',                     destination: '/products/:slug',   permanent: true },
+      { source: '/product-category/:slug/:rest*',              destination: '/products/:slug',   permanent: true },
+      // WP feed URLs — every CMS export leaves these, Google sometimes
+      // crawls them and gets noise. 301 to the closest live equivalent.
+      { source: '/feed',                                       destination: '/blog',             permanent: true },
+      { source: '/feed/:rest*',                                destination: '/blog',             permanent: true },
+      { source: '/comments/feed',                              destination: '/blog',             permanent: true },
+      { source: '/?feed=:rest*',                               destination: '/blog',             permanent: true },
+
       // ── Locale clean-up redirects ──────────────────────────────────
       // /en → / (English is the no-prefix canonical, localePrefix: 'as-needed')
       // /zh, /it, /ko, /pt → / (legacy/unsupported locales from old WP experiment)
