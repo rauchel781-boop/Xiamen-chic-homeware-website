@@ -74,11 +74,15 @@ const nextConfig = {
       // ── Legacy WP / WooCommerce URL cleanup ────────────────────────
       // Common URLs Google may still have indexed from the old WordPress site
       // (about-us, contact-us, shop, sample-page, WooCommerce my-account/cart/
-      // wishlist, etc.) plus the specific /custom-wooden-products-manufacturer/
-      // marketing landing page that was a top WP entry. All 301'd to the
-      // closest equivalent on the new site so we don't lose link equity.
-      { source: '/custom-wooden-products-manufacturer',       destination: '/',                 permanent: true },
-      { source: '/custom-wooden-products-manufacturer/:rest*', destination: '/',                 permanent: true },
+      // wishlist, etc.). All 301'd to the closest equivalent on the new site
+      // so we don't lose link equity.
+      //
+      // NOTE: /custom-wooden-products-manufacturer is NOT redirected here — it
+      // is a LIVE hand-coded SEO landing page (app/[locale]/custom-wooden-
+      // products-manufacturer/page.js) and a priority-0.9 entry in the sitemap.
+      // A previous version 301'd it to / by mistake (assuming it was a legacy
+      // WP-only slug), which made the real page unreachable and tanked its
+      // impressions. Leave it alone so the landing page serves normally.
       { source: '/about-us',                                   destination: '/about',            permanent: true },
       { source: '/about-us/:rest*',                            destination: '/about',            permanent: true },
       { source: '/contact-us',                                 destination: '/contact',          permanent: true },
