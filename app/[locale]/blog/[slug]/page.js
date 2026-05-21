@@ -46,12 +46,38 @@ export function generateStaticParams() {
   return wpPosts().map(p => ({ slug: p.slug }));
 }
 
+// Decode the handful of HTML entities WP stores in meta_title / meta_desc
+// (e.g. "OEM &amp; Custom" → "OEM & Custom"). stripHtml only removes tags.
+function decodeEntities(s) {
+  return (s || '')
+    .replace(/&amp;/g, '&')
+    .replace(/&#0?39;|&apos;|&rsquo;|&lsquo;/g, "'")
+    .replace(/&quot;|&ldquo;|&rdquo;/g, '"')
+    .replace(/&#8211;|&ndash;/g, '–')
+    .replace(/&#8212;|&mdash;/g, '—')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 export async function generateMetadata({ params }) {
   const rawP = wpPostBySlug(params.slug);
   if (!rawP) return {};
   const p = localizePost(rawP, params.locale);
-  const title = stripHtml(p.title);
-  const desc  = stripHtml(p.excerpt || p.content).slice(0, 160);
+  const isEn = params.locale === 'en';
+
+  // Prefer the hand-written, keyword-tuned meta_title / meta_desc on the
+  // English site (English is where all our search demand is). For translated
+  // locales keep the in-language snippet derived from the translated post so
+  // we never show an English description on a German/Spanish/French/JP page.
+  const metaTitle = decodeEntities(stripHtml(rawP.meta_title || ''));
+  const metaDesc  = decodeEntities(stripHtml(rawP.meta_desc  || ''));
+  const localizedDesc = stripHtml(p.excerpt || p.content).slice(0, 160);
+
+  const title = (isEn && metaTitle) ? metaTitle : stripHtml(p.title);
+  const desc  = isEn
+    ? (metaDesc || localizedDesc)
+    : (localizedDesc || metaDesc);
   const path  = `/blog/${p.slug}`;
   const img   = p.featured_image || `${SITE.siteUrl}${SITE.defaultOgImage}`;
   return {
@@ -138,7 +164,8 @@ export default function BlogPost({ params }) {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: stripHtml(p.title),
-    description: stripHtml(p.excerpt || p.content).slice(0, 200),
+    description: (!isTranslated && decodeEntities(stripHtml(rawP.meta_desc || '')))
+      || stripHtml(p.excerpt || p.content).slice(0, 200),
     image: p.featured_image ? [p.featured_image.startsWith('http') ? p.featured_image : `${SITE.siteUrl}${p.featured_image}`] : undefined,
     datePublished: p.date,
     dateModified: isTranslated ? SITE.lastLocalizationDate : p.date,
