@@ -55,13 +55,13 @@
   },
   {
     "source": "/custom-wooden-watch-box-2",
-    "destination": "/blog/custom-wooden-watch-box-2",
+    "destination": "/blog/custom-wooden-watch-box",
     "permanent": true,
     "tag": "post"
   },
   {
     "source": "/factory-direct-wooden-boxes-vs-trading-sourcing-what-b2b-buyers-should-compare",
-    "destination": "/blog/factory-direct-wooden-boxes-vs-trading-sourcing-what-b2b-buyers-should-compare",
+    "destination": "/blog/factory-direct-wooden-boxes-vs-trading-sourcing",
     "permanent": true,
     "tag": "post"
   },
@@ -115,7 +115,7 @@
   },
   {
     "source": "/custom-engraved-wooden-boxes-for-corporate-gifts-2",
-    "destination": "/blog/custom-engraved-wooden-boxes-for-corporate-gifts-2",
+    "destination": "/blog/custom-engraved-wooden-boxes-for-corporate-gifts",
     "permanent": true,
     "tag": "post"
   },
@@ -514,5 +514,23 @@
     "destination": "/products",
     "permanent": true,
     "tag": "alias"
+  },
+  {
+    "source": "/blog/custom-wooden-watch-box-2",
+    "destination": "/blog/custom-wooden-watch-box",
+    "permanent": true,
+    "tag": "dedupe"
+  },
+  {
+    "source": "/blog/custom-engraved-wooden-boxes-for-corporate-gifts-2",
+    "destination": "/blog/custom-engraved-wooden-boxes-for-corporate-gifts",
+    "permanent": true,
+    "tag": "dedupe"
+  },
+  {
+    "source": "/blog/factory-direct-wooden-boxes-vs-trading-sourcing-what-b2b-buyers-should-compare",
+    "destination": "/blog/factory-direct-wooden-boxes-vs-trading-sourcing",
+    "permanent": true,
+    "tag": "dedupe"
   }
 ]
