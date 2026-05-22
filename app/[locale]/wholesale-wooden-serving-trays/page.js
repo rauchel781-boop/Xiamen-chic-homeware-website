@@ -7,9 +7,12 @@ import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import { schemaLang } from '@/i18n/seo';
 
 const SLUG = 'wholesale-wooden-serving-trays';
 const HERO_IMAGE = '/wp-images/2026/02/1-1.jpg';
+// YouTube Short — 3 acacia wood serving trays product close-up.
+const VIDEO_ID = '8Wdo-Qh5C7c';
 
 const MATERIAL_IMAGES = [
   '/different%20wood/acacia%20wood.png',
@@ -101,12 +104,27 @@ export default function Page({ params }) {
     locale: params.locale,
     offerItems: DESIGNS.map(d => ({ name: d.title, description: d.body })),
   });
+  // VideoObject — eligible for Google Video rich results. Lazy-loaded,
+  // cookieless embed (youtube-nocookie) so it doesn't set cookies until play.
+  const videoLd = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: t('videoSchemaName'),
+    description: t('videoSchemaDesc'),
+    thumbnailUrl: [`https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`],
+    contentUrl: `https://www.youtube.com/shorts/${VIDEO_ID}`,
+    embedUrl: `https://www.youtube-nocookie.com/embed/${VIDEO_ID}`,
+    uploadDate: '2026-05-22',
+    publisher: { '@id': `${SITE.siteUrl}/#organization` },
+    inLanguage: schemaLang(params.locale || 'en'),
+  };
 
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
       <JsonLd data={serviceLd} />
+      <JsonLd data={videoLd} />
 
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-14 lg:py-20">
@@ -156,6 +174,35 @@ export default function Page({ params }) {
           </h2>
           <p className="text-brand-mute leading-relaxed text-[16px] mb-3">{t('introBody1')}</p>
           <p className="text-brand-mute leading-relaxed text-[16px]">{t('introBody2')}</p>
+        </div>
+      </section>
+
+      {/* VIDEO — acacia serving trays Short */}
+      <section className="py-12 lg:py-20 bg-white border-t border-brand-line">
+        <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div className="mx-auto w-full max-w-[300px]">
+              <div className="relative aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-brand-line shadow-sm">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${VIDEO_ID}?rel=0&modestbranding=1`}
+                  title={t('videoTitle')}
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('videoEyebrow')}</p>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('videoTitle')}</h2>
+              <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('videoIntro')}</p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/contact#form" className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition">{t('ctaPrice')}</Link>
+                <a href={`https://www.youtube.com/shorts/${VIDEO_ID}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">{t('videoWatchOnYt')}</a>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
