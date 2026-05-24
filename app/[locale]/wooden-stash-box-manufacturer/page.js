@@ -17,6 +17,12 @@ const MATERIAL_IMAGES = [
   '/different%20wood/bamboo.png',
   '/different%20wood/pine%20wood.png',
 ];
+const STYLE_IMAGES = [
+  '/wp-images/2026/01/acacia-wood-stash-box-2.png',
+  '/wp-images/2026/01/stash-box-2.png',
+  '/wp-images/2026/02/1-1.jpg',
+  '/wp-images/2026/02/10.jpg',
+];
 
 export async function generateMetadata({ params: { locale } }) {
   const t = await getTranslations({ locale, namespace: 'landing.woodenStashBox' });
@@ -44,11 +50,16 @@ export default function Page({ params }) {
   const tCta = useTranslations('cta');
 
   const MATERIALS = MATERIAL_IMAGES.map((image, i) => ({
-    name: t(`mat${i + 1}Name`),
-    label: t(`mat${i + 1}Label`),
-    body: t(`mat${i + 1}Body`),
-    image,
+    name: t(`mat${i + 1}Name`), label: t(`mat${i + 1}Label`), body: t(`mat${i + 1}Body`), image,
   }));
+  const STYLES = STYLE_IMAGES.map((image, i) => ({
+    name: t(`style${i + 1}Name`), body: t(`style${i + 1}Body`), image,
+  }));
+  const SEAL = [
+    { title: t('seal1Title'), body: t('seal1Body') },
+    { title: t('seal2Title'), body: t('seal2Body') },
+    { title: t('seal3Title'), body: t('seal3Body') },
+  ];
   const QUALITY = [
     { title: t('quality1Title'), body: t('quality1Body') },
     { title: t('quality2Title'), body: t('quality2Body') },
@@ -65,6 +76,28 @@ export default function Page({ params }) {
     { title: t('custom2Title'), body: t('custom2Body') },
     { title: t('custom3Title'), body: t('custom3Body') },
   ];
+  const SPECS = [
+    { label: t('spec1Label'), value: t('spec1Value') },
+    { label: t('spec2Label'), value: t('spec2Value') },
+    { label: t('spec3Label'), value: t('spec3Value') },
+    { label: t('spec4Label'), value: t('spec4Value') },
+    { label: t('spec5Label'), value: t('spec5Value') },
+    { label: t('spec6Label'), value: t('spec6Value') },
+    { label: t('spec7Label'), value: t('spec7Value') },
+    { label: t('spec8Label'), value: t('spec8Value') },
+  ];
+  const PROCESS = [
+    { title: t('step1Title'), body: t('step1Body') },
+    { title: t('step2Title'), body: t('step2Body') },
+    { title: t('step3Title'), body: t('step3Body') },
+    { title: t('step4Title'), body: t('step4Body') },
+  ];
+  const INDUSTRIES = [
+    { title: t('ind1Title'), body: t('ind1Body') },
+    { title: t('ind2Title'), body: t('ind2Body') },
+    { title: t('ind3Title'), body: t('ind3Body') },
+    { title: t('ind4Title'), body: t('ind4Body') },
+  ];
   const RELATED = [
     { label: t('relProd1'), href: '/products/acacia-wood-stash-box' },
     { label: t('relProd2'), href: '/products/bamboo-stash-box' },
@@ -72,37 +105,34 @@ export default function Page({ params }) {
     { label: t('relBlog2'), href: '/blog/wooden-stash-box-guide-analysis' },
   ];
   const FAQS = [
-    { q: t('faq1Q'), a: t('faq1A') },
-    { q: t('faq2Q'), a: t('faq2A') },
-    { q: t('faq3Q'), a: t('faq3A') },
-    { q: t('faq4Q'), a: t('faq4A') },
-    { q: t('faq5Q'), a: t('faq5A') },
+    { q: t('faq1Q'), a: t('faq1A') }, { q: t('faq2Q'), a: t('faq2A') },
+    { q: t('faq3Q'), a: t('faq3A') }, { q: t('faq4Q'), a: t('faq4A') },
+    { q: t('faq5Q'), a: t('faq5A') }, { q: t('faq6Q'), a: t('faq6A') },
+    { q: t('faq7Q'), a: t('faq7A') }, { q: t('faq8Q'), a: t('faq8A') },
+    { q: t('faq9Q'), a: t('faq9A') },
   ];
   const BREADCRUMB = [{ name: 'Home', url: '/' }, { name: t('breadcrumb') }];
 
   const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: BREADCRUMB.map((c, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: c.name,
+      '@type': 'ListItem', position: i + 1, name: c.name,
       item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}`,
     })),
   };
   const faqLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
+    '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   };
   const serviceLd = buildServiceLd({
-    slug: SLUG,
-    serviceType: 'Custom Wooden Stash Box Manufacturing',
-    name: t('ogTitle'),
-    description: t('metaDesc'),
-    locale: params.locale,
-    offerItems: CUSTOMIZATION.map(c => ({ name: c.title, description: c.body })),
+    slug: SLUG, serviceType: 'Custom Wooden Stash Box Manufacturing',
+    name: t('ogTitle'), description: t('metaDesc'), locale: params.locale,
+    offerItems: STYLES.map(s => ({ name: s.name, description: s.body })),
   });
+
+  const Eyebrow = ({ children }) => (
+    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{children}</p>
+  );
 
   return (
     <article className="bg-white">
@@ -136,50 +166,59 @@ export default function Page({ params }) {
               </div>
             </div>
             <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <Image
-                src={HERO_IMAGE}
-                alt={t('ogTitle')}
-                fill
-                sizes="(max-width: 1024px) 100vw, 600px"
-                priority
-                fetchPriority="high"
-                className="object-cover"
-              />
+              <Image src={HERO_IMAGE} alt={t('ogTitle')} fill sizes="(max-width: 1024px) 100vw, 600px" priority fetchPriority="high" className="object-cover" />
             </div>
           </div>
         </div>
       </header>
 
-      {/* INTRO */}
+      {/* OVERVIEW */}
       <section className="py-12 lg:py-16 bg-white">
         <div className="max-w-[820px] mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink leading-tight mb-4">
-            {t('introTitle')}
-          </h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-ink leading-tight mb-4">{t('introTitle')}</h2>
           <p className="text-brand-mute leading-relaxed text-[16px] mb-3">{t('introBody1')}</p>
-          <p className="text-brand-mute leading-relaxed text-[16px]">{t('introBody2')}</p>
+          <p className="text-brand-mute leading-relaxed text-[16px] mb-3">{t('introBody2')}</p>
+          <p className="text-brand-mute leading-relaxed text-[16px]">{t('introBody3')}</p>
+        </div>
+      </section>
+
+      {/* STYLES */}
+      <section className="py-16 lg:py-24 bg-brand-cream">
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
+            <Eyebrow>{t('stylesEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('stylesTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('stylesIntro')}</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {STYLES.map(s => (
+              <article key={s.name} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col">
+                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
+                  <Image src={s.image} alt={s.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-[1.03] transition duration-500" />
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.name}</h3>
+                  <p className="text-sm text-brand-mute leading-relaxed flex-1">{s.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* MATERIALS */}
-      <section className="py-16 lg:py-24 bg-brand-cream">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('materialsEyebrow')}</p>
+            <Eyebrow>{t('materialsEyebrow')}</Eyebrow>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('materialsTitle')}</h2>
             <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('materialsIntro')}</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {MATERIALS.map(m => (
-              <article key={m.name} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col">
-                <div className="relative aspect-square bg-brand-cream overflow-hidden">
-                  <Image
-                    src={m.image}
-                    alt={m.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover group-hover:scale-[1.03] transition duration-500"
-                  />
+              <article key={m.name} className="group bg-brand-cream rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col">
+                <div className="relative aspect-square bg-white overflow-hidden">
+                  <Image src={m.image} alt={m.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-[1.03] transition duration-500" />
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green mb-1">{m.label}</p>
@@ -192,11 +231,31 @@ export default function Page({ params }) {
         </div>
       </section>
 
+      {/* SMELL-CONTROL EXPLAINER */}
+      <section className="py-16 lg:py-24 bg-brand-cream">
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
+            <Eyebrow>{t('sealEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('sealTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('sealIntro')}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {SEAL.map((s, i) => (
+              <article key={s.title} className="bg-white rounded-2xl border border-brand-line p-7 hover:border-brand-green/40 hover:shadow-md transition">
+                <div className="w-10 h-10 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 font-bold text-sm">{String(i + 1).padStart(2, '0')}</div>
+                <h3 className="text-lg font-bold text-brand-ink mb-2 leading-snug">{s.title}</h3>
+                <p className="text-sm text-brand-mute leading-relaxed">{s.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* QUALITY / FEATURES */}
       <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('qualityEyebrow')}</p>
+            <Eyebrow>{t('qualityEyebrow')}</Eyebrow>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('qualityTitle')}</h2>
             <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('qualityIntro')}</p>
           </div>
@@ -216,7 +275,7 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('checkEyebrow')}</p>
+            <Eyebrow>{t('checkEyebrow')}</Eyebrow>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('checkTitle')}</h2>
             <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('checkIntro')}</p>
           </div>
@@ -233,18 +292,80 @@ export default function Page({ params }) {
       </section>
 
       {/* CUSTOMIZATION */}
-      <section className="py-16 lg:py-24 bg-brand-cream">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('customEyebrow')}</p>
+            <Eyebrow>{t('customEyebrow')}</Eyebrow>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('customTitle')}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {CUSTOMIZATION.map((c, i) => (
-              <article key={c.title} className="bg-white rounded-2xl border border-brand-line p-7 hover:border-brand-green/40 hover:shadow-md transition">
+              <article key={c.title} className="bg-brand-cream rounded-2xl border border-brand-line p-7 hover:border-brand-green/40 hover:shadow-md transition">
                 <div className="w-10 h-10 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 font-bold text-sm">{String(i + 1).padStart(2, '0')}</div>
                 <h3 className="text-lg font-bold text-brand-ink mb-2 leading-snug">{c.title}</h3>
                 <p className="text-sm text-brand-mute leading-relaxed">{c.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SPECS TABLE */}
+      <section className="py-16 lg:py-24 bg-brand-cream">
+        <div className="max-w-[860px] mx-auto px-6 lg:px-8">
+          <div className="text-center mb-10 lg:mb-12">
+            <Eyebrow>{t('specsEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('specsTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('specsIntro')}</p>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-brand-line bg-white">
+            <table className="w-full text-left text-[15px]">
+              <tbody>
+                {SPECS.map((s, i) => (
+                  <tr key={s.label} className={i % 2 ? 'bg-brand-cream/50' : 'bg-white'}>
+                    <th className="py-4 px-5 font-semibold text-brand-ink align-top w-2/5 border-b border-brand-line">{s.label}</th>
+                    <td className="py-4 px-5 text-brand-mute border-b border-brand-line">{s.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* PROCESS */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
+            <Eyebrow>{t('procEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('procTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('procIntro')}</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {PROCESS.map((p, i) => (
+              <article key={p.title} className="bg-brand-cream rounded-2xl border border-brand-line p-6">
+                <div className="text-3xl font-extrabold text-brand-green/30 mb-2">{String(i + 1).padStart(2, '0')}</div>
+                <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{p.title}</h3>
+                <p className="text-sm text-brand-mute leading-relaxed">{p.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INDUSTRIES */}
+      <section className="py-16 lg:py-24 bg-brand-cream">
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
+            <Eyebrow>{t('indEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('indTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('indIntro')}</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {INDUSTRIES.map((n) => (
+              <article key={n.title} className="bg-white rounded-2xl border border-brand-line p-6 hover:border-brand-green/40 hover:shadow-md transition">
+                <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{n.title}</h3>
+                <p className="text-sm text-brand-mute leading-relaxed">{n.body}</p>
               </article>
             ))}
           </div>
@@ -255,7 +376,7 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-20 bg-white border-t border-brand-line">
         <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('relatedEyebrow')}</p>
+            <Eyebrow>{t('relatedEyebrow')}</Eyebrow>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('relatedTitle')}</h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -273,7 +394,7 @@ export default function Page({ params }) {
       <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[820px] mx-auto px-6 lg:px-8">
           <div className="text-center mb-10 lg:mb-14">
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">{t('faqEyebrow')}</p>
+            <Eyebrow>{t('faqEyebrow')}</Eyebrow>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('faqTitle')}</h2>
           </div>
           <div className="space-y-3">
