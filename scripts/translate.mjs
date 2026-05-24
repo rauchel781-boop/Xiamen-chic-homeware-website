@@ -609,6 +609,19 @@ async function translateAltAttrs(html, target, source = 'en') {
   return result;
 }
 
+// Translate a faq[] array: question as plain text, answer as HTML so the
+// <p> wrapper is preserved. Cached per string like everything else.
+async function translateFaq(faq, target, source = 'en') {
+  const out = [];
+  for (const item of faq) {
+    if (!item) { out.push(item); continue; }
+    const q = item.q ? await tr(String(item.q), target, source) : item.q;
+    const a = item.a ? await trHtml(String(item.a), target, source) : item.a;
+    out.push({ q, a });
+  }
+  return out;
+}
+
 async function cmdBlogs() {
   const posts = JSON.parse(
     await readFile(path.join(ROOT, 'wp-data/posts.json'), 'utf8')
@@ -625,11 +638,16 @@ async function cmdBlogs() {
       const title = String(p.title || '').replace(/<[^>]+>/g, '').trim();
       const excerpt = String(p.excerpt || '').replace(/<[^>]+>/g, '').trim();
       const content = p.content || '';
+      const metaTitle = String(p.meta_title || '').replace(/<[^>]+>/g, '').trim();
+      const metaDesc = String(p.meta_desc || '').replace(/<[^>]+>/g, '').trim();
       try {
         out[p.slug] = {
           title: title ? await tr(title, lang) : '',
           excerpt: excerpt ? await tr(excerpt, lang) : '',
           content: content ? await trBlogContent(content, lang) : '',
+          meta_title: metaTitle ? await tr(metaTitle, lang) : '',
+          meta_desc: metaDesc ? await tr(metaDesc, lang) : '',
+          faq: (Array.isArray(p.faq) && p.faq.length) ? await translateFaq(p.faq, lang) : undefined,
         };
       } catch (e) {
         console.error(`\n  ✗ Failed post "${p.slug}": ${e.message}`);

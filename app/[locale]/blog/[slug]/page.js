@@ -64,20 +64,17 @@ export async function generateMetadata({ params }) {
   const rawP = wpPostBySlug(params.slug);
   if (!rawP) return {};
   const p = localizePost(rawP, params.locale);
-  const isEn = params.locale === 'en';
 
-  // Prefer the hand-written, keyword-tuned meta_title / meta_desc on the
-  // English site (English is where all our search demand is). For translated
-  // locales keep the in-language snippet derived from the translated post so
-  // we never show an English description on a German/Spanish/French/JP page.
-  const metaTitle = decodeEntities(stripHtml(rawP.meta_title || ''));
-  const metaDesc  = decodeEntities(stripHtml(rawP.meta_desc  || ''));
+  // Hand-written, keyword-tuned meta_title / meta_desc — translated per-locale
+  // by translate.mjs and merged in via localizePost (English keeps the original
+  // tuned strings). Fall back to a snippet derived from the translated body so
+  // we never show an empty or English description on a localized page.
+  const metaTitle = decodeEntities(stripHtml(p.meta_title || ''));
+  const metaDesc  = decodeEntities(stripHtml(p.meta_desc  || ''));
   const localizedDesc = stripHtml(p.excerpt || p.content).slice(0, 160);
 
-  const title = (isEn && metaTitle) ? metaTitle : stripHtml(p.title);
-  const desc  = isEn
-    ? (metaDesc || localizedDesc)
-    : (localizedDesc || metaDesc);
+  const title = metaTitle || stripHtml(p.title);
+  const desc  = metaDesc || localizedDesc;
   const path  = `/blog/${p.slug}`;
   const img   = p.featured_image || `${SITE.siteUrl}${SITE.defaultOgImage}`;
   return {
@@ -106,6 +103,7 @@ function readingTime(html) {
 export default function BlogPost({ params }) {
   unstable_setRequestLocale(params.locale);
   const tTeam = useTranslations('team');
+  const tBlog = useTranslations('blogPost');
   const rawP = wpPostBySlug(params.slug);
   if (!rawP) notFound();
   const p = localizePost(rawP, params.locale);
@@ -164,7 +162,7 @@ export default function BlogPost({ params }) {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: stripHtml(p.title),
-    description: (!isTranslated && decodeEntities(stripHtml(rawP.meta_desc || '')))
+    description: decodeEntities(stripHtml(p.meta_desc || ''))
       || stripHtml(p.excerpt || p.content).slice(0, 200),
     image: p.featured_image ? [p.featured_image.startsWith('http') ? p.featured_image : `${SITE.siteUrl}${p.featured_image}`] : undefined,
     datePublished: p.date,
@@ -231,9 +229,9 @@ export default function BlogPost({ params }) {
       <header className="bg-brand-cream border-b border-brand-line">
         <div className="max-w-[1100px] mx-auto px-6 lg:px-8 py-12 lg:py-16">
           <nav className="text-xs text-brand-mute mb-5">
-            <Link href="/" className="hover:text-brand-green">Home</Link>
+            <Link href="/" className="hover:text-brand-green">{tBlog('breadcrumbHome')}</Link>
             {' / '}
-            <Link href="/blog" className="hover:text-brand-green">Blog</Link>
+            <Link href="/blog" className="hover:text-brand-green">{tBlog('breadcrumbBlog')}</Link>
             {cat && <>{' / '}<span className="text-brand-mute">{cat.name}</span></>}
           </nav>
 
@@ -268,16 +266,16 @@ export default function BlogPost({ params }) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-green">
                 <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
               </svg>
-              {minutes} min read
+              {tBlog('readingTime', { minutes })}
             </span>
             <span className="inline-flex items-center gap-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-green">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
               </svg>
-              By <Link href="/about/team" className="hover:text-brand-green underline-offset-2 hover:underline">{author.name}</Link>
+              {tBlog('by')} <Link href="/about/team" className="hover:text-brand-green underline-offset-2 hover:underline">{author.name}</Link>
             </span>
             <span className="ml-auto print:hidden">
-              <PrintButton label="Print / Save PDF" />
+              <PrintButton label={tBlog('printLabel')} />
             </span>
           </div>
         </div>
@@ -307,7 +305,7 @@ export default function BlogPost({ params }) {
             <div className="min-w-0">
               {/* Mobile-only TOC accordion (the desktop TOC lives in the sidebar) */}
               {toc.length >= 3 && (
-                <TableOfContents toc={toc} title="On this page" />
+                <TableOfContents toc={toc} title={tBlog('onThisPage')} />
               )}
 
               <div
@@ -321,10 +319,10 @@ export default function BlogPost({ params }) {
               {faqItems.length > 0 && (
                 <section id="faq" className="mt-12 pt-8 border-t border-brand-line">
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-2">
-                    Frequently asked questions
+                    {tBlog('faqEyebrow')}
                   </p>
                   <h2 className="text-2xl md:text-3xl font-extrabold text-brand-ink leading-tight mb-6">
-                    Questions buyers ask before placing an order
+                    {tBlog('faqTitle')}
                   </h2>
                   <div className="blog-faq">
                     {faqItems.map((f, i) => (
@@ -345,26 +343,26 @@ export default function BlogPost({ params }) {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-1">From the factory</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-1">{tBlog('midCtaEyebrow')}</p>
                   <p className="font-bold text-brand-ink leading-snug">
-                    Need a custom wooden product like this for your brand?
+                    {tBlog('midCtaTitle')}
                   </p>
                   <p className="text-sm text-brand-mute mt-1">
-                    Send a brief — quote within 24h, samples in 7–10 days.
+                    {tBlog('midCtaBody')}
                   </p>
                 </div>
                 <Link
                   href="/contact#form"
                   className="shrink-0 inline-flex items-center justify-center rounded-full bg-brand-green text-white font-semibold text-sm px-5 py-2.5 hover:bg-brand-greenDark transition"
                 >
-                  Get a Quote →
+                  {tBlog('midCtaButton')}
                 </Link>
               </aside>
 
               {/* Tags / categories */}
               {p.categories && p.categories.length > 0 && (
                 <div className="mt-10 pt-6 border-t border-brand-line flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-mute mr-2">Topics:</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-mute mr-2">{tBlog('topics')}</span>
                   {p.categories.map(c => (
                     <Link
                       key={c.slug}
@@ -385,7 +383,7 @@ export default function BlogPost({ params }) {
                   the article has at least 3 headings. */}
               {toc.length >= 3 && (
                 <div className="bg-white border border-brand-line rounded-2xl p-5 print:hidden">
-                  <TableOfContents toc={toc} title="On this page" />
+                  <TableOfContents toc={toc} title={tBlog('onThisPage')} />
                 </div>
               )}
 
@@ -417,36 +415,36 @@ export default function BlogPost({ params }) {
                   href="/about/team"
                   className="mt-3 inline-flex items-center text-[13px] font-semibold text-brand-green hover:text-brand-greenDark"
                 >
-                  Meet the team →
+                  {tBlog('meetTeam')}
                 </Link>
               </div>
 
               {/* Quick CTA */}
               <div className="bg-brand-green text-white rounded-2xl p-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-wood mb-2">
-                  Custom Project?
+                  {tBlog('sideCtaEyebrow')}
                 </p>
                 <p className="font-bold leading-snug mb-3">
-                  Get a wholesale quote in 24 hours.
+                  {tBlog('sideCtaTitle')}
                 </p>
                 <Link
                   href="/contact#form"
                   className="inline-flex items-center rounded-full bg-white text-brand-green font-semibold text-sm px-4 py-2 hover:bg-brand-cream transition"
                 >
-                  Contact Us →
+                  {tBlog('sideCtaButton')}
                 </Link>
               </div>
 
               {/* Quick links */}
               <div className="bg-white border border-brand-line rounded-2xl p-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green mb-3">
-                  Explore
+                  {tBlog('exploreTitle')}
                 </p>
                 <ul className="space-y-2 text-sm">
-                  <li><Link href="/products" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> All Products</Link></li>
-                  <li><Link href="/material-guide" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> Material Guide</Link></li>
-                  <li><Link href="/about" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> About Factory</Link></li>
-                  <li><Link href="/blog" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> All Articles</Link></li>
+                  <li><Link href="/products" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkAllProducts')}</Link></li>
+                  <li><Link href="/material-guide" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkMaterialGuide')}</Link></li>
+                  <li><Link href="/about" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkAboutFactory')}</Link></li>
+                  <li><Link href="/blog" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkAllArticles')}</Link></li>
                 </ul>
               </div>
             </aside>
@@ -460,14 +458,14 @@ export default function BlogPost({ params }) {
           <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-10">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-2">Continue Reading</p>
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-tight">Related articles</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-2">{tBlog('relatedEyebrow')}</p>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-tight">{tBlog('relatedTitle')}</h2>
               </div>
               <Link
                 href="/blog"
                 className="hidden md:inline-flex items-center rounded-full border-2 border-brand-green px-5 py-2 text-sm font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
               >
-                Browse all articles →
+                {tBlog('browseAll')}
               </Link>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -503,7 +501,7 @@ export default function BlogPost({ params }) {
                       </p>
                     )}
                     <span className="mt-4 inline-flex items-center text-sm font-semibold text-brand-green">
-                      Read article →
+                      {tBlog('readArticle')}
                     </span>
                   </div>
                 </Link>
@@ -514,7 +512,7 @@ export default function BlogPost({ params }) {
                 href="/blog"
                 className="inline-flex items-center rounded-full border-2 border-brand-green px-5 py-2 text-sm font-semibold text-brand-green"
               >
-                Browse all articles →
+                {tBlog('browseAll')}
               </Link>
             </div>
           </div>
@@ -526,13 +524,12 @@ export default function BlogPost({ params }) {
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-16 lg:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">Ready to source?</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">{tBlog('finalCtaEyebrow')}</p>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                Reading is great — but a real quote moves the project forward.
+                {tBlog('finalCtaTitle')}
               </h2>
               <p className="mt-4 text-white/85 leading-relaxed text-[16px] max-w-xl">
-                Have a wooden product in mind? Send us a brief, sketch or reference photo —
-                we&apos;ll come back with a quote and a sample timeline within 24 hours.
+                {tBlog('finalCtaBody')}
               </p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
@@ -540,13 +537,13 @@ export default function BlogPost({ params }) {
                 href="/contact#form"
                 className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition"
               >
-                Get a Free Quote
+                {tBlog('finalCtaButton1')}
               </Link>
               <Link
                 href="/products"
                 className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition"
               >
-                Browse Products
+                {tBlog('finalCtaButton2')}
               </Link>
             </div>
           </div>

@@ -79,6 +79,7 @@ export default function sitemap() {
     'wooden-sofa-tray-manufacturer',
     'custom-wooden-storage-boxes-wholesale',
     'custom-wooden-products-manufacturer',
+    'wooden-stash-box-manufacturer',
   ];
   for (const slug of LANDING_PAGES) {
     push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });
