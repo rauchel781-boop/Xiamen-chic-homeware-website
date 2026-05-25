@@ -80,6 +80,7 @@ export default function sitemap() {
     'custom-wooden-storage-boxes-wholesale',
     'custom-wooden-products-manufacturer',
     'wooden-stash-box-manufacturer',
+    'custom-wooden-gift-box-manufacturer',
   ];
   for (const slug of LANDING_PAGES) {
     push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });
