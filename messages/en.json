@@ -2599,7 +2599,24 @@
       "cost4Title": "Branding method",
       "cost4Body": "Engraving is usually included; UV colour, hot foil and embossed plates add tooling or per-piece cost.",
       "cost5Title": "Order quantity",
-      "cost5Body": "Higher volumes cut the per-unit price by spreading tooling, setup and print costs — the biggest lever."
+      "cost5Body": "Higher volumes cut the per-unit price by spreading tooling, setup and print costs — the biggest lever.",
+      "effEyebrow": "Logo effects",
+      "effTitle": "See your logo on real boxes",
+      "effIntro": "Laser engraving doesn't add ink — it burns the wood surface, so the same logo looks different on every material. Below are real samples from our factory, plus UV printing and foil for when you need colour or shine.",
+      "effLaserLabel": "Laser engraving, wood by wood",
+      "effLaserNote": "Because engraving relies on the wood's own colour and density, paler, even-grained woods give the crispest, highest-contrast mark, while darker or stronger-grained woods give a subtler, more tonal result. Here is the same logo on four common woods:",
+      "eff1Title": "Bamboo",
+      "eff1Body": "Pale, even and dense — bamboo burns to a clean medium-brown with sharp edges and excellent contrast, ideal for fine detail and small text.",
+      "eff2Title": "Acacia",
+      "eff2Body": "Rich, varied grain and a warm mid-tone — engraving reads as a deep brown, with the natural grain adding a premium, handcrafted character (contrast shifts slightly across the grain).",
+      "eff3Title": "Paulownia",
+      "eff3Body": "Very light and soft — paulownia engraves easily and shows a clear light-to-medium brown mark; great for larger logos and a rustic, natural look.",
+      "eff4Title": "Dark / stained wood",
+      "eff4Body": "On walnut or dark-stained boxes the burn is closer in tone to the surface, giving an understated, elegant low-contrast mark — for maximum pop on dark wood, pair it with foil or a metal plate.",
+      "effUvTitle": "UV printing — full colour, photographic detail",
+      "effUvBody": "UV printing lays a crisp, full-colour image directly onto the wood, so you can reproduce logos with multiple colours, gradients or even photos exactly as designed. The grain often shows subtly through lighter areas, keeping a natural wooden feel while giving brand-accurate colour. Best when your logo isn't a single colour.",
+      "effGoldTitle": "Gold & metallic — foil and plates for luxury",
+      "effGoldBody": "For a premium, high-shine finish we use hot-foil stamping or an embossed metal plate in gold, silver or other metallics. Gold especially stands out on dark wood and dark labels, signalling luxury for gifting, spirits and high-end retail — the look of the finest presentation boxes."
     }
   },
   "blogPost": {

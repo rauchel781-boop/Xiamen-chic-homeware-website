@@ -2006,7 +2006,24 @@
       "cost4Title": "Méthode de marquage",
       "cost4Body": "La gravure est généralement incluse ; la couleur UV, la dorure et les plaques en relief ajoutent un coût d'outillage ou par pièce.",
       "cost5Title": "Quantité commandée",
-      "cost5Body": "Les volumes élevés réduisent le prix unitaire en répartissant outillage, calage et impression — le plus grand levier."
+      "cost5Body": "Les volumes élevés réduisent le prix unitaire en répartissant outillage, calage et impression — le plus grand levier.",
+      "effEyebrow": "Effets de logo",
+      "effTitle": "Voyez votre logo sur de vraies boîtes",
+      "effIntro": "La gravure laser n'ajoute pas d'encre — elle brûle la surface du bois, donc le même logo rend différemment sur chaque matériau. Ci-dessous, de vrais échantillons de notre usine, plus l'impression UV et la dorure quand il vous faut couleur ou brillance.",
+      "effLaserLabel": "Gravure laser, bois par bois",
+      "effLaserNote": "Comme la gravure dépend de la couleur et de la densité propres au bois, les bois plus clairs et à grain régulier donnent la marque la plus nette et contrastée, tandis que les bois plus foncés ou à grain marqué donnent un résultat plus subtil et nuancé. Voici le même logo sur quatre bois courants :",
+      "eff1Title": "Bambou",
+      "eff1Body": "Clair, régulier et dense — le bambou brûle en un brun moyen net, aux bords précis et au contraste excellent, idéal pour les détails fins et le petit texte.",
+      "eff2Title": "Acacia",
+      "eff2Body": "Grain riche et varié et ton moyen chaud — la gravure ressort en brun profond, le grain naturel apportant un caractère premium et artisanal (le contraste varie légèrement selon le grain).",
+      "eff3Title": "Paulownia",
+      "eff3Body": "Très clair et tendre — le paulownia se grave facilement et montre une marque claire à moyenne ; parfait pour les grands logos et un aspect rustique et naturel.",
+      "eff4Title": "Bois foncé / teinté",
+      "eff4Body": "Sur le noyer ou les boîtes teintées foncé, la brûlure est plus proche du ton de la surface, donnant une marque élégante et discrète à faible contraste — pour un maximum d'impact sur bois foncé, associez-la à une dorure ou une plaque métallique.",
+      "effUvTitle": "Impression UV — pleine couleur, détail photographique",
+      "effUvBody": "L'impression UV pose une image nette en pleine couleur directement sur le bois, pour reproduire des logos à plusieurs couleurs, des dégradés ou même des photos exactement comme conçus. Le grain transparaît souvent subtilement dans les zones claires, gardant un aspect bois naturel avec une couleur fidèle à la marque. Idéal quand votre logo n'est pas monochrome.",
+      "effGoldTitle": "Or & métallisé — dorure et plaques pour le luxe",
+      "effGoldBody": "Pour une finition premium et brillante, nous utilisons la dorure à chaud ou une plaque métallique en relief en or, argent ou autres métallisés. L'or ressort particulièrement sur le bois et les étiquettes foncés, signalant le luxe pour le cadeau, les spiritueux et la vente haut de gamme — le rendu des plus belles boîtes de présentation."
     }
   },
   "productContent": {

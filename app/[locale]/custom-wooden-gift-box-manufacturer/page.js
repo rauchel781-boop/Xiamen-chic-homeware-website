@@ -55,6 +55,12 @@ export default function Page({ params }) {
   const GALLERY = GALLERY_IMAGES.map((image, i) => ({ image, alt: t(`galleryAlt${i + 1}`) }));
   const LIDS = [1, 2, 3, 4].map(i => ({ type: t(`lid${i}Type`), feel: t(`lid${i}Feel`), best: t(`lid${i}Best`), cost: t(`lid${i}Cost`) }));
   const BRANDING = [1, 2, 3, 4, 5].map(i => ({ method: t(`brand${i}Method`), effect: t(`brand${i}Effect`), color: t(`brand${i}Color`), best: t(`brand${i}Best`) }));
+  const LASER = [
+    { title: t('eff1Title'), body: t('eff1Body'), image: '/logo/laser-logo-bamboo.png' },
+    { title: t('eff2Title'), body: t('eff2Body'), image: '/logo/laser-logo-acacia.jpg' },
+    { title: t('eff3Title'), body: t('eff3Body'), image: '/logo/laser-logo-paulownia.png' },
+    { title: t('eff4Title'), body: t('eff4Body'), image: '/logo/laser-logo-dark-wood.png' },
+  ];
   const INSERTS = [
     { title: t('insert1Title'), body: t('insert1Body') },
     { title: t('insert2Title'), body: t('insert2Body') },
@@ -251,6 +257,46 @@ export default function Page({ params }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      {/* LOGO EFFECTS */}
+      <section className="py-16 lg:py-24 bg-brand-cream">
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-12">
+            <Eyebrow>{t('effEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('effTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('effIntro')}</p>
+          </div>
+          <div className="max-w-3xl mx-auto text-center mb-8">
+            <h3 className="text-xl md:text-2xl font-bold text-brand-ink mb-2 leading-snug">{t('effLaserLabel')}</h3>
+            <p className="text-brand-mute leading-relaxed text-[15px]">{t('effLaserNote')}</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
+            {LASER.map(l => (
+              <article key={l.title} className="bg-white rounded-2xl border border-brand-line overflow-hidden flex flex-col hover:border-brand-green/40 hover:shadow-md transition">
+                <div className="relative aspect-[4/3] bg-brand-cream"><Image src={l.image} alt={l.title} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" /></div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <h4 className="text-base font-bold text-brand-ink mb-2">{l.title}</h4>
+                  <p className="text-sm text-brand-mute leading-relaxed flex-1">{l.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center mb-6 bg-white rounded-2xl border border-brand-line p-6 lg:p-8">
+            <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-brand-cream border border-brand-line"><Image src="/logo/uv-printing.png" alt={t('effUvTitle')} fill sizes="(max-width: 1024px) 100vw, 480px" className="object-cover" /></div>
+            <div>
+              <h3 className="text-xl md:text-2xl font-bold text-brand-ink mb-2 leading-snug">{t('effUvTitle')}</h3>
+              <p className="text-brand-mute leading-relaxed text-[15px]">{t('effUvBody')}</p>
+            </div>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center bg-white rounded-2xl border border-brand-line p-6 lg:p-8">
+            <div className="lg:order-2 relative aspect-[4/3] rounded-xl overflow-hidden bg-brand-cream border border-brand-line"><Image src="/logo/gold-logo.jpg" alt={t('effGoldTitle')} fill sizes="(max-width: 1024px) 100vw, 480px" className="object-cover" /></div>
+            <div className="lg:order-1">
+              <h3 className="text-xl md:text-2xl font-bold text-brand-ink mb-2 leading-snug">{t('effGoldTitle')}</h3>
+              <p className="text-brand-mute leading-relaxed text-[15px]">{t('effGoldBody')}</p>
+            </div>
           </div>
         </div>
       </section>

@@ -2006,7 +2006,24 @@
       "cost4Title": "Método de marca",
       "cost4Body": "El grabado suele estar incluido; el color UV, el estampado y las placas en relieve añaden coste de utillaje o por pieza.",
       "cost5Title": "Cantidad del pedido",
-      "cost5Body": "Los volúmenes altos reducen el precio unitario al repartir utillaje, preparación e impresión — la mayor palanca."
+      "cost5Body": "Los volúmenes altos reducen el precio unitario al repartir utillaje, preparación e impresión — la mayor palanca.",
+      "effEyebrow": "Efectos de logotipo",
+      "effTitle": "Vea su logotipo en cajas reales",
+      "effIntro": "El grabado láser no añade tinta — quema la superficie de la madera, por lo que el mismo logotipo se ve diferente en cada material. Abajo, muestras reales de nuestra fábrica, además de impresión UV y estampado para cuando necesite color o brillo.",
+      "effLaserLabel": "Grabado láser, madera por madera",
+      "effLaserNote": "Como el grabado depende del color y la densidad propios de la madera, las maderas más claras y de veta uniforme dan la marca más nítida y de mayor contraste, mientras que las más oscuras o de veta marcada dan un resultado más sutil y tonal. Aquí el mismo logotipo en cuatro maderas comunes:",
+      "eff1Title": "Bambú",
+      "eff1Body": "Claro, uniforme y denso — el bambú se quema a un marrón medio limpio, con bordes nítidos y excelente contraste, ideal para detalles finos y texto pequeño.",
+      "eff2Title": "Acacia",
+      "eff2Body": "Veta rica y variada y un tono medio cálido — el grabado se ve como un marrón profundo, y la veta natural aporta un carácter premium y artesanal (el contraste varía algo según la veta).",
+      "eff3Title": "Paulownia",
+      "eff3Body": "Muy clara y blanda — la paulownia se graba con facilidad y muestra una marca clara de tono medio; ideal para logotipos grandes y un aspecto rústico y natural.",
+      "eff4Title": "Madera oscura / teñida",
+      "eff4Body": "En cajas de nogal o teñidas en oscuro, la quemadura queda más cercana al tono de la superficie, dando una marca elegante y discreta de bajo contraste — para máximo impacto en madera oscura, combínela con estampado o placa metálica.",
+      "effUvTitle": "Impresión UV — color completo, detalle fotográfico",
+      "effUvBody": "La impresión UV aplica una imagen nítida a todo color directamente sobre la madera, para reproducir logotipos con varios colores, degradados o incluso fotos tal como se diseñaron. La veta suele verse sutilmente en las zonas claras, manteniendo el aire natural de la madera con color fiel a la marca. Lo mejor cuando su logotipo no es de un solo color.",
+      "effGoldTitle": "Oro y metálico — estampado y placas para lujo",
+      "effGoldBody": "Para un acabado premium y brillante usamos estampado en caliente o una placa metálica en relieve en oro, plata u otros metálicos. El oro destaca especialmente en madera y etiquetas oscuras, señalando lujo para regalo, licores y venta de alta gama — el aspecto de las mejores cajas de presentación."
     }
   },
   "productContent": {
