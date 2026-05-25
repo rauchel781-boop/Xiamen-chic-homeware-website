@@ -81,7 +81,7 @@ export default function Page({ params }) {
     { label: t('relBlog1'), href: '/blog/custom-wooden-gift-boxes-wholesale-guide' },
     { label: t('relBlog2'), href: '/blog/wooden-gift-box-manufacturing-guide' },
   ];
-  const FAQS = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => ({ q: t(`faq${i}Q`), a: t(`faq${i}A`) }));
+  const FAQS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(i => ({ q: t(`faq${i}Q`), a: t(`faq${i}A`) }));
   const BREADCRUMB = [{ name: 'Home', url: '/' }, { name: t('breadcrumb') }];
 
   const breadcrumbLd = {
