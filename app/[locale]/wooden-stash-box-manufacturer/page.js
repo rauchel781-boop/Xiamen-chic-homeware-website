@@ -9,19 +9,19 @@ import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 
 const SLUG = 'wooden-stash-box-manufacturer';
-const HERO_IMAGE = '/wooden%20stash%20box/acacia%20wood.png';
+const HERO_IMAGE = '/wooden-stash-box/acacia-wood.png';
 
 const MATERIAL_IMAGES = [
-  '/wooden%20stash%20box/acacia%20wood.png',
-  '/wooden%20stash%20box/walnut%20wood.jpg',
-  '/wooden%20stash%20box/bamboo.jpg',
-  '/wooden%20stash%20box/pine%20wood.png',
+  '/wooden-stash-box/acacia-wood.png',
+  '/wooden-stash-box/walnut-wood.jpg',
+  '/wooden-stash-box/bamboo.jpg',
+  '/wooden-stash-box/pine-wood.png',
 ];
 const STYLE_IMAGES = [
-  '/wooden%20stash%20box/simple%20lided%20box.png',
-  '/wooden%20stash%20box/bamboo.jpg',
-  '/wooden%20stash%20box/Lockable%20%26%20sealed%20box.png',
-  '/wooden%20stash%20box/Premium%20gift%20set.png',
+  '/wooden-stash-box/simple-lided-box.png',
+  '/wooden-stash-box/bamboo.jpg',
+  '/wooden-stash-box/lockable-sealed-box.png',
+  '/wooden-stash-box/premium-gift-set.png',
 ];
 
 export async function generateMetadata({ params: { locale } }) {
