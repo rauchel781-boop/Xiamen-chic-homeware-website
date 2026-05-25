@@ -17,11 +17,15 @@ const MATERIAL_IMAGES = [
   '/different%20wood/bamboo.png',
   '/different%20wood/pine%20wood.png',
 ];
-const STYLE_IMAGES = [
-  '/wp-images/2026/02/dark-color-chocolate-box-2.jpg',
-  '/wp-images/2026/02/wooden-drawer-gift-box.jpg',
+const GALLERY_IMAGES = [
   '/wp-images/2026/02/wooden-gift-box-.jpg',
+  '/wp-images/2026/02/wooden-drawer-gift-box.jpg',
+  '/wp-images/2026/02/dark-color-chocolate-box-2.jpg',
+  '/wp-images/2026/02/drawer-chocolate-box-1.jpg',
   '/wp-images/2026/01/Walnut-Wood-Cufflink-Box-2.png',
+  '/wp-images/2026/01/Keepsake-Chest-box-2.png',
+  '/wp-images/2026/03/Keepsake-Box-2.png',
+  '/wp-images/2026/04/Custom-Unfinished-Wooden-Boxes-Wholesale-Linen-Lined-Wooden-Gift-Storage-Box-with-Decorative-Cut-Lid-2.jpg',
 ];
 
 export async function generateMetadata({ params: { locale } }) {
@@ -33,12 +37,8 @@ export async function generateMetadata({ params: { locale } }) {
     description,
     alternates: { canonical: canonicalFor(locale, `/${SLUG}`), languages: hreflangFor(SITE.siteUrl, `/${SLUG}`) },
     openGraph: {
-      type: 'website',
-      url: `${SITE.siteUrl}/${SLUG}`,
-      title: ogTitle,
-      description,
-      images: [{ url: HERO_IMAGE, width: 1200, height: 800, alt: ogTitle }],
-      siteName: SITE.company.brand,
+      type: 'website', url: `${SITE.siteUrl}/${SLUG}`, title: ogTitle, description,
+      images: [{ url: HERO_IMAGE, width: 1200, height: 800, alt: ogTitle }], siteName: SITE.company.brand,
     },
     twitter: { card: 'summary_large_image', title: ogTitle, description },
   };
@@ -52,73 +52,35 @@ export default function Page({ params }) {
   const MATERIALS = MATERIAL_IMAGES.map((image, i) => ({
     name: t(`mat${i + 1}Name`), label: t(`mat${i + 1}Label`), body: t(`mat${i + 1}Body`), image,
   }));
-  const STYLES = STYLE_IMAGES.map((image, i) => ({
-    name: t(`style${i + 1}Name`), body: t(`style${i + 1}Body`), image,
-  }));
+  const GALLERY = GALLERY_IMAGES.map((image, i) => ({ image, alt: t(`galleryAlt${i + 1}`) }));
+  const LIDS = [1, 2, 3, 4].map(i => ({ type: t(`lid${i}Type`), feel: t(`lid${i}Feel`), best: t(`lid${i}Best`), cost: t(`lid${i}Cost`) }));
+  const BRANDING = [1, 2, 3, 4, 5].map(i => ({ method: t(`brand${i}Method`), effect: t(`brand${i}Effect`), color: t(`brand${i}Color`), best: t(`brand${i}Best`) }));
   const INSERTS = [
     { title: t('insert1Title'), body: t('insert1Body') },
     { title: t('insert2Title'), body: t('insert2Body') },
     { title: t('insert3Title'), body: t('insert3Body') },
   ];
-  const QUALITY = [
-    { title: t('quality1Title'), body: t('quality1Body') },
-    { title: t('quality2Title'), body: t('quality2Body') },
-    { title: t('quality3Title'), body: t('quality3Body') },
-  ];
-  const CHECKLIST = [
-    { title: t('check1Title'), body: t('check1Body') },
-    { title: t('check2Title'), body: t('check2Body') },
-    { title: t('check3Title'), body: t('check3Body') },
-    { title: t('check4Title'), body: t('check4Body') },
-  ];
+  const COSTS = [1, 2, 3, 4, 5].map(i => ({ title: t(`cost${i}Title`), body: t(`cost${i}Body`) }));
   const CUSTOMIZATION = [
     { title: t('custom1Title'), body: t('custom1Body') },
     { title: t('custom2Title'), body: t('custom2Body') },
     { title: t('custom3Title'), body: t('custom3Body') },
   ];
-  const SPECS = [
-    { label: t('spec1Label'), value: t('spec1Value') },
-    { label: t('spec2Label'), value: t('spec2Value') },
-    { label: t('spec3Label'), value: t('spec3Value') },
-    { label: t('spec4Label'), value: t('spec4Value') },
-    { label: t('spec5Label'), value: t('spec5Value') },
-    { label: t('spec6Label'), value: t('spec6Value') },
-    { label: t('spec7Label'), value: t('spec7Value') },
-    { label: t('spec8Label'), value: t('spec8Value') },
-  ];
-  const PROCESS = [
-    { title: t('step1Title'), body: t('step1Body') },
-    { title: t('step2Title'), body: t('step2Body') },
-    { title: t('step3Title'), body: t('step3Body') },
-    { title: t('step4Title'), body: t('step4Body') },
-  ];
-  const INDUSTRIES = [
-    { title: t('ind1Title'), body: t('ind1Body') },
-    { title: t('ind2Title'), body: t('ind2Body') },
-    { title: t('ind3Title'), body: t('ind3Body') },
-    { title: t('ind4Title'), body: t('ind4Body') },
-  ];
+  const SPECS = [1, 2, 3, 4, 5, 6, 7, 8].map(i => ({ label: t(`spec${i}Label`), value: t(`spec${i}Value`) }));
+  const PROCESS = [1, 2, 3, 4].map(i => ({ title: t(`step${i}Title`), body: t(`step${i}Body`) }));
+  const OCCASIONS = [1, 2, 3, 4].map(i => ({ title: t(`ind${i}Title`), body: t(`ind${i}Body`) }));
   const RELATED = [
     { label: t('relProd1'), href: '/products/wooden-gift-box-wholesale' },
     { label: t('relProd2'), href: '/products/premium-magnetic-wooden-chocolate-gift-box' },
     { label: t('relBlog1'), href: '/blog/custom-wooden-gift-boxes-wholesale-guide' },
     { label: t('relBlog2'), href: '/blog/wooden-gift-box-manufacturing-guide' },
   ];
-  const FAQS = [
-    { q: t('faq1Q'), a: t('faq1A') }, { q: t('faq2Q'), a: t('faq2A') },
-    { q: t('faq3Q'), a: t('faq3A') }, { q: t('faq4Q'), a: t('faq4A') },
-    { q: t('faq5Q'), a: t('faq5A') }, { q: t('faq6Q'), a: t('faq6A') },
-    { q: t('faq7Q'), a: t('faq7A') }, { q: t('faq8Q'), a: t('faq8A') },
-    { q: t('faq9Q'), a: t('faq9A') },
-  ];
+  const FAQS = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => ({ q: t(`faq${i}Q`), a: t(`faq${i}A`) }));
   const BREADCRUMB = [{ name: 'Home', url: '/' }, { name: t('breadcrumb') }];
 
   const breadcrumbLd = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
-    itemListElement: BREADCRUMB.map((c, i) => ({
-      '@type': 'ListItem', position: i + 1, name: c.name,
-      item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}`,
-    })),
+    itemListElement: BREADCRUMB.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.url ? `${SITE.siteUrl}${c.url}` : `${SITE.siteUrl}/${SLUG}` })),
   };
   const faqLd = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -127,7 +89,7 @@ export default function Page({ params }) {
   const serviceLd = buildServiceLd({
     slug: SLUG, serviceType: 'Custom Wooden Gift Box Manufacturing',
     name: t('ogTitle'), description: t('metaDesc'), locale: params.locale,
-    offerItems: STYLES.map(s => ({ name: s.name, description: s.body })),
+    offerItems: LIDS.map(l => ({ name: l.type, description: l.best })),
   });
 
   const Eyebrow = ({ children }) => (
@@ -182,26 +144,35 @@ export default function Page({ params }) {
         </div>
       </section>
 
-      {/* STYLES */}
+      {/* LID MECHANISM COMPARISON */}
       <section className="py-16 lg:py-24 bg-brand-cream">
-        <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <Eyebrow>{t('stylesEyebrow')}</Eyebrow>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('stylesTitle')}</h2>
-            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('stylesIntro')}</p>
+        <div className="max-w-[960px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-12">
+            <Eyebrow>{t('lidEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('lidTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('lidIntro')}</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STYLES.map(s => (
-              <article key={s.name} className="group bg-white rounded-2xl border border-brand-line overflow-hidden hover:border-brand-green/40 hover:shadow-lg transition flex flex-col">
-                <div className="relative aspect-[4/3] bg-brand-cream overflow-hidden">
-                  <Image src={s.image} alt={s.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-[1.03] transition duration-500" />
-                </div>
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{s.name}</h3>
-                  <p className="text-sm text-brand-mute leading-relaxed flex-1">{s.body}</p>
-                </div>
-              </article>
-            ))}
+          <div className="overflow-x-auto rounded-2xl border border-brand-line bg-white">
+            <table className="w-full text-left text-[14px] min-w-[640px]">
+              <thead>
+                <tr className="bg-brand-green/10 text-brand-ink">
+                  <th className="py-3 px-5 font-bold">{t('lidColType')}</th>
+                  <th className="py-3 px-5 font-bold">{t('lidColFeel')}</th>
+                  <th className="py-3 px-5 font-bold">{t('lidColBest')}</th>
+                  <th className="py-3 px-5 font-bold">{t('lidColCost')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LIDS.map((l, i) => (
+                  <tr key={l.type} className={i % 2 ? 'bg-brand-cream/40' : 'bg-white'}>
+                    <th className="py-4 px-5 font-semibold text-brand-ink align-top border-t border-brand-line">{l.type}</th>
+                    <td className="py-4 px-5 text-brand-mute align-top border-t border-brand-line">{l.feel}</td>
+                    <td className="py-4 px-5 text-brand-mute align-top border-t border-brand-line">{l.best}</td>
+                    <td className="py-4 px-5 text-brand-mute align-top border-t border-brand-line">{l.cost}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -231,7 +202,7 @@ export default function Page({ params }) {
         </div>
       </section>
 
-      {/* SMELL-CONTROL EXPLAINER */}
+      {/* INSERTS & PRESENTATION */}
       <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
@@ -251,39 +222,70 @@ export default function Page({ params }) {
         </div>
       </section>
 
-      {/* QUALITY / FEATURES */}
+      {/* BRANDING METHODS COMPARISON */}
       <section className="py-16 lg:py-24 bg-white">
+        <div className="max-w-[1000px] mx-auto px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-12">
+            <Eyebrow>{t('brandEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('brandTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('brandIntro')}</p>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-brand-line bg-white">
+            <table className="w-full text-left text-[14px] min-w-[680px]">
+              <thead>
+                <tr className="bg-brand-green/10 text-brand-ink">
+                  <th className="py-3 px-5 font-bold">{t('brandColMethod')}</th>
+                  <th className="py-3 px-5 font-bold">{t('brandColEffect')}</th>
+                  <th className="py-3 px-5 font-bold">{t('brandColColor')}</th>
+                  <th className="py-3 px-5 font-bold">{t('brandColBest')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {BRANDING.map((b, i) => (
+                  <tr key={b.method} className={i % 2 ? 'bg-brand-cream/40' : 'bg-white'}>
+                    <th className="py-4 px-5 font-semibold text-brand-ink align-top border-t border-brand-line">{b.method}</th>
+                    <td className="py-4 px-5 text-brand-mute align-top border-t border-brand-line">{b.effect}</td>
+                    <td className="py-4 px-5 text-brand-mute align-top border-t border-brand-line">{b.color}</td>
+                    <td className="py-4 px-5 text-brand-mute align-top border-t border-brand-line">{b.best}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCT GALLERY */}
+      <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <Eyebrow>{t('qualityEyebrow')}</Eyebrow>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('qualityTitle')}</h2>
-            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('qualityIntro')}</p>
+            <Eyebrow>{t('galleryEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('galleryTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('galleryIntro')}</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {QUALITY.map((q, i) => (
-              <article key={q.title} className="bg-brand-cream rounded-2xl border border-brand-line p-7 hover:border-brand-green/40 hover:shadow-md transition">
-                <div className="w-10 h-10 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 font-bold text-sm">{String(i + 1).padStart(2, '0')}</div>
-                <h3 className="text-lg font-bold text-brand-ink mb-2 leading-snug">{q.title}</h3>
-                <p className="text-sm text-brand-mute leading-relaxed">{q.body}</p>
-              </article>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {GALLERY.map(g => (
+              <div key={g.image} className="relative aspect-square rounded-2xl overflow-hidden border border-brand-line bg-white group">
+                <Image src={g.image} alt={g.alt} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-[1.04] transition duration-500" />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* BUYER CHECKLIST */}
-      <section className="py-16 lg:py-24 bg-brand-cream">
+      {/* COST FACTORS */}
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
-            <Eyebrow>{t('checkEyebrow')}</Eyebrow>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('checkTitle')}</h2>
-            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('checkIntro')}</p>
+            <Eyebrow>{t('costEyebrow')}</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-brand-ink">{t('costTitle')}</h2>
+            <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('costIntro')}</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {CHECKLIST.map((c, i) => (
-              <article key={c.title} className="bg-white rounded-2xl border border-brand-line p-6 hover:border-brand-green/40 hover:shadow-md transition">
-                <div className="w-9 h-9 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 font-bold text-sm">{String(i + 1).padStart(2, '0')}</div>
-                <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{c.title}</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {COSTS.map((c, i) => (
+              <article key={c.title} className="bg-brand-cream rounded-2xl border border-brand-line p-5">
+                <div className="text-3xl font-extrabold text-brand-green/30 mb-2">{String(i + 1).padStart(2, '0')}</div>
+                <h3 className="text-[15px] font-bold text-brand-ink mb-2 leading-snug">{c.title}</h3>
                 <p className="text-sm text-brand-mute leading-relaxed">{c.body}</p>
               </article>
             ))}
@@ -292,7 +294,7 @@ export default function Page({ params }) {
       </section>
 
       {/* CUSTOMIZATION */}
-      <section className="py-16 lg:py-24 bg-white">
+      <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
             <Eyebrow>{t('customEyebrow')}</Eyebrow>
@@ -300,7 +302,7 @@ export default function Page({ params }) {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {CUSTOMIZATION.map((c, i) => (
-              <article key={c.title} className="bg-brand-cream rounded-2xl border border-brand-line p-7 hover:border-brand-green/40 hover:shadow-md transition">
+              <article key={c.title} className="bg-white rounded-2xl border border-brand-line p-7 hover:border-brand-green/40 hover:shadow-md transition">
                 <div className="w-10 h-10 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 font-bold text-sm">{String(i + 1).padStart(2, '0')}</div>
                 <h3 className="text-lg font-bold text-brand-ink mb-2 leading-snug">{c.title}</h3>
                 <p className="text-sm text-brand-mute leading-relaxed">{c.body}</p>
@@ -311,7 +313,7 @@ export default function Page({ params }) {
       </section>
 
       {/* SPECS TABLE */}
-      <section className="py-16 lg:py-24 bg-brand-cream">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[860px] mx-auto px-6 lg:px-8">
           <div className="text-center mb-10 lg:mb-12">
             <Eyebrow>{t('specsEyebrow')}</Eyebrow>
@@ -334,7 +336,7 @@ export default function Page({ params }) {
       </section>
 
       {/* PROCESS */}
-      <section className="py-16 lg:py-24 bg-white">
+      <section className="py-16 lg:py-24 bg-brand-cream">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
             <Eyebrow>{t('procEyebrow')}</Eyebrow>
@@ -343,7 +345,7 @@ export default function Page({ params }) {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {PROCESS.map((p, i) => (
-              <article key={p.title} className="bg-brand-cream rounded-2xl border border-brand-line p-6">
+              <article key={p.title} className="bg-white rounded-2xl border border-brand-line p-6">
                 <div className="text-3xl font-extrabold text-brand-green/30 mb-2">{String(i + 1).padStart(2, '0')}</div>
                 <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{p.title}</h3>
                 <p className="text-sm text-brand-mute leading-relaxed">{p.body}</p>
@@ -353,8 +355,8 @@ export default function Page({ params }) {
         </div>
       </section>
 
-      {/* INDUSTRIES */}
-      <section className="py-16 lg:py-24 bg-brand-cream">
+      {/* OCCASIONS */}
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-10 lg:mb-14">
             <Eyebrow>{t('indEyebrow')}</Eyebrow>
@@ -362,8 +364,8 @@ export default function Page({ params }) {
             <p className="mt-4 leading-relaxed text-[16px] text-brand-mute">{t('indIntro')}</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {INDUSTRIES.map((n) => (
-              <article key={n.title} className="bg-white rounded-2xl border border-brand-line p-6 hover:border-brand-green/40 hover:shadow-md transition">
+            {OCCASIONS.map((n) => (
+              <article key={n.title} className="bg-brand-cream rounded-2xl border border-brand-line p-6 hover:border-brand-green/40 hover:shadow-md transition">
                 <h3 className="text-base font-bold text-brand-ink mb-2 leading-snug">{n.title}</h3>
                 <p className="text-sm text-brand-mute leading-relaxed">{n.body}</p>
               </article>
@@ -373,7 +375,7 @@ export default function Page({ params }) {
       </section>
 
       {/* RELATED */}
-      <section className="py-16 lg:py-20 bg-white border-t border-brand-line">
+      <section className="py-16 lg:py-20 bg-brand-cream border-t border-brand-line">
         <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-8">
             <Eyebrow>{t('relatedEyebrow')}</Eyebrow>
@@ -381,7 +383,7 @@ export default function Page({ params }) {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {RELATED.map(r => (
-              <Link key={r.href} href={r.href} className="flex items-center justify-between gap-4 bg-brand-cream border border-brand-line rounded-2xl px-6 py-5 hover:border-brand-green/40 hover:shadow-md transition">
+              <Link key={r.href} href={r.href} className="flex items-center justify-between gap-4 bg-white border border-brand-line rounded-2xl px-6 py-5 hover:border-brand-green/40 hover:shadow-md transition">
                 <span className="font-semibold text-brand-ink leading-snug">{r.label}</span>
                 <span className="shrink-0 text-brand-green font-bold">&rarr;</span>
               </Link>
@@ -391,7 +393,7 @@ export default function Page({ params }) {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 lg:py-24 bg-brand-cream">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[820px] mx-auto px-6 lg:px-8">
           <div className="text-center mb-10 lg:mb-14">
             <Eyebrow>{t('faqEyebrow')}</Eyebrow>
@@ -399,7 +401,7 @@ export default function Page({ params }) {
           </div>
           <div className="space-y-3">
             {FAQS.map((f, i) => (
-              <details key={i} className="group bg-white rounded-2xl border border-brand-line hover:border-brand-green/40 transition overflow-hidden">
+              <details key={i} className="group bg-brand-cream rounded-2xl border border-brand-line hover:border-brand-green/40 transition overflow-hidden">
                 <summary className="flex items-start justify-between cursor-pointer p-5 lg:p-6 gap-4 list-none">
                   <span className="font-semibold text-brand-ink leading-snug">{f.q}</span>
                   <span className="shrink-0 w-7 h-7 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center text-sm font-bold transition group-open:bg-brand-green group-open:text-white group-open:rotate-45">+</span>
