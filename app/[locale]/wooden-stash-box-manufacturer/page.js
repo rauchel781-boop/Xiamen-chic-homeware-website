@@ -9,19 +9,19 @@ import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 
 const SLUG = 'wooden-stash-box-manufacturer';
-const HERO_IMAGE = '/wp-images/2026/01/acacia-wood-stash-box-2.png';
+const HERO_IMAGE = '/wooden%20stash%20box/acacia%20wood.png';
 
 const MATERIAL_IMAGES = [
-  '/different%20wood/acacia%20wood.png',
-  '/different%20wood/walnut%20wood.png',
-  '/different%20wood/bamboo.png',
-  '/different%20wood/pine%20wood.png',
+  '/wooden%20stash%20box/acacia%20wood.png',
+  '/wooden%20stash%20box/walnut%20wood.jpg',
+  '/wooden%20stash%20box/bamboo.jpg',
+  '/wooden%20stash%20box/pine%20wood.png',
 ];
 const STYLE_IMAGES = [
-  '/wp-images/2026/01/acacia-wood-stash-box-2.png',
-  '/wp-images/2026/01/stash-box-2.png',
-  '/wp-images/2026/02/1-1.jpg',
-  '/wp-images/2026/02/10.jpg',
+  '/wooden%20stash%20box/simple%20lided%20box.png',
+  '/wooden%20stash%20box/bamboo.jpg',
+  '/wooden%20stash%20box/Lockable%20%26%20sealed%20box.png',
+  '/wooden%20stash%20box/Premium%20gift%20set.png',
 ];
 
 export async function generateMetadata({ params: { locale } }) {
