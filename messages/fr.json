@@ -290,6 +290,16 @@
       "wood7Desc": "Grain serré, fort",
       "wood8Name": "MDF et contreplaqué",
       "wood8Desc": "Options machinés"
+    },
+    "industryBrief": {
+      "badge": "NOUVEAU",
+      "eyebrow": "Industry Brief",
+      "titlePre": "Cette semaine depuis notre",
+      "titleHighlight": "atelier d'usine",
+      "intro": "Un signal externe du marché + nos propres données du bureau des devis, chaque semaine. Utile si vous avez besoin d'une vue côté usine du marché du homeware en bois.",
+      "newLabel": "Nouveau",
+      "readBrief": "Lire le brief",
+      "allBriefs": "Tous les briefs"
     }
   },
   "productDetail": {

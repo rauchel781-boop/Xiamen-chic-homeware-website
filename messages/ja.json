@@ -290,6 +290,16 @@
       "wood7Desc": "タイトな穀物、強い",
       "wood8Name": "MDF & 合板",
       "wood8Desc": "設計されたオプション"
+    },
+    "industryBrief": {
+      "badge": "NEW",
+      "eyebrow": "Industry Brief",
+      "titlePre": "今週の",
+      "titleHighlight": "工場フロアから",
+      "intro": "毎週、市場の外部シグナル1つ＋当社見積デスクの実データを発信。木製ホームウェア市場の工場側ビューが必要な方に。",
+      "newLabel": "新着",
+      "readBrief": "ブリーフを読む",
+      "allBriefs": "すべてのブリーフ"
     }
   },
   "productDetail": {

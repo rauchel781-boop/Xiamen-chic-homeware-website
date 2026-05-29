@@ -290,6 +290,16 @@
       "wood7Desc": "Tight grain, strong",
       "wood8Name": "MDF & Plywood",
       "wood8Desc": "Engineered options"
+    },
+    "industryBrief": {
+      "badge": "NEW",
+      "eyebrow": "Industry Brief",
+      "titlePre": "This week from our",
+      "titleHighlight": "factory floor",
+      "intro": "One external market signal + our own quote-desk data, every week. Useful if you need a factory-side view of the wooden homeware market.",
+      "newLabel": "New",
+      "readBrief": "Read brief",
+      "allBriefs": "All briefs"
     }
   },
   "productDetail": {

@@ -290,6 +290,16 @@
       "wood7Desc": "Grano apretado, fuerte",
       "wood8Name": "MDF y madera contrachapada",
       "wood8Desc": "Opciones de ingeniería"
+    },
+    "industryBrief": {
+      "badge": "NUEVO",
+      "eyebrow": "Industry Brief",
+      "titlePre": "Esta semana desde nuestra",
+      "titleHighlight": "planta de fábrica",
+      "intro": "Una señal externa del mercado + datos propios de nuestra mesa de cotización, cada semana. Útil si necesita una visión del mercado de homeware de madera desde la fábrica.",
+      "newLabel": "Nuevo",
+      "readBrief": "Leer brief",
+      "allBriefs": "Todos los briefs"
     }
   },
   "productDetail": {

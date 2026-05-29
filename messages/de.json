@@ -290,6 +290,16 @@
       "wood7Desc": "Enges Korn, stark",
       "wood8Name": "MDF & Sperrholz",
       "wood8Desc": "Entwickelte Optionen"
+    },
+    "industryBrief": {
+      "badge": "NEU",
+      "eyebrow": "Industry Brief",
+      "titlePre": "Diese Woche aus unserer",
+      "titleHighlight": "Fabrikhalle",
+      "intro": "Ein externes Marktsignal + unsere eigenen Angebotsschalterdaten, jede Woche. Nützlich für eine Fabrik-Sichtweise auf den Holzhomeware-Markt.",
+      "newLabel": "Neu",
+      "readBrief": "Brief lesen",
+      "allBriefs": "Alle Briefs"
     }
   },
   "productDetail": {
