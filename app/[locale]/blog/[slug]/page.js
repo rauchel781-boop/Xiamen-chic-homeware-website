@@ -445,6 +445,10 @@ export default function BlogPost({ params }) {
                   <li><Link href="/material-guide" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkMaterialGuide')}</Link></li>
                   <li><Link href="/about" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkAboutFactory')}</Link></li>
                   <li><Link href="/blog" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> {tBlog('linkAllArticles')}</Link></li>
+                  {params.locale === routing.defaultLocale && (<>
+                    <li><Link href="/custom-wooden-boxes" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> Custom Wooden Boxes</Link></li>
+                    <li><Link href="/wooden-box-factory-in-china" className="text-brand-ink hover:text-brand-green flex items-center gap-2"><span className="text-brand-green">›</span> Wooden Box Factory in China</Link></li>
+                  </>)}
                 </ul>
               </div>
             </aside>
