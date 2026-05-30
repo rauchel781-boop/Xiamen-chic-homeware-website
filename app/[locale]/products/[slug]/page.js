@@ -58,6 +58,23 @@ function buildAlternates(path) {
   return langs;
 }
 
+// Build an SEO <title> for a product detail page: prefer the hand-written
+// meta_title, fall back to the product name, and keep it within Google's
+// ~60-char SERP limit by cutting at a separator or word boundary. The on-page
+// H1 still renders the full product name — only the <title> tag is shortened,
+// so this changes no displayed text and no URLs.
+function productSeoTitle(metaTitle, rawTitle) {
+  let t = stripHtml(metaTitle || rawTitle || '').replace(/\s+/g, ' ').trim();
+  if (t.length <= 60) return t;
+  for (const sep of [' | ', ' — ', ' – ', ' - ']) {
+    const i = t.indexOf(sep);
+    if (i >= 20 && i <= 60) return t.slice(0, i).trim();
+  }
+  const cut = t.slice(0, 60);
+  const sp = cut.lastIndexOf(' ');
+  return (sp >= 30 ? cut.slice(0, sp) : cut).trim();
+}
+
 export function generateStaticParams() {
   const cats = wpProductCategories().filter(c => c.slug !== 'uncategorized');
   const prods = wpProducts();
@@ -91,7 +108,7 @@ export async function generateMetadata({ params }) {
   const rawP = wpProductBySlug(params.slug);
   if (rawP) {
     const p = localizeProduct(rawP, params.locale);
-    const title = stripHtml(p.title);
+    const title = productSeoTitle(p.meta_title, p.title);
     const desc  = p._localizedOverview?.slice(0, 160) || p.meta_desc || stripHtml(p.excerpt || p.content).slice(0, 160);
     const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
     return {
