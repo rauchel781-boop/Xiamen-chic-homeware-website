@@ -43,7 +43,6 @@ function buildBlogAlternates(path) {
 }
 
 export function generateStaticParams() {
-  // Industry Briefs live under /briefs/[slug], not /blog/[slug] — exclude them.
   return wpBlogPosts().map(p => ({ slug: p.slug }));
 }
 
@@ -118,7 +117,6 @@ export default function BlogPost({ params }) {
   const authorUrl  = `${SITE.siteUrl}/about/team#${author.slug}`;
 
   // Related — prefer same category, fall back to most recent
-  // (briefs excluded so they don't leak into /blog detail pages)
   const sameCategory = wpBlogPosts().filter(x =>
     x.id !== p.id &&
     x.categories?.some(c => p.categories?.some(pc => pc.slug === c.slug))
@@ -543,4 +541,14 @@ export default function BlogPost({ params }) {
               </Link>
               <Link
                 href="/products"
-                className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green trans
+                className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition"
+              >
+                {tBlog('finalCtaButton2')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </article>
+  );
+}
