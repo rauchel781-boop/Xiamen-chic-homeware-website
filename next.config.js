@@ -91,6 +91,17 @@ const nextConfig = {
   // Validated against Google Search Console export (May 2026).
   async redirects() {
     return [
+      // ── Canonical host: force www → non-www as a 301 (permanent) ───
+      // The edge proxy currently answers www with a 302. This app-level
+      // rule makes the host redirect a proper 301 *if* the proxy forwards
+      // www requests to the app, so Google consolidates www + non-www.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.xmchichomeware.com' }],
+        destination: 'https://xmchichomeware.com/:path*',
+        permanent: true,
+      },
+
       // ── Wildcard: WP singular permalink → new plural ───────────────
       // WP used /product/<slug>/ — our new structure uses /products/<slug>.
       // This single rule covers all 178 products + any future product whose
