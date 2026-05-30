@@ -299,7 +299,9 @@
       "intro": "Un signal externe du marché + nos propres données du bureau des devis, chaque semaine. Utile si vous avez besoin d'une vue côté usine du marché du homeware en bois.",
       "newLabel": "Nouveau",
       "readBrief": "Lire le brief",
-      "allBriefs": "Tous les briefs"
+      "allBriefs": "Tous les briefs",
+      "vol": "Vol.",
+      "minRead": "min de lecture"
     }
   },
   "productDetail": {
@@ -2833,5 +2835,22 @@
     "finalCtaBody": "Vous avez un produit en bois en tête ? Envoyez-nous un brief, un croquis ou une photo de référence — nous reviendrons avec un devis et un calendrier d'échantillons sous 24 heures.",
     "finalCtaButton1": "Obtenir un devis gratuit",
     "finalCtaButton2": "Voir les produits"
+  },
+  "briefs": {
+    "seriesName": "Industry Brief",
+    "vol": "Vol.",
+    "weekOf": "Semaine du",
+    "minRead": "min de lecture",
+    "tldr": "TL;DR",
+    "byTheNumbers": "En Chiffres",
+    "outsideSignal": "Signal Externe",
+    "fromTheFloor": "De l'Atelier",
+    "whatToDo": "À Faire Cette Semaine",
+    "nextWeek": "La Semaine Prochaine",
+    "getQuoteCta": "Demander un devis Q4",
+    "faqLabel": "Questions Rapides",
+    "newerBrief": "Brief plus récent",
+    "olderBrief": "Brief plus ancien",
+    "allBriefs": "Tous les briefs"
   }
 }

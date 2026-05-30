@@ -12,6 +12,69 @@ const dataRedirects = require('./wp-data/extracted/all_redirects.json');
 const nextConfig = {
   reactStrictMode: true,
 
+  // ── Cache-Control headers for the Cloudflare CDN in front ───────────
+  // Cloudflare obeys origin Cache-Control headers, so we set explicit
+  // long-lived caching on hashed/static assets and a short shared TTL
+  // (s-maxage) on HTML so the edge can cache pages while browsers
+  // still revalidate. The /api/ route stays uncached.
+  async headers() {
+    const oneYear  = 60 * 60 * 24 * 365;
+    const thirtyDays = 60 * 60 * 24 * 30;
+    return [
+      {
+        // Next.js build assets — content-hashed, safe to cache forever.
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: `public, max-age=${oneYear}, immutable` },
+        ],
+      },
+      {
+        // Optimized images returned by next/image.
+        source: '/_next/image',
+        headers: [
+          { key: 'Cache-Control', value: `public, max-age=${thirtyDays}, s-maxage=${thirtyDays}, stale-while-revalidate=86400` },
+        ],
+      },
+      {
+        // Raw WP-imported images (~756 MB). Long edge TTL = huge bandwidth saving.
+        source: '/wp-images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: `public, max-age=${thirtyDays}, s-maxage=${thirtyDays}, immutable` },
+        ],
+      },
+      {
+        // Hero / brand / product images at the public/ root (PNG/JPG/WebP).
+        source: '/:img(.*\\.(?:png|jpg|jpeg|webp|avif|svg|ico|woff2?))',
+        headers: [
+          { key: 'Cache-Control', value: `public, max-age=${thirtyDays}, s-maxage=${thirtyDays}` },
+        ],
+      },
+      {
+        // Sitemap + robots refresh every 24 hours at the edge.
+        source: '/:f(sitemap.xml|robots.txt)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=300, s-maxage=86400' },
+        ],
+      },
+      {
+        // API routes — never cache. Form posts, etc.
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
+        ],
+      },
+      {
+        // Everything else (HTML pages). Short browser TTL, longer shared
+        // s-maxage so Cloudflare edge can cache for a minute, then SWR
+        // serves stale while revalidating in the background.
+        source: '/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, s-maxage=60, stale-while-revalidate=86400' },
+        ],
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
     // Auto-convert to modern formats — saves 70-80% size vs PNG/JPG.
@@ -34,6 +97,17 @@ const nextConfig = {
       // old URL Google has indexed.
       { source: '/product/:slug',          destination: '/products/:slug', permanent: true },
       { source: '/product/:slug/:rest*',   destination: '/products/:slug', permanent: true },
+
+      // ── Industry Brief was briefly published at /blog/<slug> ───────
+      // before being moved to its dedicated /briefs/<slug> route with a
+      // newsletter-style template. 301 catches anything that may have
+      // been indexed during that window.
+      { source: '/blog/q4-wooden-gift-box-inquiry-timeline-2026',
+        destination: '/briefs/q4-wooden-gift-box-inquiry-timeline-2026',
+        permanent: true },
+      { source: '/:locale(de|es|fr|ja)/blog/q4-wooden-gift-box-inquiry-timeline-2026',
+        destination: '/:locale/briefs/q4-wooden-gift-box-inquiry-timeline-2026',
+        permanent: true },
 
       // ── Per-slug redirects from the JSON data ──────────────────────
       // Blog posts (71) + empty-page category stubs (10) + alias pages (5).

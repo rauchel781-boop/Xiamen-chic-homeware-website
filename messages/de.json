@@ -299,7 +299,9 @@
       "intro": "Ein externes Marktsignal + unsere eigenen Angebotsschalterdaten, jede Woche. Nützlich für eine Fabrik-Sichtweise auf den Holzhomeware-Markt.",
       "newLabel": "Neu",
       "readBrief": "Brief lesen",
-      "allBriefs": "Alle Briefs"
+      "allBriefs": "Alle Briefs",
+      "vol": "Vol.",
+      "minRead": "Min Lesedauer"
     }
   },
   "productDetail": {
@@ -2833,5 +2835,22 @@
     "finalCtaBody": "Haben Sie ein Holzprodukt im Sinn? Schicken Sie uns ein Briefing, eine Skizze oder ein Referenzfoto — wir melden uns innerhalb von 24 Stunden mit einem Angebot und einem Musterzeitplan.",
     "finalCtaButton1": "Kostenloses Angebot anfordern",
     "finalCtaButton2": "Produkte ansehen"
+  },
+  "briefs": {
+    "seriesName": "Industry Brief",
+    "vol": "Vol.",
+    "weekOf": "Woche vom",
+    "minRead": "Min Lesedauer",
+    "tldr": "TL;DR",
+    "byTheNumbers": "In Zahlen",
+    "outsideSignal": "Externes Signal",
+    "fromTheFloor": "Aus der Halle",
+    "whatToDo": "Was diese Woche zu tun ist",
+    "nextWeek": "Nächste Woche",
+    "getQuoteCta": "Q4-Angebot anfordern",
+    "faqLabel": "Kurze Fragen",
+    "newerBrief": "Neuerer Brief",
+    "olderBrief": "Älterer Brief",
+    "allBriefs": "Alle Briefs"
   }
 }

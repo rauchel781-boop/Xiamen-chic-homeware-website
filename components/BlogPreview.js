@@ -2,11 +2,11 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { wpPosts, stripHtml } from '@/lib/wp-data';
+import { wpBlogPosts, stripHtml } from '@/lib/wp-data';
 
 export default function BlogPreview() {
   const t = useTranslations('home.blogPreview');
-  const posts = wpPosts().slice(0, 3);
+  const posts = wpBlogPosts().slice(0, 3);
   if (posts.length === 0) return null;
   const [featured, second, third] = posts;
 

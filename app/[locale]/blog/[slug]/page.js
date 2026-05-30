@@ -12,7 +12,7 @@ import TableOfContents from '@/components/TableOfContents';
 import PrintButton from '@/components/PrintButton';
 import MermaidLoader from '@/components/MermaidLoader';
 import { SITE } from '@/data/site-config';
-import { wpPosts, wpPostBySlug, stripHtml } from '@/lib/wp-data';
+import { wpPosts, wpBlogPosts, wpBlogPostBySlug, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
 import { routing, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -43,7 +43,8 @@ function buildBlogAlternates(path) {
 }
 
 export function generateStaticParams() {
-  return wpPosts().map(p => ({ slug: p.slug }));
+  // Industry Briefs live under /briefs/[slug], not /blog/[slug] — exclude them.
+  return wpBlogPosts().map(p => ({ slug: p.slug }));
 }
 
 // Decode the handful of HTML entities WP stores in meta_title / meta_desc
@@ -61,7 +62,7 @@ function decodeEntities(s) {
 }
 
 export async function generateMetadata({ params }) {
-  const rawP = wpPostBySlug(params.slug);
+  const rawP = wpBlogPostBySlug(params.slug);
   if (!rawP) return {};
   const p = localizePost(rawP, params.locale);
 
@@ -104,7 +105,7 @@ export default function BlogPost({ params }) {
   unstable_setRequestLocale(params.locale);
   const tTeam = useTranslations('team');
   const tBlog = useTranslations('blogPost');
-  const rawP = wpPostBySlug(params.slug);
+  const rawP = wpBlogPostBySlug(params.slug);
   if (!rawP) notFound();
   const p = localizePost(rawP, params.locale);
 
@@ -117,11 +118,12 @@ export default function BlogPost({ params }) {
   const authorUrl  = `${SITE.siteUrl}/about/team#${author.slug}`;
 
   // Related — prefer same category, fall back to most recent
-  const sameCategory = wpPosts().filter(x =>
+  // (briefs excluded so they don't leak into /blog detail pages)
+  const sameCategory = wpBlogPosts().filter(x =>
     x.id !== p.id &&
     x.categories?.some(c => p.categories?.some(pc => pc.slug === c.slug))
   );
-  const fallback = wpPosts().filter(x => x.id !== p.id);
+  const fallback = wpBlogPosts().filter(x => x.id !== p.id);
   const related = [...sameCategory, ...fallback]
     .filter((x, i, arr) => arr.findIndex(y => y.id === x.id) === i)
     .slice(0, 3)
@@ -541,14 +543,4 @@ export default function BlogPost({ params }) {
               </Link>
               <Link
                 href="/products"
-                className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition"
-              >
-                {tBlog('finalCtaButton2')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </article>
-  );
-}
+                className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green trans

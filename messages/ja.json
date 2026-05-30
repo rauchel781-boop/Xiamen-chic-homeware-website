@@ -299,7 +299,9 @@
       "intro": "毎週、市場の外部シグナル1つ＋当社見積デスクの実データを発信。木製ホームウェア市場の工場側ビューが必要な方に。",
       "newLabel": "新着",
       "readBrief": "ブリーフを読む",
-      "allBriefs": "すべてのブリーフ"
+      "allBriefs": "すべてのブリーフ",
+      "vol": "Vol.",
+      "minRead": "分で読了"
     }
   },
   "productDetail": {
@@ -2833,5 +2835,22 @@
     "finalCtaBody": "木製品をお考えですか？概要・スケッチ・参考写真をお送りください。24時間以内に見積もりとサンプルのスケジュールをご返信します。",
     "finalCtaButton1": "無料見積もりを依頼",
     "finalCtaButton2": "製品を見る"
+  },
+  "briefs": {
+    "seriesName": "Industry Brief",
+    "vol": "Vol.",
+    "weekOf": "週",
+    "minRead": "分で読了",
+    "tldr": "要約",
+    "byTheNumbers": "数字で見る",
+    "outsideSignal": "外部シグナル",
+    "fromTheFloor": "工場フロアから",
+    "whatToDo": "今週やるべきこと",
+    "nextWeek": "次週予告",
+    "getQuoteCta": "Q4の見積を依頼",
+    "faqLabel": "クイックQ&A",
+    "newerBrief": "新しいブリーフ",
+    "olderBrief": "古いブリーフ",
+    "allBriefs": "すべてのブリーフ"
   }
 }

@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
-import { wpPosts } from '@/lib/wp-data';
+import { wpBlogPosts } from '@/lib/wp-data';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import ProcessVideos from '@/components/ProcessVideos';
@@ -820,7 +820,7 @@ function MaterialFAQ() {
 function RelatedArticles() {
   const t = useTranslations('materialGuide');
   const KEYWORDS = ['wood', 'material', 'fsc', 'spec', 'finish', 'oem', 'sourcing', 'manufactur'];
-  const related = wpPosts()
+  const related = wpBlogPosts()
     .filter((p) => {
       const text = (p.title + ' ' + (p.excerpt || '')).toLowerCase();
       return KEYWORDS.some((k) => text.includes(k));

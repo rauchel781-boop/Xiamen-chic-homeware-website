@@ -13,7 +13,8 @@
 import { SITE } from '@/data/site-config';
 import {
   wpProducts,
-  wpPosts,
+  wpBlogPosts,
+  wpBriefs,
   wpProductCategories,
   wpPages,
 } from '@/lib/wp-data';
@@ -153,13 +154,26 @@ export default function sitemap() {
     });
   }
 
-  // ── Blog posts ─────────────────────────────────────────────────────
-  for (const post of wpPosts()) {
+  // ── Blog posts (excludes briefs) ───────────────────────────────────
+  for (const post of wpBlogPosts()) {
     const imgs = post.featured_image ? [{ url: abs(post.featured_image) }] : [];
     push(`/blog/${post.slug}`, {
       lastModified: post.date ? new Date(post.date) : TODAY,
       priority: 0.6,
       changeFrequency: 'monthly',
+      images: imgs,
+    });
+  }
+
+  // ── Industry Briefs ────────────────────────────────────────────────
+  // Newsletter-style weekly posts under /briefs/[slug]. Higher
+  // changeFrequency than blog posts because the series is recurring.
+  for (const brief of wpBriefs()) {
+    const imgs = brief.featured_image ? [{ url: abs(brief.featured_image) }] : [];
+    push(`/briefs/${brief.slug}`, {
+      lastModified: brief.date ? new Date(brief.date) : TODAY,
+      priority: 0.7,
+      changeFrequency: 'weekly',
       images: imgs,
     });
   }

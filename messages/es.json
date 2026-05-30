@@ -299,7 +299,9 @@
       "intro": "Una señal externa del mercado + datos propios de nuestra mesa de cotización, cada semana. Útil si necesita una visión del mercado de homeware de madera desde la fábrica.",
       "newLabel": "Nuevo",
       "readBrief": "Leer brief",
-      "allBriefs": "Todos los briefs"
+      "allBriefs": "Todos los briefs",
+      "vol": "Vol.",
+      "minRead": "min lectura"
     }
   },
   "productDetail": {
@@ -2833,5 +2835,22 @@
     "finalCtaBody": "¿Tiene en mente un producto de madera? Envíenos un briefing, un boceto o una foto de referencia — le responderemos con un presupuesto y un calendario de muestras en 24 horas.",
     "finalCtaButton1": "Solicitar presupuesto gratis",
     "finalCtaButton2": "Ver productos"
+  },
+  "briefs": {
+    "seriesName": "Industry Brief",
+    "vol": "Vol.",
+    "weekOf": "Semana del",
+    "minRead": "min lectura",
+    "tldr": "TL;DR",
+    "byTheNumbers": "En Números",
+    "outsideSignal": "Señal Externa",
+    "fromTheFloor": "Desde la Planta",
+    "whatToDo": "Qué Hacer Esta Semana",
+    "nextWeek": "La Próxima Semana",
+    "getQuoteCta": "Pedir cotización Q4",
+    "faqLabel": "Preguntas Rápidas",
+    "newerBrief": "Brief más nuevo",
+    "olderBrief": "Brief más antiguo",
+    "allBriefs": "Todos los briefs"
   }
 }

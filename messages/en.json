@@ -299,7 +299,9 @@
       "intro": "One external market signal + our own quote-desk data, every week. Useful if you need a factory-side view of the wooden homeware market.",
       "newLabel": "New",
       "readBrief": "Read brief",
-      "allBriefs": "All briefs"
+      "allBriefs": "All briefs",
+      "vol": "Vol.",
+      "minRead": "min read"
     }
   },
   "productDetail": {
@@ -2833,5 +2835,22 @@
     "finalCtaBody": "Have a wooden product in mind? Send us a brief, sketch or reference photo — we'll come back with a quote and a sample timeline within 24 hours.",
     "finalCtaButton1": "Get a Free Quote",
     "finalCtaButton2": "Browse Products"
+  },
+  "briefs": {
+    "seriesName": "Industry Brief",
+    "vol": "Vol.",
+    "weekOf": "Week of",
+    "minRead": "min read",
+    "tldr": "TL;DR",
+    "byTheNumbers": "By the Numbers",
+    "outsideSignal": "Outside Signal",
+    "fromTheFloor": "From the Floor",
+    "whatToDo": "What to Do This Week",
+    "nextWeek": "Next Week",
+    "getQuoteCta": "Get a Q4 quote",
+    "faqLabel": "Quick Questions",
+    "newerBrief": "Newer brief",
+    "olderBrief": "Older brief",
+    "allBriefs": "All briefs"
   }
 }
