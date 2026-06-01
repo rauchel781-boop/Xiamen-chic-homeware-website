@@ -8,6 +8,17 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.js');
 //   - 5 long-slug aliases:     /complete-guide-… → /material-guide  etc.
 const dataRedirects = require('./wp-data/extracted/all_redirects.json');
 
+// Industry Briefs live under /briefs/<slug>, not /blog/<slug>. Auto-build a
+// 301 from the (non-existent) /blog/<slug> to the real /briefs/<slug> for every
+// brief, so a mistyped, shared, or previously-indexed /blog link never 404s.
+// Covers the default locale and the de/es/fr/ja prefixed variants.
+const briefBlogRedirects = require('./wp-data/posts.json')
+  .filter(p => (p.categories || []).some(c => c.slug === 'industry-brief'))
+  .flatMap(p => [
+    { source: `/blog/${p.slug}`, destination: `/briefs/${p.slug}`, permanent: true },
+    { source: `/:locale(de|es|fr|ja)/blog/${p.slug}`, destination: `/:locale/briefs/${p.slug}`, permanent: true },
+  ]);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -109,16 +120,11 @@ const nextConfig = {
       { source: '/product/:slug',          destination: '/products/:slug', permanent: true },
       { source: '/product/:slug/:rest*',   destination: '/products/:slug', permanent: true },
 
-      // ── Industry Brief was briefly published at /blog/<slug> ───────
-      // before being moved to its dedicated /briefs/<slug> route with a
-      // newsletter-style template. 301 catches anything that may have
-      // been indexed during that window.
-      { source: '/blog/q4-wooden-gift-box-inquiry-timeline-2026',
-        destination: '/briefs/q4-wooden-gift-box-inquiry-timeline-2026',
-        permanent: true },
-      { source: '/:locale(de|es|fr|ja)/blog/q4-wooden-gift-box-inquiry-timeline-2026',
-        destination: '/:locale/briefs/q4-wooden-gift-box-inquiry-timeline-2026',
-        permanent: true },
+      // ── Industry Briefs live at /briefs/<slug>, not /blog/<slug> ───
+      // Auto-generated 301s (see briefBlogRedirects above) so any /blog
+      // link to a brief — mistyped, shared, or previously indexed —
+      // redirects to the real /briefs URL instead of showing a blank 404.
+      ...briefBlogRedirects,
 
       // ── Per-slug redirects from the JSON data ──────────────────────
       // Blog posts (71) + empty-page category stubs (10) + alias pages (5).
