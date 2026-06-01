@@ -170,6 +170,18 @@ function BriefDetail({ params }) {
               className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-brand-ink leading-[1.1]"
               dangerouslySetInnerHTML={{ __html: b.title }}
             />
+            {b.featured_image && (
+              <div className="relative aspect-[16/9] mt-8 rounded-2xl overflow-hidden border border-brand-line bg-brand-cream">
+                <Image
+                  src={b.featured_image}
+                  alt={stripHtml(b.title)}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  priority
+                  className="object-cover"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -217,6 +229,18 @@ function BriefDetail({ params }) {
                   </p>
                 )}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Illustrated breakdown (rich body, optional) ───────── */}
+        {b.content && (
+          <section className="py-8">
+            <div className="max-w-3xl mx-auto px-6">
+              <div
+                className="wp-content blog-prose"
+                dangerouslySetInnerHTML={{ __html: b.content }}
+              />
             </div>
           </section>
         )}
