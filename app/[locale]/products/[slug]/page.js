@@ -75,6 +75,16 @@ function productSeoTitle(metaTitle, rawTitle) {
   return (sp >= 30 ? cut.slice(0, sp) : cut).trim();
 }
 
+// Clamp a meta description to ~160 chars at a word boundary (Google truncates
+// beyond ~160). Returns '' for empty input so callers can fall back.
+function clampDesc(s, max = 160) {
+  const t = stripHtml(s || '').replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sp = cut.lastIndexOf(' ');
+  return (sp >= max - 30 ? cut.slice(0, sp) : cut).trim();
+}
+
 export function generateStaticParams() {
   const cats = wpProductCategories().filter(c => c.slug !== 'uncategorized');
   const prods = wpProducts();
@@ -89,7 +99,7 @@ export async function generateMetadata({ params }) {
   const t = await getTranslations({ locale: params.locale, namespace: 'productDetail' });
   const cat  = wpCategoryBySlug(params.slug);
   if (cat) {
-    const desc = stripHtml(cat.description).slice(0, 160)
+    const desc = clampDesc(cat.description)
       || t('categoryFallbackDesc', { category: cat.name.toLowerCase() });
     return {
       title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`,
@@ -109,7 +119,7 @@ export async function generateMetadata({ params }) {
   if (rawP) {
     const p = localizeProduct(rawP, params.locale);
     const title = productSeoTitle(p.meta_title, p.title);
-    const desc  = p._localizedOverview?.slice(0, 160) || p.meta_desc || stripHtml(p.excerpt || p.content).slice(0, 160);
+    const desc  = clampDesc(p._localizedOverview || p.meta_desc || p.excerpt || p.content);
     const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
     return {
       title,
