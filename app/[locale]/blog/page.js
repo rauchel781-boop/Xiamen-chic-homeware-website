@@ -41,7 +41,9 @@ export default function BlogIndex({ params: { locale } }) {
   unstable_setRequestLocale(locale);
 
   // Localize titles + excerpts for the active locale (English passes through).
-  const allPosts = wpPosts().map((p) => localizePost(p, locale));
+  const allPosts = wpPosts()
+    .map((p) => localizePost(p, locale))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
   const cats = wpPostCategories();
 
   // Counts per category slug
@@ -53,10 +55,11 @@ export default function BlogIndex({ params: { locale } }) {
   const featured = allPosts[0];                  // newest = featured
   const recent   = allPosts.slice(1, 7);         // next 6 in a 3x2 grid
 
-  // Group remaining posts by category for "browse by topic"
-  const remaining = allPosts.slice(7);
+  // Group ALL posts by category for "browse by topic" so every category shows
+  // its newest few — including categories (like Industry Brief) whose newest
+  // post was lifted into the featured/recent slots above.
   const byCategory = {};
-  for (const p of remaining) {
+  for (const p of allPosts) {
     const slug = p.categories?.[0]?.slug || 'uncategorized';
     if (!byCategory[slug]) byCategory[slug] = [];
     byCategory[slug].push(p);
