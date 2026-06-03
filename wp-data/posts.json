@@ -1,5 +1,66 @@
 [
     {
+        "slug":  "fob-to-landed-cost-math-wooden-products-2026",
+        "type":  "brief",
+        "briefNumber":  4,
+        "weekOf":  "June 15–19, 2026",
+        "readTime":  4,
+        "title":  "What a $6.90 Cutting Board Actually Costs to Land in the US",
+        "meta_title":  "FOB to Landed-Cost Math for Wooden Products 2026 | CHIC Industry Brief Vol. 04",
+        "meta_desc":  "Industry Brief Vol. 04: a line-by-line FOB-to-landed-cost breakdown for a wooden cutting board and gift box. Duty, the 30% tariff and freight add ~40% on top of FOB — price off the landed number, not the FOB.",
+        "excerpt":  "\u003cp\u003eIndustry Brief Vol. 04 — the line-by-line landed cost of a wooden cutting board and a gift box for a US importer. Duty, the current 30% tariff and freight add about 40% on top of FOB, so build your retail price off the landed number, not the FOB.\u003c/p\u003e",
+        "date":  "2026-06-15T09:00:00",
+        "author":  "rauchel1@hotmail.com",
+        "categories":  [
+                           {
+                               "slug":  "industry-brief",
+                               "name":  "Industry Brief"
+                           }
+                       ],
+        "featured_image":  "/wp-images/2026/01/Acacia-Cutting-Board-Set-with-Stand-2.png",
+        "bigNumber":  {
+                          "value":  "+40%",
+                          "label":  "what duty, tariff \u0026 freight add on top of FOB today",
+                          "context":  "a $6.90 acacia board lands at ≈$9.70 in the US · FOB + 3.2% duty + 30% tariff + freight"
+                      },
+        "tldr":  [
+                     "Duty + the current 30% tariff + freight add roughly \u003cstrong\u003e40% on top of FOB\u003c/strong\u003e for a US import today.",
+                     "The 30% tariff is the single biggest line \u0026mdash; bigger than freight, brokerage and base duty combined.",
+                     "Freight per unit is small (~$0.30) \u003cem\u003ebecause the board packs flat and dense\u003c/em\u003e \u0026mdash; packing efficiency is real money."
+                 ],
+        "outsideSignal":  {
+                              "headline":  "The tariff line is the one that moves your number",
+                              "body":  "With the extra US tariff on Chinese goods at 30% (a 20% fentanyl plus 10% reciprocal tariff) on top of the normal ~3.2% duty on wooden kitchenware, the tariff has become the largest single component of the gap between FOB and landed cost. Ocean freight from Xiamen — roughly $1,850-2,400 per 40-ft box to the US West Coast — spreads to only a few cents per unit on a product that packs densely, so for most wooden goods the tariff, not freight, is what decides the landed price. Section 301 reviews remain open, so the number is known today but not settled."
+                          },
+        "fromTheFloor":  {
+                             "headline":  "We run this math on every quote — here it is in the open",
+                             "body":  "Buyers increasingly ask for landed cost, not FOB, so we build the stack for them: take the FOB, add the base duty, add the 30% tariff, add per-unit freight and last-mile. For a $6.90 acacia board the landed cost lands near $9.70; for a $3.20 gift box, near $4.70. The number that surprises first-time importers is always the tariff line, never the freight. Our FOBs are stable, so the entire swing a buyer feels right now is tariff plus freight — and we\u0027d rather show the math than hide it."
+                         },
+        "actionItems":  [
+                            "Confirm your HS code with your broker (4419 for kitchenware, 4420 for boxes) — it sets your exact base duty.",
+                            "Ask your factory for the packed CBM and the per-unit ocean freight, not just the unit FOB.",
+                            "Build your retail price off the landed cost (FOB + duty + 30% tariff + freight), never off FOB.",
+                            "Lock the order while the tariff is a known 30% — Section 301 reviews are still open."
+                        ],
+        "nextWeek":  "Vol. 05 will look at packing and freight: how design-for-nesting and dense cartons quietly cut your landed cost more than haggling over FOB ever will.",
+        "faq":  [
+                    {
+                        "q":  "Is the 30% tariff added to FOB or to FOB plus duty?",
+                        "a":  "\u003cp\u003eUS duties and the additional tariffs are generally assessed on the customs value, which is close to your FOB. So both the ~3.2% base duty and the 30% tariff are calculated on roughly the FOB figure, then added on top — not compounded on each other.\u003c/p\u003e"
+                    },
+                    {
+                        "q":  "Why is freight only about 30 cents a unit?",
+                        "a":  "\u003cp\u003eBecause a flat cutting board packs densely — a 40-ft container holds a lot of units, so the freight spreads thin. On a bulky product that wastes carton space, the per-unit freight can be several times higher, which is why design-for-packing matters.\u003c/p\u003e"
+                    },
+                    {
+                        "q":  "Can you give me the landed-cost math for my specific product?",
+                        "a":  "\u003cp\u003eYes — send us the product, target size and quantity and we\u0027ll build the FOB-to-landed-cost line items for your destination, including the current duty and tariff. MOQ from 500 pcs, quote in 24-48 hours.\u003c/p\u003e"
+                    }
+                ],
+        "id":  7012,
+        "content":  "\u003c!-- wp:paragraph --\u003e\n\u003cp\u003eLast edition we said the tariff on Chinese goods is a known 30% right now — and promised to show what that actually does to a real product\u0027s price. So here it is: the line-by-line landed cost of two of our most-quoted items, a wooden cutting board and a small wooden gift box, the way our quote desk builds it for a US buyer. The headline: \u003cstrong\u003eduty, tariff and freight add about 40% on top of FOB today.\u003c/strong\u003e Plannable, but only if you price off the landed number, not the FOB.\u003c/p\u003e\n\u003c!-- /wp:paragraph --\u003e\n\n\u003c!-- wp:html --\u003e\n\u003ctable class=\"blog-compare\"\u003e\n\u003cthead\u003e\n\u003ctr\u003e\u003cth\u003eAcacia edge-grain board · 35\u0026times;25 cm · 2,000 pcs\u003c/th\u003e\u003cth\u003ePer unit\u003c/th\u003e\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\u003ctd\u003eFOB Xiamen\u003c/td\u003e\u003ctd\u003e$6.90\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eBase import duty (HS 4419, ~3.2%)\u003c/td\u003e\u003ctd\u003e$0.22\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eCurrent US tariff (30%)\u003c/td\u003e\u003ctd\u003e$2.07\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eOcean freight, dense-packed (per unit)\u003c/td\u003e\u003ctd\u003e$0.30\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eCustoms / brokerage / last-mile\u003c/td\u003e\u003ctd\u003e$0.20\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003e\u003cstrong\u003eLanded cost, US warehouse\u003c/strong\u003e\u003c/td\u003e\u003ctd\u003e\u003cstrong\u003e≈ $9.70\u003c/strong\u003e\u003c/td\u003e\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003cp\u003e\u003csmall\u003eIndicative, FOB Xiamen at 2,000 pcs. Your exact duty depends on the HS code your broker assigns — confirm it.\u003c/small\u003e\u003c/p\u003e\n\u003c!-- /wp:html --\u003e\n\n\u003c!-- wp:paragraph --\u003e\n\u003cp\u003eTwo things jump out. First, \u003cstrong\u003ethe 30% tariff is the single biggest add\u003c/strong\u003e — bigger than freight, brokerage and base duty combined. That\u0027s why locking orders while the rate is a known quantity matters so much. Second, \u003cstrong\u003efreight per unit is small\u003c/strong\u003e — about 30 cents — \u003cem\u003ebecause the board ships flat and dense\u003c/em\u003e. On a bulky product that doesn\u0027t pack tight, that line can triple, so packing efficiency is real money.\u003c/p\u003e\n\u003c!-- /wp:paragraph --\u003e\n\n\u003c!-- wp:image {\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} --\u003e\n\u003cfigure class=\"wp-block-image size-large\"\u003e\u003cimg src=\"/wp-images/2026/01/Keepsake-Chest-box-6.png\" alt=\"Custom wooden gift box — landed cost breakdown for a US importer under current tariffs\"/\u003e\u003cfigcaption\u003eA $3.20-FOB wooden gift box lands near $4.70 — the same ~40% stack of duty, tariff and freight, on a smaller base.\u003c/figcaption\u003e\u003c/figure\u003e\n\u003c!-- /wp:image --\u003e\n\n\u003c!-- wp:html --\u003e\n\u003ctable class=\"blog-compare\"\u003e\n\u003cthead\u003e\n\u003ctr\u003e\u003cth\u003eWooden gift box · small · 2,000 pcs\u003c/th\u003e\u003cth\u003ePer unit\u003c/th\u003e\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\u003ctd\u003eFOB Xiamen\u003c/td\u003e\u003ctd\u003e$3.20\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eBase import duty (HS 4420, ~3.2%)\u003c/td\u003e\u003ctd\u003e$0.10\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eCurrent US tariff (30%)\u003c/td\u003e\u003ctd\u003e$0.96\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eOcean freight, dense-packed (per unit)\u003c/td\u003e\u003ctd\u003e$0.25\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003eCustoms / brokerage / last-mile\u003c/td\u003e\u003ctd\u003e$0.15\u003c/td\u003e\u003c/tr\u003e\n\u003ctr\u003e\u003ctd\u003e\u003cstrong\u003eLanded cost, US warehouse\u003c/strong\u003e\u003c/td\u003e\u003ctd\u003e\u003cstrong\u003e≈ $4.66\u003c/strong\u003e\u003c/td\u003e\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003c!-- /wp:html --\u003e\n\n\u003c!-- wp:paragraph --\u003e\n\u003cp\u003eHere\u0027s why this matters for your retail price. A board that lands at $9.70 and sells at a $39-$49 shelf price still leaves healthy margin after Amazon FBA fees — but only if you built the $9.70 into your price, not the $6.90. The brands that get squeezed are the ones who quoted their retailer off FOB and got surprised by the tariff at the port. \u003cstrong\u003ePrice off landed cost, lock the order while the tariff is a known 30%, and the math stays in your favour.\u003c/strong\u003e The action checklist below is how to run this for your own product.\u003c/p\u003e\n\u003c!-- /wp:paragraph --\u003e"
+    },
+    {
         "id":  7011,
         "slug":  "us-china-tariff-freight-window-june-2026",
         "type":  "brief",
