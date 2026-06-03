@@ -29,6 +29,7 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Keepsake Boxes',       href: '/products/wooden-keepsake-boxes' },
       { label: 'Wooden Pantry Organizers',    href: '/products/wooden-pantry-organizers' },
       { label: 'Wooden Sofa Tray',            href: '/products/wooden-sofa-tray' },
+      { label: 'Vinyl Record Holders',        href: '/products/wooden-vinyl-record-holders' },
     ],
   },
   {
