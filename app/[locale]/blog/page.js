@@ -12,6 +12,13 @@ import { wpPosts, wpPostCategories, stripHtml } from '@/lib/wp-data';
 import { localizePost } from '@/lib/translated-content';
 import { hreflangFor } from '@/i18n/routing';
 
+// Serve /wp-images thumbnails through Next's optimizer (AVIF/WebP + resized)
+// instead of the raw 1-3 MB source files.
+const optImg = (src, w = 828) =>
+  src && src.startsWith('/wp-images/')
+    ? `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=72`
+    : src;
+
 export async function generateMetadata({ params: { locale } = {} }) {
   return {
     title: 'Blog — Wooden Homeware Sourcing & Manufacturing Guides',
@@ -153,7 +160,7 @@ export default function BlogIndex({ params: { locale } }) {
               <div className="aspect-[4/3] lg:aspect-auto lg:h-full bg-white overflow-hidden order-1 lg:order-2">
                 {featured.featured_image && (
                   <img
-                    src={featured.featured_image}
+                    src={optImg(featured.featured_image, 1200)}
                     alt=""
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
                   />
@@ -338,8 +345,9 @@ function ArticleCard({ post: p }) {
       {p.featured_image && (
         <div className="aspect-[16/10] bg-brand-cream overflow-hidden">
           <img
-            src={p.featured_image}
+            src={optImg(p.featured_image, 640)}
             alt=""
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
           />
         </div>
