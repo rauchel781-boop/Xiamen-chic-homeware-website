@@ -21,6 +21,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpPosts, stripHtml } from '@/lib/wp-data';
+import { optimizeContentImages } from '@/lib/article-enhance';
 import { localizePost } from '@/lib/translated-content';
 import { routing, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
@@ -239,7 +240,7 @@ function BriefDetail({ params }) {
             <div className="max-w-3xl mx-auto px-6">
               <div
                 className="wp-content blog-prose"
-                dangerouslySetInnerHTML={{ __html: b.content }}
+                dangerouslySetInnerHTML={{ __html: optimizeContentImages(b.content) }}
               />
             </div>
           </section>
