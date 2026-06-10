@@ -6881,11 +6881,13 @@ let _purchasePickerItemId = null;
 let _expandedPurchases = new Set();
 
 function calcPurchaseTotal(p) {
-  return (p.items || []).reduce((s, it) => {
+  const itemsTotal = (p.items || []).reduce((s, it) => {
     const qty = Number(it.qty) || 0;
     const price = Number(it.unitPriceWithTax || it.unitPriceNoTax) || 0;
     return s + qty * price;
   }, 0);
+  const shippingCost = Number(p.shippingCost) || 0;
+  return itemsTotal + shippingCost;
 }
 
 function togglePurchaseExpand(id) {
@@ -7158,11 +7160,25 @@ function purchaseItemSubtotal(item) {
 }
 
 function purchaseTotalHtml() {
-  const total = calcPurchaseTotal(_editingPurchase);
+  const p = _editingPurchase;
+  const itemsTotal = calcPurchaseTotal(p);
+  const shippingCost = Number(p.shippingCost) || 0;
+  const total = itemsTotal + shippingCost;
   return `
     <div style="border:2px solid #4a90e2;border-radius:6px;padding:12px 14px;background:#eff6ff;">
       <div style="font-weight:600;margin-bottom:8px;color:#1e40af;font-size:13px;">采购合计</div>
-      <div style="font-size:16px;">总金额：<strong style="color:#1e40af;font-size:18px;">¥${total.toFixed(2)}</strong></div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;margin-bottom:4px;">
+        <div>产品小计：</div>
+        <div style="text-align:right;"><strong>¥${itemsTotal.toFixed(2)}</strong></div>
+        <div>运费：</div>
+        <div style="text-align:right;">
+          <input type="number" min="0" step="0.01" value="${p.shippingCost || ''}"
+            oninput="_editingPurchase.shippingCost=this.value;refreshPurchaseTotal();"
+            placeholder="0.00"
+            style="width:120px;text-align:right;border:1px solid #cbd5e1;border-radius:4px;padding:4px 8px;">
+        </div>
+      </div>
+      <div style="font-size:16px;padding-top:8px;border-top:1px solid #cbd5e1;">总金额：<strong style="color:#1e40af;font-size:18px;">¥${total.toFixed(2)}</strong></div>
     </div>
   `;
 }
@@ -7718,7 +7734,10 @@ function renderPayable() {
   (DB.purchases || []).forEach(p => {
     const total = calcPurchaseTotal(p);
     if (total <= 0) return;
-    const paid = sumPaymentsFor('purchase', p.code);
+    // 只统计关联类型为 'purchase' 的付款
+    const paid = (DB.payments || [])
+      .filter(pay => pay.type === 'expense' && pay.relatedType === 'purchase' && pay.relatedNo === p.code)
+      .reduce((s, pay) => s + (Number(pay.netAmount || pay.amount) || 0), 0);
     rows.push({
       code: p.code, factory: p.factoryName,
       currency: 'CNY', date: p.date || '',
