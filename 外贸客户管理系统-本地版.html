@@ -16,6 +16,7 @@ body {
 .sidebar {
   width: 200px; background: #1f2937; color: #fff;
   flex-shrink: 0; display: flex; flex-direction: column;
+  position: relative; z-index: 200;
 }
 .logo {
   padding: 18px 18px; font-size: 15px; font-weight: 600;
@@ -159,6 +160,8 @@ tbody tr:hover { background: #fafbfc; }
 .tag-purple { background: #ede9fe; color: #5b21b6; }
 .tag-pink   { background: #fce7f3; color: #9d174d; }
 .tag-cyan   { background: #cffafe; color: #155e75; }
+.tag-gold   { background: #fef3c7; color: #b45309; border: 1px solid #fbbf24; font-weight: 600; }
+.tag-amber  { background: #ffedd5; color: #9a3412; }
 
 /* ===== Stars ===== */
 .stars { color: #f59e0b; letter-spacing: 1px; font-size: 13px; }
@@ -170,13 +173,16 @@ tbody tr:hover { background: #fafbfc; }
 
 /* ===== Modal ===== */
 .modal-mask {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  position: fixed; inset: 0; background: transparent;
   display: none; align-items: center; justify-content: center; z-index: 100;
+  pointer-events: none;
 }
 .modal-mask.show { display: flex; }
 .modal {
   background: #fff; border-radius: 8px; width: 600px;
   max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column;
+  pointer-events: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1);
 }
 .modal.modal-lg { width: 800px; }
 .modal.modal-xl { width: 1000px; }

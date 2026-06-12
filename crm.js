@@ -145,13 +145,60 @@ async function preloadAllImages() {
   }
 }
 
+// 云端图片缓存：存储 img_xxx -> 云端URL 的映射
+const cloudImageCache = new Map();
+
 // 同步取 URL：如果是 imageId 引用，从 cache 返回 blobURL；否则原值返回
 function imgUrl(ref) {
   if (!ref) return '';
   if (typeof ref === 'string' && ref.startsWith('img_')) {
-    return imgCache.get(ref) || '';
+    // 1. 先尝试从本地IndexedDB缓存获取
+    const localUrl = imgCache.get(ref);
+    if (localUrl) return localUrl;
+
+    // 2. 如果本地没有，尝试从云端缓存获取
+    const cloudUrl = cloudImageCache.get(ref);
+    if (cloudUrl) return cloudUrl;
+
+    // 3. 如果都没有，尝试异步从云端恢复（不阻塞，下次刷新会显示）
+    recoverImageFromCloud(ref);
+
+    return ''; // 暂时返回空，等待恢复
   }
   return ref; // 旧 base64 兼容
+}
+
+// 从云端恢复图片到本地IndexedDB
+async function recoverImageFromCloud(imageId) {
+  if (!imageId || !imageId.startsWith('img_')) return;
+
+  try {
+    // 构造云端URL（根据你的部署调整）
+    const cloudUrl = `https://xmchic-crm.rauchel781.workers.dev/api/images/${imageId}`;
+
+    // 尝试从云端获取
+    const response = await fetch(cloudUrl);
+    if (!response.ok) throw new Error('图片不存在于云端');
+
+    const blob = await response.blob();
+
+    // 保存回IndexedDB
+    await imgDB.putBlob(imageId, blob);
+
+    // 更新缓存
+    const blobUrl = URL.createObjectURL(blob);
+    imgCache.set(imageId, blobUrl);
+
+    console.log('已从云端恢复图片:', imageId);
+
+    // 刷新当前页面以显示恢复的图片
+    if (typeof render === 'function') {
+      setTimeout(render, 100);
+    }
+
+  } catch (e) {
+    console.warn('无法从云端恢复图片', imageId, e);
+  }
 }
 
 // ===== 图片放大查看器（lightbox） =====
@@ -222,15 +269,57 @@ async function saveImage(dataUrl) {
   if (typeof dataUrl === 'string' && dataUrl.startsWith('img_')) return dataUrl; // 已是 ID
   const id = 'img_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
   try {
+    // 1. 保存到本地 IndexedDB
     await imgDB.put(id, dataUrl);
     const blob = await imgDB.get(id);
     if (blob) imgCache.set(id, URL.createObjectURL(blob));
+
+    // 2. 同时备份到云端（后台进行，不阻塞）
+    uploadImageToCloud(id, dataUrl).catch(e => {
+      console.warn('图片云端备份失败（已保存到本地）:', id, e);
+    });
+
     return id;
   } catch (e) {
     console.warn('saveImage failed', e);
     toast('图片保存失败：' + e.message, 'error');
     return '';
   }
+}
+
+// 上传图片到云端进行备份
+async function uploadImageToCloud(imageId, dataUrl) {
+  try {
+    // 如果有 Supabase 云端上传功能，使用它
+    if (typeof cloudUploadImage === 'function' && typeof cloudClient !== 'undefined' && cloudClient) {
+      const url = await cloudUploadImage(dataUrl, imageId);
+      if (url) {
+        cloudImageCache.set(imageId, url);
+        console.log('图片已备份到云端:', imageId, url);
+        return url;
+      }
+    }
+
+    // 否则，上传到 Cloudflare Workers KV 或 R2
+    const response = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: imageId, data: dataUrl })
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.url) {
+        cloudImageCache.set(imageId, result.url);
+        console.log('图片已备份到云端:', imageId, result.url);
+        return result.url;
+      }
+    }
+  } catch (e) {
+    // 云端备份失败不影响本地使用
+    console.warn('云端备份失败:', imageId, e);
+  }
+  return null;
 }
 
 // 删除图片
@@ -354,6 +443,7 @@ const NAV_MENU = [
   { id: 'payments',      name: '财务',     icon: '¥' },
   { id: 'shipments',     name: '出货单',   icon: '📦' },
   { id: 'tasks',         name: '日程',     icon: '📅' },
+  { id: 'annual-report', name: '年度报表', icon: '📊' },
   { id: 'backup',        name: '数据备份', icon: '⇅' },
 ];
 
@@ -410,11 +500,11 @@ const CUSTOMER_SOURCES = ['阿里', '自建站', '其他'];
 const CUSTOMER_STATUSES = [
   { name: '正在跟进', tag: 'tag-orange' },
   { name: '持续跟进', tag: 'tag-orange' },
-  { name: '重点跟进', tag: 'tag-red' },
+  { name: '重点客户', tag: 'tag-gold' },
   { name: '小数量',   tag: 'tag-blue' },
   { name: '从未回复', tag: 'tag-gray' },
   { name: '暂无需求', tag: 'tag-gray' },
-  { name: '已打样',   tag: 'tag-blue' },
+  { name: '已打样',   tag: 'tag-cyan' },
   { name: '已合作',   tag: 'tag-green' },
 ];
 
@@ -441,12 +531,9 @@ const OPP_STAGES = [
 
 /* 样品状态 */
 const SAMPLE_STATUSES = [
-  { name: '筹备中', tag: 'tag-gray' },
+  { name: '草稿', tag: 'tag-gray' },
+  { name: '样品进行中', tag: 'tag-orange' },
   { name: '已寄出', tag: 'tag-blue' },
-  { name: '待反馈', tag: 'tag-orange' },
-  { name: '已反馈', tag: 'tag-purple' },
-  { name: '已成交', tag: 'tag-green' },
-  { name: '已搁置', tag: 'tag-red' },
 ];
 
 /* 订单付款状态 */
@@ -1251,7 +1338,7 @@ function render() {
     products: renderProducts, quotations: renderQuotations,
     samples: renderSamples, orders: renderOrders, purchases: renderPurchases, payments: renderPayments, shipments: renderShipments,
     emails: renderEmails,
-    tasks: renderTasks, templates: renderTemplates, backup: renderBackup
+    tasks: renderTasks, templates: renderTemplates, backup: renderBackup, 'annual-report': renderAnnualReport
   })[currentPage];
   fn && fn();
 }
@@ -1666,6 +1753,7 @@ function renderCustomers() {
             ${sortableTh('company', '公司名称')}
             ${sortableTh('status', '客户状态')}
             ${sortableTh('grade', '等级')}
+            ${sortableTh('rating', '星级')}
             ${sortableTh('source', '来源')}
             ${sortableTh('country', '区域')}
             ${sortableTh('contact', '联系人')}
@@ -1682,6 +1770,7 @@ function renderCustomers() {
               <td class="click bold" onclick="viewCustomerDetail('${c.id}')">${escapeHtml(c.company)}</td>
               <td>${c.status ? `<span class="tag ${getStatus(CUSTOMER_STATUSES, c.status).tag}">${escapeHtml(c.status)}</span>` : '<span class="muted">-</span>'}</td>
               <td>${gradeHtml(c)}</td>
+              <td class="no-wrap">${c.rating ? starsHtml(c.rating) : '<span class="muted">-</span>'}</td>
               <td class="muted">${escapeHtml(c.source || '-')}</td>
               <td class="no-wrap">${flagFor(c.country) ? '<span class="flag">' + flagFor(c.country) + '</span>' : ''}${escapeHtml(c.country || '')}</td>
               <td>${escapeHtml(c.contact || '')}</td>
@@ -1778,6 +1867,15 @@ function customerForm(c) {
         <select name="grade">
           <option value="">未设置</option>
           ${CUSTOMER_GRADES.map(g => `<option ${c.grade===g?'selected':''}>${g}</option>`).join('')}
+        </select></div>
+      <div class="field"><label>客户星级 <span class="muted" style="font-weight:normal;font-size:10px;">（重要程度）</span></label>
+        <select name="rating">
+          <option value="">未评分</option>
+          <option value="5" ${c.rating==='5'||c.rating===5?'selected':''}>★★★★★ (5星)</option>
+          <option value="4" ${c.rating==='4'||c.rating===4?'selected':''}>★★★★ (4星)</option>
+          <option value="3" ${c.rating==='3'||c.rating===3?'selected':''}>★★★ (3星)</option>
+          <option value="2" ${c.rating==='2'||c.rating===2?'selected':''}>★★ (2星)</option>
+          <option value="1" ${c.rating==='1'||c.rating===1?'selected':''}>★ (1星)</option>
         </select></div>
       <div class="field"><label>来源渠道</label>
         <select name="source">
@@ -5146,9 +5244,11 @@ function editSample(id, customerId) {
       orderDate: todayStr(),
       productionTime: '',
       sentDate: '',
-      status: '筹备中',
+      status: '草稿',
       currency: 'USD',
       trackingNo: '',
+      shippingFee: 0,        // 运费（英文版用）
+      factoryShippingFee: 0, // 厂家运费（中文版用）
       feedback: '',
       notes: '',
       items: [],
@@ -5182,6 +5282,10 @@ function renderSampleForm() {
         <input type="date" value="${fmtDate(s.sentDate)}" onchange="_editingSample.sentDate=this.value"></div>
       <div class="field"><label>快递公司/单号</label>
         <input value="${escapeHtml(s.trackingNo||'')}" oninput="_editingSample.trackingNo=this.value"></div>
+      <div class="field"><label>运费 (英文版导出用)</label>
+        <input type="number" min="0" step="0.01" value="${escapeHtml(s.shippingFee||'')}" oninput="_editingSample.shippingFee=this.value;document.getElementById('sampleTotal').innerHTML=sampleTotalHtml()"></div>
+      <div class="field"><label>厂家运费 RMB (中文版导出用)</label>
+        <input type="number" min="0" step="0.01" value="${escapeHtml(s.factoryShippingFee||'')}" oninput="_editingSample.factoryShippingFee=this.value;document.getElementById('sampleTotal').innerHTML=sampleTotalHtml()"></div>
       <div class="field"><label>备注</label>
         <input value="${escapeHtml(s.notes||'')}" oninput="_editingSample.notes=this.value"></div>
     </div>
@@ -5264,12 +5368,23 @@ function sampleTotalHtml() {
   const totalFactory = items.reduce((sum, it) => sum + (Number(it.factoryPrice) || 0) * (Number(it.qty) || 1), 0);
   const totalClient = items.reduce((sum, it) => sum + (Number(it.clientPrice) || 0) * (Number(it.qty) || 1), 0);
   const cur = (_editingSample && _editingSample.currency) || 'USD';
+  const shippingFee = Number(_editingSample.shippingFee) || 0;
+  const factoryShippingFee = Number(_editingSample.factoryShippingFee) || 0;
+
   return `
     <div style="border:2px solid #4a90e2;border-radius:6px;padding:12px 14px;background:#eff6ff;">
       <div style="font-weight:600;margin-bottom:8px;color:#1e40af;font-size:13px;">合计</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;font-size:13px;">
-        <div>工厂样品费合计：<strong style="color:#1e40af;">¥${totalFactory.toFixed(2)}</strong></div>
-        <div>客户样品报价合计：<strong style="color:#1e40af;">${cur} ${totalClient.toFixed(2)}</strong></div>
+        <div>
+          <div>工厂样品费合计：<strong style="color:#1e40af;">¥${totalFactory.toFixed(2)}</strong></div>
+          <div style="margin-top:4px;">厂家运费：<strong style="color:#1e40af;">¥${factoryShippingFee.toFixed(2)}</strong></div>
+          <div style="margin-top:4px;padding-top:4px;border-top:1px solid #bfdbfe;">总计（含运费）：<strong style="color:#1e40af;font-size:14px;">¥${(totalFactory + factoryShippingFee).toFixed(2)}</strong></div>
+        </div>
+        <div>
+          <div>客户样品报价合计：<strong style="color:#1e40af;">${cur} ${totalClient.toFixed(2)}</strong></div>
+          <div style="margin-top:4px;">运费：<strong style="color:#1e40af;">${cur} ${shippingFee.toFixed(2)}</strong></div>
+          <div style="margin-top:4px;padding-top:4px;border-top:1px solid #bfdbfe;">总计（含运费）：<strong style="color:#1e40af;font-size:14px;">${cur} ${(totalClient + shippingFee).toFixed(2)}</strong></div>
+        </div>
       </div>
     </div>
   `;
@@ -5617,18 +5732,55 @@ async function exportSampleListZh(sampleId) {
   ws.getRow(totalRow).height = 30;
   ws.mergeCells(totalRow, 1, totalRow, 7);
   const tc = ws.getCell(totalRow, 1);
-  tc.value = '合  计  TOTAL (RMB)';
+  tc.value = '产品小计 Subtotal (RMB)';
   tc.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
   tc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
-  tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
+  tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
   tc.border = thinBorderS();
   const tv = ws.getCell(totalRow, 8);
   tv.value = totalFactory;
   tv.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
   tv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
-  tv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
+  tv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
   tv.border = thinBorderS();
   tv.numFmt = '¥#,##0.00';
+
+  // 厂家运费行
+  const shippingRow = totalRow + 1;
+  ws.getRow(shippingRow).height = 30;
+  ws.mergeCells(shippingRow, 1, shippingRow, 7);
+  const sc = ws.getCell(shippingRow, 1);
+  sc.value = '厂家运费 Shipping Fee (RMB)';
+  sc.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
+  sc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  sc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+  sc.border = thinBorderS();
+  const sv = ws.getCell(shippingRow, 8);
+  const factoryShipping = Number(s.factoryShippingFee) || 0;
+  sv.value = factoryShipping;
+  sv.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
+  sv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  sv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+  sv.border = thinBorderS();
+  sv.numFmt = '¥#,##0.00';
+
+  // 总计（含运费）行
+  const grandTotalRow = shippingRow + 1;
+  ws.getRow(grandTotalRow).height = 30;
+  ws.mergeCells(grandTotalRow, 1, grandTotalRow, 7);
+  const gtc = ws.getCell(grandTotalRow, 1);
+  gtc.value = '总计（含运费）GRAND TOTAL (RMB)';
+  gtc.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
+  gtc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  gtc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
+  gtc.border = thinBorderS();
+  const gtv = ws.getCell(grandTotalRow, 8);
+  gtv.value = totalFactory + factoryShipping;
+  gtv.font = { name: 'Microsoft YaHei', bold: true, size: 12, color: { argb: 'FF1F2937' } };
+  gtv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  gtv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4D6' } };
+  gtv.border = thinBorderS();
+  gtv.numFmt = '¥#,##0.00';
 
   const buf = await wb.xlsx.writeBuffer();
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -5779,20 +5931,57 @@ async function exportSampleListEn(sampleId) {
   ws.getRow(totalRow).height = 30;
   ws.mergeCells(totalRow, 1, totalRow, 6);
   const tc = ws.getCell(totalRow, 1);
-  tc.value = 'TOTAL DUE (USD)';
-  tc.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  tc.value = 'Subtotal (USD)';
+  tc.font = { name: 'Cambria', bold: true, size: 12, color: { argb: 'FF1F2937' } };
   tc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
-  tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
   tc.border = thinBorderS();
   const tv = ws.getCell(totalRow, 7);
   tv.value = totalClient;
-  tv.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  tv.font = { name: 'Cambria', bold: true, size: 12, color: { argb: 'FF1F2937' } };
   tv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
-  tv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  tv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
   tv.border = thinBorderS();
   tv.numFmt = '$#,##0.00';
 
-  const payStart = totalRow + 3;
+  // 运费行
+  const shippingRow = totalRow + 1;
+  ws.getRow(shippingRow).height = 30;
+  ws.mergeCells(shippingRow, 1, shippingRow, 6);
+  const sc = ws.getCell(shippingRow, 1);
+  sc.value = 'Shipping Fee (USD)';
+  sc.font = { name: 'Cambria', bold: true, size: 12, color: { argb: 'FF1F2937' } };
+  sc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  sc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+  sc.border = thinBorderS();
+  const sv = ws.getCell(shippingRow, 7);
+  const shippingFee = Number(s.shippingFee) || 0;
+  sv.value = shippingFee;
+  sv.font = { name: 'Cambria', bold: true, size: 12, color: { argb: 'FF1F2937' } };
+  sv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  sv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+  sv.border = thinBorderS();
+  sv.numFmt = '$#,##0.00';
+
+  // 总计（含运费）行
+  const grandTotalRow = shippingRow + 1;
+  ws.getRow(grandTotalRow).height = 30;
+  ws.mergeCells(grandTotalRow, 1, grandTotalRow, 6);
+  const gtc = ws.getCell(grandTotalRow, 1);
+  gtc.value = 'TOTAL DUE (USD)';
+  gtc.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  gtc.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  gtc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  gtc.border = thinBorderS();
+  const gtv = ws.getCell(grandTotalRow, 7);
+  gtv.value = totalClient + shippingFee;
+  gtv.font = { name: 'Cambria', bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+  gtv.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+  gtv.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+  gtv.border = thinBorderS();
+  gtv.numFmt = '$#,##0.00';
+
+  const payStart = grandTotalRow + 3;
   ws.mergeCells(payStart, 1, payStart, 7);
   const ph = ws.getCell(payStart, 1);
   ph.value = 'PAYMENT INFORMATION';
@@ -6887,7 +7076,8 @@ function calcPurchaseTotal(p) {
     return s + qty * price;
   }, 0);
   const shippingCost = Number(p.shippingCost) || 0;
-  return itemsTotal + shippingCost;
+  const sampleFeeDeduction = Number(p.sampleFeeDeduction) || 0;
+  return itemsTotal + shippingCost - sampleFeeDeduction;
 }
 
 function togglePurchaseExpand(id) {
@@ -7161,15 +7351,22 @@ function purchaseItemSubtotal(item) {
 
 function purchaseTotalHtml() {
   const p = _editingPurchase;
-  const itemsTotal = calcPurchaseTotal(p);
+  const itemsTotal = (p.items || []).reduce((s, it) => {
+    const qty = Number(it.qty) || 0;
+    const price = Number(it.unitPriceWithTax || it.unitPriceNoTax) || 0;
+    return s + qty * price;
+  }, 0);
   const shippingCost = Number(p.shippingCost) || 0;
-  const total = itemsTotal + shippingCost;
+  const sampleFeeDeduction = Number(p.sampleFeeDeduction) || 0;
+  const total = itemsTotal + shippingCost - sampleFeeDeduction;
+
   return `
     <div style="border:2px solid #4a90e2;border-radius:6px;padding:12px 14px;background:#eff6ff;">
       <div style="font-weight:600;margin-bottom:8px;color:#1e40af;font-size:13px;">采购合计</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center;margin-bottom:4px;">
         <div>产品小计：</div>
         <div style="text-align:right;"><strong>¥${itemsTotal.toFixed(2)}</strong></div>
+
         <div>运费：</div>
         <div style="text-align:right;">
           <input type="number" min="0" step="0.01" value="${p.shippingCost || ''}"
@@ -7177,8 +7374,18 @@ function purchaseTotalHtml() {
             placeholder="0.00"
             style="width:120px;text-align:right;border:1px solid #cbd5e1;border-radius:4px;padding:4px 8px;">
         </div>
+
+        <div>样品费抵扣：</div>
+        <div style="text-align:right;">
+          <input type="number" min="0" step="0.01" value="${p.sampleFeeDeduction || ''}"
+            oninput="_editingPurchase.sampleFeeDeduction=this.value;refreshPurchaseTotal();"
+            placeholder="0.00"
+            style="width:120px;text-align:right;border:1px solid #cbd5e1;border-radius:4px;padding:4px 8px;">
+        </div>
       </div>
-      <div style="font-size:16px;padding-top:8px;border-top:1px solid #cbd5e1;">总金额：<strong style="color:#1e40af;font-size:18px;">¥${total.toFixed(2)}</strong></div>
+      <div style="font-size:16px;padding-top:8px;border-top:1px solid #cbd5e1;">
+        应付总额：<strong style="color:#1e40af;font-size:18px;">¥${total.toFixed(2)}</strong>
+      </div>
     </div>
   `;
 }
@@ -8312,11 +8519,17 @@ function paymentRelatedSelectorHtml(p) {
 }
 
 function paymentPurchaseSelector(p) {
-  const purchases = (DB.purchases || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  let purchases = (DB.purchases || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  // 如果已填写对方名称，只显示该供应商的采购单
+  if (p.counterparty) {
+    purchases = purchases.filter(pu => pu.factoryName === p.counterparty);
+  }
+
   if (purchases.length === 0) {
     return `<input value="${escapeHtml(p.relatedNo || '')}" oninput="_editingPayment.relatedNo=this.value" placeholder="暂无采购单，可手填">`;
   }
-  return `<select onchange="_editingPayment.relatedId=this.value;var pu=(DB.purchases||[]).find(x=>x.id===this.value);if(pu)_editingPayment.relatedNo=pu.code||'';">
+  return `<select onchange="var pu=(DB.purchases||[]).find(x=>x.id===this.value);if(pu){_editingPayment.relatedId=this.value;_editingPayment.relatedNo=pu.code||'';_editingPayment.counterparty=pu.factoryName||'';refreshPaymentForm();}">
     <option value="">-- 选采购单 --</option>
     ${purchases.map(pu => `<option value="${pu.id}" ${p.relatedId===pu.id?'selected':''}>${escapeHtml(pu.code || '-')} · ${escapeHtml(pu.factoryName || '')} · ${fmtDate(pu.date)}</option>`).join('')}
   </select>`;
@@ -8331,6 +8544,15 @@ function refreshPaymentRelatedWrap() {
   if (wrap && _editingPayment) {
     wrap.innerHTML = paymentRelatedSelectorHtml(_editingPayment);
   }
+}
+
+function refreshPaymentForm() {
+  // 刷新整个表单（用于更新对方名称等字段）
+  const counterpartyInput = document.querySelector('input[placeholder="工厂名 / 其他对象"]');
+  if (counterpartyInput && _editingPayment) {
+    counterpartyInput.value = _editingPayment.counterparty || '';
+  }
+  refreshPaymentRelatedWrap();
 }
 
 function renderPaymentForm() {
@@ -8375,7 +8597,7 @@ function renderPaymentForm() {
           </div>
           <div>
             <label style="font-size:11.5px;color:#6b7280;">对方名称 <span class="muted" style="font-size:10px;">（不选客户时填工厂名/其他）</span></label>
-            <input value="${escapeHtml(p.counterparty || '')}" oninput="_editingPayment.counterparty=this.value" placeholder="工厂名 / 其他对象">
+            <input value="${escapeHtml(p.counterparty || '')}" oninput="_editingPayment.counterparty=this.value;refreshPaymentRelatedWrap();" placeholder="工厂名 / 其他对象">
           </div>
         </div>
         <div id="paymentRelatedWrap" style="margin-top:8px;">
@@ -11715,7 +11937,8 @@ function renderBackup() {
 
   document.getElementById('content').innerHTML = `
     <div class="warning-box">
-      ⚠️ 重要：数据保存在浏览器本地存储中。请定期点击"导出 JSON 备份"保存文件。如果清除浏览器数据或换电脑，未导出的数据会丢失。
+      ⚠️ 重要：数据和图片保存在浏览器本地存储中。<strong>浏览器清理缓存会导致图片丢失！</strong><br>
+      请定期使用下方"一键全量备份（数据+图片 ZIP）"保存完整备份。如果图片丢失，可以从备份ZIP中恢复。
     </div>
 
     <div class="panel" style="margin-bottom:12px;">
@@ -11803,6 +12026,15 @@ function renderBackup() {
             </div>
           `;
         })()}
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px;">
+      <div class="panel-header">🔍 图片诊断与修复</div>
+      <div class="panel-body">
+        <p class="muted" style="margin-bottom:10px;">检查所有产品图片是否完整，找出丢失或损坏的图片引用。</p>
+        <button class="btn" onclick="diagnoseImages()">🔍 检查所有图片</button>
+        <div id="imageDiagResult" style="margin-top:10px;"></div>
       </div>
     </div>
 
@@ -12120,6 +12352,139 @@ function downloadCSV(rows, name) {
   URL.revokeObjectURL(a.href);
 }
 
+/* ============================================================
+ * 年度报表页面
+ * ============================================================ */
+function renderAnnualReport() {
+  document.getElementById('pageTitle').textContent = '年度报表';
+  document.getElementById('topbarActions').innerHTML = `
+    <select id="yearSelect" onchange="renderAnnualReport()" style="padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;">
+      ${(() => {
+        const currentYear = new Date().getFullYear();
+        let opts = '';
+        for (let y = currentYear; y >= currentYear - 5; y--) {
+          opts += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
+        }
+        return opts;
+      })()}
+    </select>
+  `;
+  setTabs('');
+
+  const year = document.getElementById('yearSelect')?.value || new Date().getFullYear();
+  const startDate = `${year}-01-01`;
+  const endDate = `${year}-12-31`;
+
+  // 计算各项指标
+  const stats = calculateYearStats(startDate, endDate);
+
+  document.getElementById('content').innerHTML = `
+    <div style="text-align:center;margin:20px 0;">
+      <h2 style="font-size:28px;color:#1f2937;font-weight:600;">公司年度报表 (${year})</h2>
+      <p style="color:#6b7280;font-size:13px;margin-top:8px;">数据范围：${year}-01-01 ~ ${year}-12-31</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:20px 0;">
+      ${statCard('新增供应商数', stats.newSuppliers, '', '↑', '#3b82f6')}
+      ${statCard('新增客户数', stats.newCustomers, '', '↑', '#3b82f6')}
+      ${statCard('新客户成交数', stats.newCustomerDeals, '个', '↑', '#3b82f6')}
+
+      ${statCard('老客户成交数', stats.oldCustomerDeals, '个', '↑', '#3b82f6')}
+      ${statCard('新客户成交金额', stats.newCustomerAmount, '元', '', '#3b82f6')}
+      ${statCard('老客户成交金额', stats.oldCustomerAmount, '万元', '', '#3b82f6')}
+
+      ${statCard('寄样次数/样品总额', `${stats.sampleCount} 次`, `${stats.sampleAmount} 元`, '', '#3b82f6')}
+      ${statCard('报价次数', stats.quotationCount, '次', '', '#3b82f6')}
+      ${statCard('出货单数/出货总金额', `${stats.shipmentCount} 单`, `${stats.shipmentAmount} 元`, '', '#3b82f6')}
+
+      ${statCard('出货采购总金额', stats.shipmentPurchaseAmount, '元', '', '#3b82f6')}
+      ${statCard('采购总金额', stats.purchaseAmount, '万元', '', '#3b82f6')}
+      ${statCard('已收款总金额', stats.incomeAmount, '万元', '', '#3b82f6')}
+
+      ${statCard('已付款总金额', stats.expenseAmount, '万元', '', '#3b82f6')}
+      ${statCard('业务费用总额', stats.businessExpense, '元', '', '#3b82f6')}
+      ${statCard('日常费用总额', stats.dailyExpense, '元', '', '#3b82f6')}
+    </div>
+  `;
+}
+
+function statCard(title, value, unit, trend, color) {
+  return `
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+      <div style="color:#6b7280;font-size:13px;margin-bottom:12px;">${title}</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div>
+          <span style="font-size:32px;font-weight:700;color:${color};">${typeof value === 'number' ? value.toLocaleString() : value}</span>
+          ${unit ? `<span style="font-size:14px;color:#6b7280;margin-left:4px;">${unit}</span>` : ''}
+        </div>
+        ${trend ? `<span style="color:#10b981;font-size:18px;">${trend}</span>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function calculateYearStats(startDate, endDate) {
+  // 新增客户
+  const newCustomers = DB.customers.filter(c => c.createdAt >= startDate && c.createdAt <= endDate + 'T23:59:59').length;
+
+  // 订单相关
+  const orders = DB.orders.filter(o => o.orderDate >= startDate && o.orderDate <= endDate);
+  const newCustomerOrders = orders.filter(o => {
+    const c = customerById(o.customerId);
+    return c && c.createdAt >= startDate;
+  });
+  const oldCustomerOrders = orders.filter(o => {
+    const c = customerById(o.customerId);
+    return c && c.createdAt < startDate;
+  });
+
+  const newCustomerDeals = newCustomerOrders.length;
+  const oldCustomerDeals = oldCustomerOrders.length;
+  const newCustomerAmount = newCustomerOrders.reduce((s, o) => s + (Number(o.amount) || 0), 0).toFixed(2);
+  const oldCustomerAmount = (oldCustomerOrders.reduce((s, o) => s + (Number(o.amount) || 0), 0) / 10000).toFixed(2);
+
+  // 样品
+  const samples = (DB.samples || []).filter(s => s.orderDate >= startDate && s.orderDate <= endDate);
+  const sampleCount = samples.length;
+  const sampleAmount = samples.reduce((s, sample) => {
+    return s + (sample.items || []).reduce((sum, it) => sum + (Number(it.factoryPrice) || 0) * (Number(it.qty) || 1), 0);
+  }, 0).toFixed(2);
+
+  // 报价
+  const quotationCount = (DB.quotations || []).filter(q => q.date >= startDate && q.date <= endDate).length;
+
+  // 出货
+  const shipments = (DB.shipments || []).filter(s => s.shipDate >= startDate && s.shipDate <= endDate);
+  const shipmentCount = shipments.length;
+  const shipmentAmount = 0; // 需要计算出货金额
+  const shipmentPurchaseAmount = 0; // 需要计算出货采购金额
+
+  // 采购
+  const purchases = (DB.purchases || []).filter(p => p.date >= startDate && p.date <= endDate);
+  const newSuppliers = [...new Set(purchases.map(p => p.factoryName))].length;
+  const purchaseAmount = (purchases.reduce((s, p) => {
+    return s + (p.items || []).reduce((sum, it) => sum + (Number(it.qty) || 0) * (Number(it.purchasePriceWithTax) || 0), 0);
+  }, 0) / 10000).toFixed(2);
+
+  // 财务
+  const payments = (DB.payments || []).filter(p => p.date >= startDate && p.date <= endDate);
+  const incomeAmount = (payments.filter(p => p.type === 'income').reduce((s, p) => s + (Number(p.amount) || 0), 0) / 10000).toFixed(2);
+  const expenseAmount = (payments.filter(p => p.type === 'expense').reduce((s, p) => s + (Number(p.amount) || 0), 0) / 10000).toFixed(2);
+
+  const businessExpense = 0;
+  const dailyExpense = 0;
+
+  return {
+    newSuppliers, newCustomers, newCustomerDeals, oldCustomerDeals,
+    newCustomerAmount, oldCustomerAmount,
+    sampleCount, sampleAmount, quotationCount,
+    shipmentCount, shipmentAmount, shipmentPurchaseAmount,
+    purchaseAmount, incomeAmount, expenseAmount,
+    businessExpense, dailyExpense
+  };
+}
+
+
 async function importData(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -12216,6 +12581,337 @@ async function importData(e) {
   };
   reader.readAsText(file);
   e.target.value = '';
+}
+
+/* ============================================================
+ * 图片诊断与修复
+ * ============================================================ */
+
+async function diagnoseImages() {
+  const resultDiv = document.getElementById('imageDiagResult');
+  resultDiv.innerHTML = '<div class="muted">正在检查图片...</div>';
+
+  try {
+    // 获取所有IndexedDB中的图片ID
+    const allImageIds = await imgDB.getAllIds();
+    const imageIdSet = new Set(allImageIds);
+
+    // 检查产品图片
+    const products = DB.products || [];
+    const missingProducts = [];
+    const validProducts = [];
+
+    for (const p of products) {
+      if (p.image) {
+        const exists = imageIdSet.has(p.image);
+        if (!exists) {
+          missingProducts.push({
+            id: p.id,
+            name: p.nameEn || p.nameCn || '未命名产品',
+            imageId: p.image
+          });
+        } else {
+          validProducts.push(p);
+        }
+      }
+    }
+
+    // 检查订单中的产品图片
+    const orders = DB.orders || [];
+    const ordersWithMissingImages = [];
+
+    for (const order of orders) {
+      const items = order.items || [];
+      if (items.length > 0 && items[0].productId) {
+        const product = products.find(p => p.id === items[0].productId);
+        if (product && product.image && !imageIdSet.has(product.image)) {
+          ordersWithMissingImages.push({
+            orderNo: order.orderNo,
+            productName: items[0].productName || product.nameEn,
+            productId: product.id
+          });
+        }
+      }
+    }
+
+    // 生成报告
+    let html = '<div style="margin-top:10px;">';
+    html += `<div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:10px;border-radius:4px;margin-bottom:10px;">`;
+    html += `<strong>📊 检查结果：</strong><br>`;
+    html += `・IndexedDB 中共有 <strong>${allImageIds.length}</strong> 张图片<br>`;
+    html += `・产品数据库共有 <strong>${products.length}</strong> 个产品<br>`;
+    html += `・其中 <strong>${validProducts.length}</strong> 个产品有有效图片<br>`;
+    html += `・发现 <strong style="color:#ef4444;">${missingProducts.length}</strong> 个产品的图片丢失`;
+    html += `</div>`;
+
+    if (missingProducts.length > 0) {
+      html += '<div style="background:#fef3c7;border:1px solid #fbbf24;padding:10px;border-radius:4px;margin-bottom:10px;">';
+      html += '<strong>⚠️ 图片丢失的产品：</strong><br>';
+      html += '<table style="width:100%;margin-top:6px;font-size:12px;">';
+      html += '<thead><tr style="background:#fde68a;"><th style="padding:4px;text-align:left;">产品名称</th><th style="padding:4px;">图片ID</th><th style="padding:4px;">操作</th></tr></thead>';
+      html += '<tbody>';
+      for (const p of missingProducts) {
+        html += `<tr style="border-bottom:1px solid #fde68a;">`;
+        html += `<td style="padding:4px;">${escapeHtml(p.name)}</td>`;
+        html += `<td style="padding:4px;font-family:monospace;font-size:10px;color:#92400e;">${escapeHtml(p.imageId.substring(0,16))}...</td>`;
+        html += `<td style="padding:4px;"><button class="btn-link" onclick="fixProductImage('${p.id}')">重新上传图片</button></td>`;
+        html += `</tr>`;
+      }
+      html += '</tbody></table>';
+      html += '</div>';
+    }
+
+    if (ordersWithMissingImages.length > 0) {
+      html += '<div style="background:#fee2e2;border:1px solid #fca5a5;padding:10px;border-radius:4px;margin-bottom:10px;">';
+      html += '<strong>⚠️ 受影响的订单（图片显示异常）：</strong><br>';
+      html += '<div style="font-size:12px;margin-top:6px;">';
+      for (const o of ordersWithMissingImages) {
+        html += `・订单 <strong>${escapeHtml(o.orderNo)}</strong> - ${escapeHtml(o.productName)}<br>`;
+      }
+      html += '</div>';
+      html += '</div>';
+    }
+
+    if (missingProducts.length === 0) {
+      html += '<div style="background:#d1fae5;border:1px solid #6ee7b7;padding:10px;border-radius:4px;">';
+      html += '✅ <strong>所有产品图片完整，未发现问题！</strong>';
+      html += '</div>';
+    } else {
+      html += '<div class="info-box" style="margin-top:10px;font-size:12px;">';
+      html += '<strong>修复方式：</strong><br>';
+      html += '1. <strong>从备份恢复（推荐）：</strong>点击下方"从备份ZIP恢复图片"，选择之前导出的完整备份ZIP文件<br>';
+      html += '2. <strong>手动上传：</strong>点击"重新上传"为单个产品重新上传图片<br>';
+      html += '<br><strong>💡 预防图片丢失：</strong>建议每周使用"数据备份"页面的"一键全量备份"功能导出完整备份。';
+      html += '<div style="margin-top:12px;">';
+      html += '<button class="btn btn-primary" onclick="restoreImagesFromBackup()" style="margin-right:8px;">📦 从备份ZIP恢复图片</button>';
+      html += '<button class="btn" onclick="renderBackup()">前往数据备份</button>';
+      html += '</div>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+    resultDiv.innerHTML = html;
+
+  } catch (e) {
+    resultDiv.innerHTML = `<div style="color:#ef4444;">检查失败：${escapeHtml(e.message)}</div>`;
+    console.error('图片诊断失败', e);
+  }
+}
+
+async function recoverImageFromCloudUI(imageId, productId) {
+  toast('正在从云端恢复图片...', 'info');
+  try {
+    await recoverImageFromCloud(imageId);
+    toast('图片已从云端恢复！', 'success');
+    // 重新检查
+    setTimeout(() => diagnoseImages(), 500);
+  } catch (e) {
+    toast('恢复失败：' + e.message, 'error');
+  }
+}
+
+async function recoverAllMissingImages() {
+  if (!confirm('确定要从云端恢复所有丢失的图片吗？这可能需要一些时间。')) return;
+
+  toast('开始批量恢复图片...', 'info');
+
+  try {
+    const allImageIds = await imgDB.getAllIds();
+    const imageIdSet = new Set(allImageIds);
+    const products = DB.products || [];
+
+    let recovered = 0;
+    let failed = 0;
+
+    for (const p of products) {
+      if (p.image && !imageIdSet.has(p.image)) {
+        try {
+          await recoverImageFromCloud(p.image);
+          recovered++;
+        } catch (e) {
+          failed++;
+          console.warn('恢复失败:', p.image, e);
+        }
+      }
+    }
+
+    if (recovered > 0) {
+      toast(`成功恢复 ${recovered} 张图片${failed > 0 ? `，${failed} 张失败` : ''}`, 'success');
+      setTimeout(() => diagnoseImages(), 500);
+    } else if (failed > 0) {
+      toast(`无法从云端恢复图片。可能云端没有备份，请手动重新上传。`, 'error');
+    } else {
+      toast('没有需要恢复的图片', 'info');
+    }
+
+  } catch (e) {
+    toast('批量恢复失败：' + e.message, 'error');
+  }
+}
+
+function fixProductImage(productId) {
+  const product = DB.products.find(p => p.id === productId);
+  if (!product) {
+    toast('产品不存在', 'error');
+    return;
+  }
+
+  // 打开产品编辑页面
+  editProduct(productId);
+  toast('请在编辑页面重新上传图片', 'info');
+}
+
+// 从备份 ZIP 恢复图片
+async function restoreImagesFromBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.zip';
+
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      toast('正在读取备份文件...', 'info');
+
+      const JSZip = window.JSZip;
+      if (!JSZip) {
+        toast('缺少 JSZip 库，请刷新页面重试', 'error');
+        return;
+      }
+
+      const zip = await JSZip.loadAsync(file);
+      const imagesFolder = zip.folder('images');
+
+      if (!imagesFolder) {
+        toast('备份文件中没有找到 images 文件夹', 'error');
+        return;
+      }
+
+      let restored = 0;
+      const files = Object.keys(zip.files).filter(name => name.startsWith('images/') && !name.endsWith('/'));
+
+      for (const filename of files) {
+        const imageId = filename.replace('images/', '').replace(/\.(png|jpg|jpeg|webp)$/, '');
+
+        // 检查图片是否已存在
+        const existing = await imgDB.get(imageId);
+        if (existing) continue; // 跳过已存在的图片
+
+        // 读取图片数据
+        const blob = await zip.files[filename].async('blob');
+
+        // 转换为 dataUrl
+        const dataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+
+        // 保存到 IndexedDB
+        await imgDB.put(imageId, dataUrl);
+
+        // 更新缓存
+        const restoredBlob = await imgDB.get(imageId);
+        if (restoredBlob) {
+          imgCache.set(imageId, URL.createObjectURL(restoredBlob));
+        }
+
+        restored++;
+      }
+
+      if (restored > 0) {
+        toast(`成功恢复 ${restored} 张图片！`, 'success');
+        // 重新渲染当前页面以显示恢复的图片
+        render();
+      } else {
+        toast('没有找到需要恢复的图片（可能都已存在）', 'info');
+      }
+
+    } catch (error) {
+      console.error('恢复图片失败', error);
+      toast('恢复失败：' + error.message, 'error');
+    }
+  };
+
+  input.click();
+}
+
+// 自动检查图片丢失并提示恢复
+async function autoCheckMissingImages() {
+  try {
+    const allImageIds = await imgDB.getAllIds();
+    const imageIdSet = new Set(allImageIds);
+
+    const products = DB.products || [];
+    let missingCount = 0;
+
+    for (const p of products) {
+      if (p.image && !imageIdSet.has(p.image)) {
+        missingCount++;
+      }
+    }
+
+    if (missingCount > 0) {
+      // 显示恢复提示
+      const notificationId = 'missing-images-notification';
+      if (document.getElementById(notificationId)) return; // 已显示，不重复
+
+      const notification = document.createElement('div');
+      notification.id = notificationId;
+      notification.style.cssText = `
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 350px;
+        animation: slideIn 0.3s ease-out;
+      `;
+
+      notification.innerHTML = `
+        <div style="display: flex; align-items: start; gap: 12px;">
+          <div style="font-size: 24px;">⚠️</div>
+          <div style="flex: 1;">
+            <div style="font-weight: bold; color: #92400e; margin-bottom: 6px;">
+              发现 ${missingCount} 张产品图片丢失
+            </div>
+            <div style="font-size: 12px; color: #78350f; margin-bottom: 10px;">
+              可能是浏览器清理了 IndexedDB 存储。你可以从备份 ZIP 文件中恢复这些图片。
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="restoreImagesFromBackup(); document.getElementById('${notificationId}').remove();"
+                style="padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                从备份恢复
+              </button>
+              <button onclick="document.getElementById('${notificationId}').remove();"
+                style="padding: 6px 12px; background: #d1d5db; color: #374151; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                稍后处理
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(notification);
+
+      // 添加动画
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(400px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  } catch (error) {
+    console.warn('自动检查图片失败', error);
+  }
 }
 
 function clearAllData() {
@@ -12690,6 +13386,10 @@ async function startApp() {
   renderNav();
   render();
   checkAutoBackup();
+  // 自动检查图片丢失（延迟5秒，避免影响启动速度）
+  setTimeout(() => {
+    autoCheckMissingImages().catch(e => console.warn('自动检查图片失败', e));
+  }, 5000);
   // 顶栏右上加登录用户 + 退出按钮
   try {
     const u = currentUser;
