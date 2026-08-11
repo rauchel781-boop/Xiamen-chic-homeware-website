@@ -83,6 +83,7 @@ export default function sitemap() {
     'wooden-stash-box-manufacturer',
     'custom-wooden-gift-box-manufacturer',
     'carved-wooden-boxes-manufacturer',
+    'premium-gift-packaging-manufacturer',
   ];
   for (const slug of LANDING_PAGES) {
     push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });
