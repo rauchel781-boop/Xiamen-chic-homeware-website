@@ -104,7 +104,8 @@
     "linkBlog": "Blog",
     "linkContact": "Contact",
     "xiamenAddress": "Xiamen, Fujian, République populaire de Chine",
-    "caoAddress": "Comté de Cao, Shandong, Chine"
+    "caoAddress": "Comté de Cao, Shandong, Chine",
+    "sisterSiteLink": "custom-woodenbox.com"
   },
   "language": {
     "label": "Langue"
@@ -965,7 +966,10 @@
     "bottomCtaEyebrow": "Prêt à parler?",
     "bottomCtaTitle": "Vous avez un brief? Construisons-le ensemble.",
     "bottomCtaBody": "Envoyez vos spécifications, croquis ou échantillons de référence-nous répondons généralement dans les 24 heures avec un devis et un calendrier d'échantillon.",
-    "bottomCtaMaterial": "Guide des matériaux"
+    "bottomCtaMaterial": "Guide des matériaux",
+    "sitesEyebrow": "Two sites, one factory",
+    "sitesNote": "Xiamen Chic Homeware runs two websites. This one covers our full range of wooden and bamboo homeware — kitchen and dining, storage, organizers, gift packaging and pet products. Custom wooden box and packaging enquiries are handled on our dedicated box site,",
+    "sitesNoteEnd": ". Both are operated by the same team, from the same production floor in Cao County and the same sales office in Xiamen — same QC standards, same export documentation, same people answering your email."
   },
   "landing": {
     "woodenSofaTray": {

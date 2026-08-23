@@ -308,6 +308,26 @@ export default function AboutPage({ params: { locale } }) {
               image="/sales%20office.jpg"
             />
           </div>
+
+          {/* Two-sites note — same company, two domains. Kept factual: it
+              describes where enquiries are handled, not a catalogue split. */}
+          <div className="mt-10 max-w-3xl mx-auto rounded-2xl border border-brand-line bg-white p-6 lg:p-7 text-center">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">
+              {t('sitesEyebrow')}
+            </p>
+            <p className="text-brand-mute leading-relaxed text-[15px]">
+              {t('sitesNote')}{' '}
+              <a
+                href="https://www.custom-woodenbox.com"
+                target="_blank"
+                rel="noopener"
+                className="font-semibold text-brand-green underline underline-offset-2 hover:text-brand-greenDark"
+              >
+                custom-woodenbox.com
+              </a>
+              {t('sitesNoteEnd')}
+            </p>
+          </div>
         </div>
       </section>
 

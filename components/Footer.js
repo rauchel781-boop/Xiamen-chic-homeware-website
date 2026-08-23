@@ -31,6 +31,9 @@ export default function Footer() {
     { label: t('footer.linkFactory'),     href: '/wooden-box-factory-in-china' },
     { label: t('footer.linkBlog'),        href: '/blog' },
     { label: t('footer.linkContact'),     href: '/contact' },
+    // Sister site — same company, separate domain. Rendered as a real <a>
+    // (not next-intl <Link>) because it leaves this app entirely.
+    { label: t('footer.sisterSiteLink'), href: 'https://www.custom-woodenbox.com', external: true },
   ];
 
   function subscribe(e) {
@@ -144,7 +147,19 @@ export default function Footer() {
           <ul className="space-y-2.5 text-sm">
             {companyLinks.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="text-white/70 hover:text-white">{l.label}</Link>
+                {l.external ? (
+                  <a
+                    href={l.href}
+                    target="_blank"
+                    rel="noopener"
+                    className="text-white/70 hover:text-white inline-flex items-center gap-1"
+                  >
+                    {l.label}
+                    <span aria-hidden="true" className="text-[11px] opacity-70">&#8599;</span>
+                  </a>
+                ) : (
+                  <Link href={l.href} className="text-white/70 hover:text-white">{l.label}</Link>
+                )}
               </li>
             ))}
           </ul>
