@@ -217,12 +217,33 @@ export default function BlogPost({ params }) {
   // Shared 9-step factory workflow lives in lib/howto-schema.js.
   const howtoLd = buildSourcingHowTo(p, schemaLang(params.locale));
 
+  // Optional factory video. Declared in wp-data/posts.json as:
+  //   { ..., video: { id: 'YOUTUBE_ID', title: '...', desc: '...', date: 'YYYY-MM-DD' } }
+  // Rendered as a lazy, cookieless embed and emitted as a VideoObject so the
+  // article is eligible for Google's video rich result.
+  const video = p.video && p.video.id ? p.video : null;
+  const videoLd = video
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: video.title,
+        description: video.desc,
+        thumbnailUrl: [`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`],
+        contentUrl: `https://www.youtube.com/watch?v=${video.id}`,
+        embedUrl: `https://www.youtube-nocookie.com/embed/${video.id}`,
+        uploadDate: video.date || p.date?.slice(0, 10),
+        publisher: { '@id': `${SITE.siteUrl}/#organization` },
+        inLanguage: schemaLang(params.locale),
+      }
+    : null;
+
   return (
     <article className="bg-white">
       <JsonLd data={breadcrumb} />
       <JsonLd data={articleLd} />
       {faqLd && <JsonLd data={faqLd} />}
       {howtoLd && <JsonLd data={howtoLd} />}
+      {videoLd && <JsonLd data={videoLd} />}
       <MermaidLoader />
 
       {/* ── HERO ── */}
@@ -312,6 +333,40 @@ export default function BlogPost({ params }) {
                 className="wp-content blog-prose"
                 dangerouslySetInnerHTML={{ __html: enhancedHtml }}
               />
+
+              {/* Factory video — lazy, cookieless (no cookies set until play). */}
+              {video && (
+                <section id="video" className="mt-12 pt-8 border-t border-brand-line print:hidden">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-green mb-2">
+                    {tBlog('videoEyebrow')}
+                  </p>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-brand-ink leading-tight mb-4">
+                    {video.title}
+                  </h2>
+                  <div className="relative w-full overflow-hidden rounded-2xl border border-brand-line bg-brand-cream aspect-video">
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1`}
+                      title={video.title}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  </div>
+                  {video.desc && (
+                    <p className="mt-3 text-sm text-brand-mute leading-relaxed">{video.desc}</p>
+                  )}
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-green hover:text-brand-greenDark"
+                  >
+                    {tBlog('videoWatchOnYt')}
+                    <span aria-hidden="true">&#8599;</span>
+                  </a>
+                </section>
+              )}
 
               {/* Inline FAQ block — visible Q&A list. Companion FAQPage
                   schema is emitted at the top of the page so Google can

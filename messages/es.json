@@ -3144,7 +3144,9 @@
     "finalCtaTitle": "Leer está bien, pero un presupuesto real impulsa el proyecto.",
     "finalCtaBody": "¿Tiene en mente un producto de madera? Envíenos un briefing, un boceto o una foto de referencia — le responderemos con un presupuesto y un calendario de muestras en 24 horas.",
     "finalCtaButton1": "Solicitar presupuesto gratis",
-    "finalCtaButton2": "Ver productos"
+    "finalCtaButton2": "Ver productos",
+    "videoEyebrow": "Watch",
+    "videoWatchOnYt": "Watch on YouTube"
   },
   "briefs": {
     "seriesName": "Industry Brief",
