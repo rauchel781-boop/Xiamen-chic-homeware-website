@@ -66,7 +66,18 @@
     "woodFabrication": "Lavorazione del Legno",
     "capabilities": "Capacità",
     "blogNews": "Blog e Notizie",
-    "contactLink": "Contatti"
+    "contactLink": "Contatti",
+    "solutions": "Solutions",
+    "solPremiumPackaging": "Premium Gift Packaging",
+    "solGiftBox": "Custom Wooden Gift Boxes",
+    "solCarvedBoxes": "Carved Wooden Boxes",
+    "solStorageBoxes": "Wooden Storage Boxes Wholesale",
+    "solServingTrays": "Wholesale Wooden Serving Trays",
+    "solSofaTray": "Wooden Sofa Trays",
+    "solSpiceRack": "Custom Wooden Spice Racks",
+    "solSpiceRackWholesale": "Wholesale Spice Racks",
+    "solStashBox": "Wooden Stash Boxes",
+    "solAllProducts": "Custom Wooden Products"
   },
   "language": {
     "label": "Lingua"

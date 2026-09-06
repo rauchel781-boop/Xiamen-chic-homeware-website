@@ -4,56 +4,56 @@
   "name": "Desk & Office Organizers",
   "slug": "desk-office-organizers",
   "parent": "",
-  "description": ""
+  "description": "Wooden and bamboo desk organisers made to your spec: compartment layouts, felt bases, drawer hardware and logo engraving. MOQ 300 pcs, FOB Xiamen, CARB P2 on request."
  },
  {
   "id": 53,
   "name": "Gift Boxes & Retail Packaging",
   "slug": "gift-boxes-retail-packaging",
   "parent": "",
-  "description": ""
+  "description": "Wooden gift boxes and retail packaging built for shelf impact: sliding lids, magnetic closures, foam or EVA inserts and gold-fill engraved logos. MOQ 300 pcs per design."
  },
  {
   "id": 97,
   "name": "Hospitality & Commercial",
   "slug": "hospitality-commercial",
   "parent": "",
-  "description": ""
+  "description": "Wooden amenity trays, caddies and room accessories for hotels, restaurants and short-let operators. Built for daily commercial handling and repeat cleaning. MOQ 300 pcs."
  },
  {
   "id": 113,
   "name": "Hotel Amenity Trays",
   "slug": "hotel-amenity-trays",
   "parent": "hospitality-commercial",
-  "description": ""
+  "description": "Wooden hotel amenity trays for bathrooms, minibars and turndown service. Water-resistant finishes, stackable profiles and branded engraving. MOQ 300 pcs, FOB Xiamen."
  },
  {
   "id": 137,
   "name": "Pet Products",
   "slug": "pet-products",
   "parent": "",
-  "description": ""
+  "description": "Wooden pet urns, memorial keepsakes, treat storage and small-animal houses, manufactured to OEM spec with engraved lids and sealed closures. MOQ 300 pcs per design."
  },
  {
   "id": 117,
   "name": "Restaurant Table Caddies",
   "slug": "restaurant-table-caddies",
   "parent": "hospitality-commercial",
-  "description": ""
+  "description": "Wooden restaurant table caddies for condiments, cutlery and menus. Handle options, drainage bases and finishes that survive a commercial wipe-down. MOQ 300 pcs."
  },
  {
   "id": 114,
   "name": "Room Service Trays",
   "slug": "room-service-trays",
   "parent": "hospitality-commercial",
-  "description": ""
+  "description": "Wooden room service trays for hotels and F&B operators: reinforced handles, non-slip bases and sealed finishes rated for daily washing. MOQ 300 pcs, FOB Xiamen."
  },
  {
   "id": 51,
   "name": "Storage & Home Organization",
   "slug": "storage-home-organization",
   "parent": "",
-  "description": ""
+  "description": "Wooden and bamboo storage boxes, bins and drawer systems for home organisation retail programmes. Removable dividers, stackable sizing, custom logos. MOQ 300 pcs."
  },
  {
   "id": 18,
@@ -64,255 +64,255 @@
  },
  {
   "id": 65,
-  "name": "wooden bathroom organizer",
+  "name": "Wooden Bathroom Organizer",
   "slug": "wooden-bathroom-organizer",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden bathroom organisers and vanity storage in moisture-sealed bamboo and acacia. Countertop trays, drawer inserts and tiered caddies. MOQ 300 pcs, FOB Xiamen."
  },
  {
   "id": 111,
   "name": "Wooden Cable Organizers",
   "slug": "wooden-cable-organizers",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden cable organisers and desktop cord management boxes with routed slots and felt bases. Ideal for tech gifting and corporate programmes. MOQ 300 pcs per design."
  },
  {
   "id": 69,
   "name": "Wooden Coffee Box",
   "slug": "wooden-coffee-box",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Wooden coffee pod and capsule boxes with fixed or adjustable dividers, hinged or sliding lids and engraved branding. MOQ 300 pcs, samples in 7-10 days."
  },
  {
   "id": 104,
   "name": "Wooden Countertop Organizers",
   "slug": "wooden-countertop-organizers",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden countertop organisers for kitchen, bath and desk retail lines. Multi-compartment layouts in bamboo, acacia and pine. MOQ 300 pcs, FOB Xiamen from $2.00."
  },
  {
   "id": 61,
-  "name": "wooden desk organizer",
+  "name": "Wooden Desk Organizer",
   "slug": "wooden-desk-organizer",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden desk organisers made to order: pen wells, phone slots, drawer units and felt-lined bases. Bamboo, acacia, pine or walnut. MOQ 300 pcs, FOB $2.00-8.00."
  },
  {
   "id": 110,
   "name": "Wooden Document Trays",
   "slug": "wooden-document-trays",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden document and letter trays for office and executive desk lines. Stackable profiles, reinforced corners and engraved logos. MOQ 300 pcs, FOB Xiamen."
  },
  {
   "id": 62,
   "name": "Wooden Drawer Organizer",
   "slug": "wooden-drawer-organizer",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden drawer organisers and expandable dividers for cutlery, jewellery and office drawers. Custom internal sizing to your drawer spec. MOQ 300 pcs per design."
  },
  {
   "id": 66,
   "name": "Wooden Gift Box",
   "slug": "wooden-gift-box",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Custom wooden gift boxes in paulownia, pine and acacia: sliding lids, hinged lids, magnetic closures and branded inserts. MOQ 300 pcs, FOB from $0.50."
  },
  {
   "id": 108,
   "name": "Wooden Jewelry Boxes",
   "slug": "wooden-jewelry-boxes",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Wooden jewellery boxes with velvet linings, ring rolls, mirrored lids and lift-out trays. Walnut, acacia and MDF veneer builds. MOQ 300 pcs, FOB $2.00-10.00."
  },
  {
   "id": 64,
-  "name": "wooden jewelry organizer",
+  "name": "Wooden Jewelry Organizer",
   "slug": "wooden-jewelry-organizer",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden jewellery organisers and display trays: stackable ring inserts, necklace bars and lined compartments for retail and boutique programmes. MOQ 300 pcs."
  },
  {
   "id": 103,
   "name": "Wooden Keepsake Boxes",
   "slug": "wooden-keepsake-boxes",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden keepsake and memory boxes with engraved lids, hinged or sliding closures and optional lining. Baby, wedding and memorial builds. MOQ 300 pcs, FOB $2.00-10.00."
  },
  {
   "id": 50,
   "name": "Wooden Kitchen & Dining",
   "slug": "wooden-kitchen-dining",
   "parent": "",
-  "description": ""
+  "description": "Wooden and bamboo kitchen and dining products: boards, trays, racks and serveware, made to your spec with FDA-compliant finishes. MOQ 300 pcs, FOB Xiamen."
  },
  {
   "id": 105,
   "name": "Wooden Pantry Organizers",
   "slug": "wooden-pantry-organizers",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden pantry organisers, bins and tiered shelves for kitchen storage retail lines. Stackable, labelled and sized to your shelf spec. MOQ 300 pcs per design."
  },
  {
   "id": 109,
   "name": "Wooden Pen Holders",
   "slug": "wooden-pen-holders",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden pen holders and desktop cups in bamboo, acacia and walnut. Single-well, multi-well and combination formats. MOQ 300 pcs, FOB $1.00-4.00 from Xiamen."
  },
  {
   "id": 127,
   "name": "Wooden Photo Frame",
   "slug": "wooden-photo-frame",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden photo frames in solid pine, acacia and walnut with custom moulding profiles, easel backs and engraved messaging. MOQ 300 pcs, FOB $2.00-7.00."
  },
  {
   "id": 56,
   "name": "Wooden Serving Tray",
   "slug": "wooden-serving-tray",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden serving trays with cut-out or metal handles in acacia, bamboo and pine. Food-safe oiled finishes and pull-tested handles. MOQ 300 pcs, FOB $2.00-6.00."
  },
  {
   "id": 89,
   "name": "Wooden Sofa Tray",
   "slug": "wooden-sofa-tray",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden sofa and couch trays with armrest channels or folding legs. Balanced weight, non-slip contact points, custom sizing. MOQ 300 pcs, FOB $3.00-10.00."
  },
  {
   "id": 74,
   "name": "Wooden Spice Rack",
   "slug": "wooden-spice-rack",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden and bamboo spice racks: rotating carousels, wall-mount tiers and drawer inserts, with or without glass jars. MOQ 300 pcs, FOB $2.00-9.00 from Xiamen."
  },
  {
   "id": 125,
   "name": "Wooden Stash Box",
   "slug": "wooden-stash-box",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Wooden stash boxes with lock options, odour-sealed lids, removable trays and rolling surfaces. Discreet export packing. MOQ 300 pcs, FOB $4.00-8.00."
  },
  {
   "id": 63,
   "name": "Wooden Storage Box With Lid",
   "slug": "wooden-storage-box-with-lid",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden storage boxes with hinged, sliding or lift-off lids in paulownia, pine and acacia. Removable dividers and custom internal sizing. MOQ 300 pcs, FOB $1.00-6.00."
  },
  {
   "id": 68,
   "name": "Wooden Tea Box",
   "slug": "wooden-tea-box",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Wooden tea boxes and bag organisers with fixed or adjustable compartments, glass or solid lids and engraved branding. MOQ 300 pcs, FOB $2.00-9.00 from Xiamen."
  },
  {
   "id": 112,
   "name": "Wooden Valet Trays",
   "slug": "wooden-valet-trays",
   "parent": "desk-office-organizers",
-  "description": ""
+  "description": "Wooden valet trays for hotel rooms, nightstands and entryways. Leather or felt linings, stacked or single-tier. MOQ 300 pcs, FOB Xiamen, samples in 7-10 days."
  },
  {
   "id": 107,
   "name": "Wooden Watch Boxes",
   "slug": "wooden-watch-boxes",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Wooden watch boxes with removable cushions, glass-top lids and multi-slot layouts for 2, 6, 10 or 12 watches. MOQ 300 pcs, FOB $3.00-8.00 from Xiamen."
  },
  {
   "id": 67,
   "name": "Wooden Wine Box",
   "slug": "wooden-wine-box",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Wooden wine and spirits boxes: single, double and magnum builds with sliding lids, rope handles, hinged closures and engraved branding. MOQ 300 pcs, FOB $1.00-7.00."
  },
  {
   "id": 115,
   "name": "Airbnb Welcome Trays",
   "slug": "airbnb-welcome-trays",
   "parent": "hospitality-commercial",
-  "description": ""
+  "description": "Wooden welcome trays for short-let and Airbnb hosts: compartment layouts for keys, guides and amenities, with host or property branding. MOQ 300 pcs, FOB Xiamen."
  },
  {
   "id": 116,
   "name": "Bathroom Vanity Trays",
   "slug": "bathroom-vanity-trays",
   "parent": "hospitality-commercial",
-  "description": ""
+  "description": "Wooden bathroom vanity trays in moisture-sealed bamboo and acacia, with raised lips and non-slip bases. Hotel and retail builds. MOQ 300 pcs, FOB $1.50-7.00."
  },
  {
   "id": 118,
   "name": "Branded Wooden Promotional Gifts",
   "slug": "branded-wooden-promotional-gifts",
   "parent": "hospitality-commercial",
-  "description": ""
+  "description": "Branded wooden promotional gifts for corporate programmes: engraved boxes, desk pieces, coasters and gift sets, with gold-fill or UV-printed logos. MOQ 300 pcs."
  },
  {
   "id": 70,
   "name": "Custom Wooden Packaging Box",
   "slug": "custom-wooden-packaging-box",
   "parent": "gift-boxes-retail-packaging",
-  "description": ""
+  "description": "Custom wooden packaging boxes engineered around your product: die-cut foam or EVA inserts, drop tests, export cartons and branded finishes. MOQ 300 pcs, FOB $1.50-8.00."
  },
  {
   "id": 106,
   "name": "Entryway Catchall Trays",
   "slug": "entryway-catchall-trays",
   "parent": "storage-home-organization",
-  "description": ""
+  "description": "Wooden entryway catchall trays for keys, wallets and phones. Single or divided wells, lined or bare, with engraved branding. MOQ 300 pcs, FOB $2.00-8.00."
  },
  {
   "id": 58,
   "name": "Wooden Bread Box",
   "slug": "wooden-bread-box",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden and bamboo bread boxes with roll-top, hinged or sliding lids and controlled ventilation to keep crust texture. MOQ 300 pcs, FOB $6.00-10.00 from Xiamen."
  },
  {
   "id": 101,
   "name": "Wooden Cake Stands",
   "slug": "wooden-cake-stands",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden cake stands and tiered dessert displays in acacia, bamboo and pine, with food-safe finishes and knock-down shipping. MOQ 300 pcs, FOB $2.00-7.00."
  },
  {
   "id": 59,
   "name": "Wooden Cheese Board",
   "slug": "wooden-cheese-board",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden cheese and charcuterie boards in acacia, walnut and bamboo, with juice grooves, handles and optional knife sets. MOQ 300 pcs, FOB $2.00-10.00."
  },
  {
   "id": 100,
   "name": "Wooden Coasters",
   "slug": "wooden-coasters",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden and bamboo coasters with laser-engraved, UV-printed or screen-printed artwork, plus cork backing and holders. MOQ 500 pcs, FOB $0.15-0.60 per piece."
  },
  {
   "id": 57,
   "name": "Wooden Coffee Organizer",
   "slug": "wooden-coffee-organizer",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden coffee station organisers for pods, sachets, stirrers and cups. Multi-tier and drawer formats with branded fronts. MOQ 300 pcs, FOB $4.00-11.00."
  },
  {
   "id": 60,
   "name": "Wooden Cutlery Organizer",
   "slug": "wooden-cutlery-organizer",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden and bamboo cutlery organisers with fixed or expandable dividers, sized to your drawer spec. MOQ 300 pcs, FOB $3.00-10.00 from Xiamen."
  },
  {
   "id": 98,
   "name": "Wooden Cutting Board",
   "slug": "wooden-cutting-board",
   "parent": "wooden-kitchen-dining",
-  "description": ""
+  "description": "Wooden cutting and chopping boards in acacia, bamboo and walnut: edge-grain and end-grain builds, juice grooves, FDA-compliant oiling. MOQ 300 pcs, FOB $1.50-6.00."
  },
  {
   "id": 138,

@@ -36,6 +36,25 @@ export default function Footer() {
     { label: t('footer.sisterSiteLink'), href: 'https://www.custom-woodenbox.com', external: true },
   ];
 
+  // ── Solution / capability landing pages ──────────────────────────────
+  // These are high-intent, keyword-targeted pages that live at the site
+  // root (app/[locale]/<slug>/page.js). Before this row they were ORPHANS:
+  // reachable only via sitemap.xml, with zero internal links, which is why
+  // Google crawled them slowly and several never got indexed at all.
+  // A sitewide footer row gives each one a real internal link + anchor text.
+  const solutionLinks = [
+    { label: t('footer.solPremiumPackaging'), href: '/premium-gift-packaging-manufacturer' },
+    { label: t('footer.solGiftBox'),          href: '/custom-wooden-gift-box-manufacturer' },
+    { label: t('footer.solCarvedBoxes'),      href: '/carved-wooden-boxes-manufacturer' },
+    { label: t('footer.solStorageBoxes'),     href: '/custom-wooden-storage-boxes-wholesale' },
+    { label: t('footer.solServingTrays'),     href: '/wholesale-wooden-serving-trays' },
+    { label: t('footer.solSofaTray'),         href: '/wooden-sofa-tray-manufacturer' },
+    { label: t('footer.solSpiceRack'),        href: '/custom-wooden-spice-rack' },
+    { label: t('footer.solSpiceRackWholesale'), href: '/wholesale-wooden-spice-racks' },
+    { label: t('footer.solStashBox'),         href: '/wooden-stash-box-manufacturer' },
+    { label: t('footer.solAllProducts'),      href: '/custom-wooden-products-manufacturer' },
+  ];
+
   function subscribe(e) {
     e.preventDefault();
     if (!email) return;
@@ -191,6 +210,22 @@ export default function Footer() {
               <div className="text-white/50 text-[11px] uppercase tracking-wider">{t('footer.factoryLabel')}</div>
               <span className="text-white/70">{t('footer.caoAddress')}</span>
             </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Solutions row — sitewide internal links to the landing pages */}
+      <div className="border-t border-white/10">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
+          <h4 className="text-[11px] uppercase tracking-[0.25em] text-brand-yellowSoft font-bold mb-3">
+            {t('footer.solutions')}
+          </h4>
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            {solutionLinks.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="text-white/60 hover:text-white">{l.label}</Link>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

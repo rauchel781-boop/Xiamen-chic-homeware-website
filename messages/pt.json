@@ -66,7 +66,18 @@
     "woodFabrication": "Fabricação de Madeira",
     "capabilities": "Capacidades",
     "blogNews": "Blog e Notícias",
-    "contactLink": "Contato"
+    "contactLink": "Contato",
+    "solutions": "Solutions",
+    "solPremiumPackaging": "Premium Gift Packaging",
+    "solGiftBox": "Custom Wooden Gift Boxes",
+    "solCarvedBoxes": "Carved Wooden Boxes",
+    "solStorageBoxes": "Wooden Storage Boxes Wholesale",
+    "solServingTrays": "Wholesale Wooden Serving Trays",
+    "solSofaTray": "Wooden Sofa Trays",
+    "solSpiceRack": "Custom Wooden Spice Racks",
+    "solSpiceRackWholesale": "Wholesale Spice Racks",
+    "solStashBox": "Wooden Stash Boxes",
+    "solAllProducts": "Custom Wooden Products"
   },
   "language": {
     "label": "Idioma"

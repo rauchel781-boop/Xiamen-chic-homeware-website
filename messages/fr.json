@@ -105,7 +105,18 @@
     "linkContact": "Contact",
     "xiamenAddress": "Xiamen, Fujian, République populaire de Chine",
     "caoAddress": "Comté de Cao, Shandong, Chine",
-    "sisterSiteLink": "custom-woodenbox.com"
+    "sisterSiteLink": "custom-woodenbox.com",
+    "solutions": "Solutions",
+    "solPremiumPackaging": "Emballage cadeau premium",
+    "solGiftBox": "Coffrets cadeaux en bois sur mesure",
+    "solCarvedBoxes": "Boîtes en bois sculptées",
+    "solStorageBoxes": "Boîtes de rangement en bois en gros",
+    "solServingTrays": "Plateaux de service en bois en gros",
+    "solSofaTray": "Plateaux de canapé en bois",
+    "solSpiceRack": "Étagères à épices en bois sur mesure",
+    "solSpiceRackWholesale": "Étagères à épices en gros",
+    "solStashBox": "Boîtes stash en bois",
+    "solAllProducts": "Produits en bois sur mesure"
   },
   "language": {
     "label": "Langue"

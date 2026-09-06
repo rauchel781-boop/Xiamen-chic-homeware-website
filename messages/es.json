@@ -105,7 +105,18 @@
     "linkContact": "Contacto",
     "xiamenAddress": "Xiamen, Fujian, China",
     "caoAddress": "Condado de Cao, Shandong, China",
-    "sisterSiteLink": "custom-woodenbox.com"
+    "sisterSiteLink": "custom-woodenbox.com",
+    "solutions": "Soluciones",
+    "solPremiumPackaging": "Embalaje de regalo premium",
+    "solGiftBox": "Cajas de regalo de madera personalizadas",
+    "solCarvedBoxes": "Cajas de madera talladas",
+    "solStorageBoxes": "Cajas de almacenaje de madera al por mayor",
+    "solServingTrays": "Bandejas de madera al por mayor",
+    "solSofaTray": "Bandejas de sofá de madera",
+    "solSpiceRack": "Especieros de madera personalizados",
+    "solSpiceRackWholesale": "Especieros al por mayor",
+    "solStashBox": "Cajas stash de madera",
+    "solAllProducts": "Productos de madera personalizados"
   },
   "language": {
     "label": "Idioma"
