@@ -84,6 +84,7 @@ export default function sitemap() {
     'custom-wooden-gift-box-manufacturer',
     'carved-wooden-boxes-manufacturer',
     'premium-gift-packaging-manufacturer',
+    'wholesale-pet-urns-manufacturer',
   ];
   for (const slug of LANDING_PAGES) {
     push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });

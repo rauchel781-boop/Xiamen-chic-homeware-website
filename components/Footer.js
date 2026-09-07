@@ -44,6 +44,7 @@ export default function Footer() {
   // A sitewide footer row gives each one a real internal link + anchor text.
   const solutionLinks = [
     { label: t('footer.solPremiumPackaging'), href: '/premium-gift-packaging-manufacturer' },
+    { label: t('footer.solPetUrns'),          href: '/wholesale-pet-urns-manufacturer' },
     { label: t('footer.solGiftBox'),          href: '/custom-wooden-gift-box-manufacturer' },
     { label: t('footer.solCarvedBoxes'),      href: '/carved-wooden-boxes-manufacturer' },
     { label: t('footer.solStorageBoxes'),     href: '/custom-wooden-storage-boxes-wholesale' },
