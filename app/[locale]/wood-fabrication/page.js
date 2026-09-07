@@ -9,7 +9,10 @@ import PageFAQ from '@/components/PageFAQ';
 export async function generateMetadata({ params: { locale } = {} }) {
   const t = await getTranslations({ locale, namespace: 'woodFabrication' });
   return {
-    title: t('metaTitle'),
+    // `absolute` opts out of the root layout's `%s | CHIC — Wooden Expert`
+    // template. That suffix is 23 characters, which pushed every tuned title
+    // past the ~60 chars Google renders.
+    title: { absolute: t('metaTitle') },
     description: t('metaDesc'),
     alternates: { canonical: canonicalFor(locale, '/wood-fabrication'), languages: hreflangFor(SITE.siteUrl, '/wood-fabrication') },
   };

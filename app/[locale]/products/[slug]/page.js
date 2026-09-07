@@ -143,7 +143,8 @@ export async function generateMetadata({ params }) {
     const desc = clampDesc(cat.description)
       || t('categoryFallbackDesc', { category: cat.name.toLowerCase() });
     return {
-      title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`,
+      // absolute → skip the root layout's brand-suffix title template.
+      title: { absolute: `${cat.name} — ${t('categoryWholesaleManufacturer')}` },
       description: desc,
       alternates: { canonical: canonicalFor(params.locale, path), languages: buildAlternates(path) },
       openGraph: {
@@ -163,7 +164,8 @@ export async function generateMetadata({ params }) {
     const desc  = clampDesc(p._localizedOverview || p.meta_desc || p.excerpt || p.content);
     const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
     return {
-      title,
+      // absolute → skip the root layout's brand-suffix title template.
+      title: { absolute: title },
       description: desc,
       alternates: { canonical: canonicalFor(params.locale, path), languages: buildAlternates(path) },
       openGraph: {

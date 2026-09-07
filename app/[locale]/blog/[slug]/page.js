@@ -78,7 +78,10 @@ export async function generateMetadata({ params }) {
   const path  = `/blog/${p.slug}`;
   const img   = p.featured_image || `${SITE.siteUrl}${SITE.defaultOgImage}`;
   return {
-    title,
+    // `absolute` opts out of the root layout's title template — the tuned
+    // meta_title already carries the keyword, and the 23-char brand suffix
+    // only ate into the ~60 chars Google actually renders.
+    title: { absolute: title },
     description: desc,
     alternates: { canonical: canonicalFor(params.locale, path), languages: buildBlogAlternates(path) },
     openGraph: {
