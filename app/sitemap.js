@@ -94,8 +94,16 @@ export default function sitemap() {
   const products = wpProducts();
   const cats = wpProductCategories().filter((c) => c.slug !== 'uncategorized');
   for (const cat of cats) {
+    // Include descendants — the six top-level nav categories hold their
+    // products in child categories, so a direct-only match left them with
+    // no image entries in the sitemap at all.
+    const catSlugs = new Set(
+      cats.filter((c) => c.slug === cat.slug
+        || String(c.parent) === String(cat.slug)
+        || String(c.parent) === String(cat.id)).map((c) => c.slug)
+    );
     const catImages = products
-      .filter((p) => p.featured_image && p.categories?.some((c) => c.slug === cat.slug))
+      .filter((p) => p.featured_image && p.categories?.some((c) => catSlugs.has(c.slug)))
       .slice(0, 4)
       .map((p) => ({ url: abs(p.featured_image) }))
       .filter((i) => i.url);

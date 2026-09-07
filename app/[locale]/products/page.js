@@ -54,13 +54,20 @@ export default function ProductsIndex({ params: { locale } }) {
   const products = wpProducts().map((p) => localizeProduct(p, locale));
   const categoryTree = wpProductCategoryTree();
   const allCats = wpProductCategories();
+  // categoryTree returns ROOTS (it is a real tree now that parent resolution
+  // is fixed), so headline counts must use the full list, not roots.
+  const categoryCount = allCats.filter((c) => c.slug !== 'uncategorized').length;
 
   const cover = (slug) => {
     let p = products.find((p) => p.featured_image && p.categories?.some((c) => c.slug === slug));
     if (p) return p.featured_image;
     const cat = allCats.find((c) => c.slug === slug);
     if (!cat) return '';
-    const childSlugs = allCats.filter((c) => String(c.parent) === String(cat.id)).map((c) => c.slug);
+    // `parent` holds the parent's SLUG in our data, not its id — comparing
+    // against cat.id meant this cover-image fallback never fired.
+    const childSlugs = allCats
+      .filter((c) => String(c.parent) === String(cat.slug) || String(c.parent) === String(cat.id))
+      .map((c) => c.slug);
     p = products.find((p) => p.featured_image && p.categories?.some((c) => childSlugs.includes(c.slug)));
     return p?.featured_image || '';
   };
@@ -126,7 +133,7 @@ export default function ProductsIndex({ params: { locale } }) {
               <span className="text-brand-mute">SKUs</span>
             </span>
             <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
-              <span className="font-extrabold text-brand-ink mr-2">{categoryTree.length}</span>
+              <span className="font-extrabold text-brand-ink mr-2">{categoryCount}</span>
               <span className="text-brand-mute">Categories</span>
             </span>
             <span className="inline-flex items-center rounded-full bg-white border border-brand-line px-4 py-2">
@@ -237,7 +244,7 @@ export default function ProductsIndex({ params: { locale } }) {
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-2">Full Catalog</p>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-brand-ink leading-tight">Every product, all in one place</h2>
               <p className="mt-3 text-brand-mute">
-                {products.length} products across {categoryTree.length} categories.
+                {products.length} products across {categoryCount} categories.
               </p>
             </div>
           </div>

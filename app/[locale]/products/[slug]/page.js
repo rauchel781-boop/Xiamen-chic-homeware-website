@@ -17,6 +17,8 @@ import {
   wpProducts,
   wpProductCategories,
   wpProductsByCategory,
+  wpProductsByCategoryTree,
+  wpCategoryChildren,
   stripHtml,
 } from '@/lib/wp-data';
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
@@ -142,19 +144,25 @@ export async function generateMetadata({ params }) {
   if (cat) {
     const desc = clampDesc(cat.description)
       || t('categoryFallbackDesc', { category: cat.name.toLowerCase() });
+    // A hand-tuned meta_title on the category wins over the generic
+    // "<name> — Wholesale Manufacturer" pattern. Needed because the three
+    // gift-box categories otherwise rendered near-identical titles and
+    // competed with each other for the same head term.
+    const catTitle = decodeEntities(stripHtml(cat.meta_title || '')).trim()
+      || `${cat.name} — ${t('categoryWholesaleManufacturer')}`;
     return {
       // absolute → skip the root layout's brand-suffix title template.
-      title: { absolute: `${cat.name} — ${t('categoryWholesaleManufacturer')}` },
+      title: { absolute: catTitle },
       description: desc,
       alternates: { canonical: canonicalFor(params.locale, path), languages: buildAlternates(path) },
       openGraph: {
         type: 'website',
         url: `${SITE.siteUrl}${path}`,
-        title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`,
+        title: catTitle,
         description: desc,
         siteName: SITE.company.brand,
       },
-      twitter: { card: 'summary_large_image', title: `${cat.name} — ${t('categoryWholesaleManufacturer')}`, description: desc },
+      twitter: { card: 'summary_large_image', title: catTitle, description: desc },
     };
   }
   const rawP = wpProductBySlug(params.slug);
@@ -232,8 +240,14 @@ function CategoryFaq({ cat }) {
 
 function CategoryView({ cat, locale }) {
   const t = useTranslations('productDetail');
-  const items = wpProductsByCategory(cat.slug).map((p) => localizeProduct(p, locale));
-  const subCats = wpProductCategories().filter(c => String(c.parent) === String(cat.id));
+  // Roll up descendants. The six top-level nav categories are parents whose
+  // products hang off their children, so the old direct-only query left them
+  // nearly empty (desk-office-organizers: 2 products instead of 24).
+  const items = wpProductsByCategoryTree(cat).map((p) => localizeProduct(p, locale));
+  // `parent` holds the parent's SLUG in our data; comparing it to cat.id meant
+  // this list was ALWAYS empty and subcategories were never linked from their
+  // parent page.
+  const subCats = wpCategoryChildren(cat);
 
   // Breadcrumb + ItemList JSON-LD for category landing
   const breadcrumb = breadcrumbLd([
