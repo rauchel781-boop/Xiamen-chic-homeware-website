@@ -11,6 +11,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 const PRODUCT_GROUPS = [
   {
     title: 'Wooden Kitchen & Dining',
+    href: '/products/wooden-kitchen-dining',
     items: [
       { label: 'Wooden Serving Tray',    href: '/products/wooden-serving-tray' },
       { label: 'Wooden Cheese Board',    href: '/products/wooden-cheese-board' },
@@ -18,10 +19,12 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Cutlery Organizer', href: '/products/wooden-cutlery-organizer' },
       { label: 'Wooden Bread Box',       href: '/products/wooden-bread-box' },
       { label: 'Wooden Spice Rack',      href: '/products/wooden-spice-rack' },
+      { label: 'Picnic Baskets & Hampers', href: '/products/picnic-baskets-hampers' },
     ],
   },
   {
     title: 'Storage & Home Organization',
+    href: '/products/storage-home-organization',
     items: [
       { label: 'Wooden Storage Box With Lid', href: '/products/wooden-storage-box-with-lid' },
       { label: 'Wooden Bathroom Organizer',   href: '/products/wooden-bathroom-organizer' },
@@ -30,10 +33,13 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Pantry Organizers',    href: '/products/wooden-pantry-organizers' },
       { label: 'Wooden Sofa Tray',            href: '/products/wooden-sofa-tray' },
       { label: 'Vinyl Record Holders',        href: '/products/wooden-vinyl-record-holders' },
+      { label: 'Wooden Side Tables',          href: '/products/wooden-side-tables' },
+      { label: 'Wooden Display Racks',        href: '/products/wooden-display-racks' },
     ],
   },
   {
     title: 'Gift Box & Retail Packaging',
+    href: '/products/gift-boxes-retail-packaging',
     items: [
       { label: 'Wooden Gift Box',     href: '/products/wooden-gift-box' },
       { label: 'Wooden Watch Boxes',  href: '/products/wooden-watch-boxes' },
@@ -44,6 +50,7 @@ const PRODUCT_GROUPS = [
   },
   {
     title: 'Desk & Office Organizers',
+    href: '/products/desk-office-organizers',
     items: [
       { label: 'Wooden Drawer Organizer', href: '/products/wooden-drawer-organizer' },
       { label: 'Wooden Pen Holders',      href: '/products/wooden-pen-holders' },
@@ -53,6 +60,7 @@ const PRODUCT_GROUPS = [
   },
   {
     title: 'Hospitality & Commercial',
+    href: '/products/hospitality-commercial',
     items: [
       { label: 'Hotel Amenity Trays',       href: '/products/hotel-amenity-trays' },
       { label: 'Restaurant Table Caddies',  href: '/products/restaurant-table-caddies' },
@@ -62,8 +70,12 @@ const PRODUCT_GROUPS = [
   },
   {
     title: 'Pet Products',
+    href: '/products/pet-products',
     items: [
-      { label: 'All Pet Products', href: '/products/pet-products' },
+      { label: 'Pet Cremation Urns',     href: '/products/pet-urns' },
+      { label: 'Pet Memorial Keepsakes', href: '/products/pet-memorial-keepsakes' },
+      { label: 'Pet Storage & Feeding',  href: '/products/pet-storage-feeding' },
+      { label: 'Pet Houses & Habitats',  href: '/products/pet-houses-habitats' },
     ],
   },
 ];
@@ -199,7 +211,12 @@ function ProductDropdown({ label, href }) {
             {PRODUCT_GROUPS.map((g) => (
               <div key={g.title}>
                 <h4 className="text-[12px] uppercase tracking-wider font-bold text-brand-green mb-2">
-                  {g.title}
+                  {/* The six parent categories hold 11-92 products each once
+                      descendants roll up, but the heading used to be plain
+                      text — there was no way into them from the menu. */}
+                  <Link href={g.href} className="hover:text-brand-greenDark hover:underline">
+                    {g.title}
+                  </Link>
                 </h4>
                 <ul className="space-y-1.5">
                   {g.items.map((it) => (
