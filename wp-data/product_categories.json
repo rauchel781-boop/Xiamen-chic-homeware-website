@@ -363,5 +363,29 @@
   "slug": "pet-houses-habitats",
   "parent": "pet-products",
   "description": "Small animal hideouts, bat houses, squirrel houses and outdoor wildlife habitats in untreated or carbonized kiln-dried timber."
+ },
+ {
+  "id": 144,
+  "name": "Wooden Side Tables",
+  "slug": "wooden-side-tables",
+  "parent": "storage-home-organization",
+  "description": "Wooden and rattan tray-top side tables on powder-coated metal frames: nesting pairs, round cane tops, removable serving trays. Flat-packed for container efficiency.",
+  "meta_title": "Wooden Side Tables - Tray Top & Rattan, Wholesale"
+ },
+ {
+  "id": 145,
+  "name": "Picnic Baskets & Hampers",
+  "slug": "picnic-baskets-hampers",
+  "parent": "wooden-kitchen-dining",
+  "description": "Willow and wicker picnic baskets and gift hampers, supplied empty or fitted with ceramic tableware, stainless cutlery and lined interiors. OEM colours and branding.",
+  "meta_title": "Wicker Picnic Baskets & Hampers - Wholesale Supplier"
+ },
+ {
+  "id": 146,
+  "name": "Wooden Display Racks",
+  "slug": "wooden-display-racks",
+  "parent": "storage-home-organization",
+  "description": "Slotted wooden display and storage racks with pull-out compartment drawers, for collectors, retail fixtures and cabinet organisation. Custom slot widths to your spec.",
+  "meta_title": "Wooden Display Racks - Slotted Stands, Wholesale"
  }
 ]
