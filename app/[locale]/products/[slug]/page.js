@@ -318,7 +318,7 @@ function CategoryView({ cat, locale }) {
                   {p.featured_image && (
                     <Image
                       src={p.featured_image}
-                      alt={stripHtml(p.title)}
+                      alt={decodeEntities(stripHtml(p.title))}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       className="object-cover group-hover:scale-105 transition duration-500"
@@ -359,7 +359,7 @@ function ProductView({ p, locale }) {
   if (p.categories?.[0]) {
     crumbs.push({ name: p.categories[0].name, url: `/products/${p.categories[0].slug}` });
   }
-  crumbs.push({ name: stripHtml(p.title) });
+  crumbs.push({ name: decodeEntities(stripHtml(p.title)) });
   const breadcrumb = breadcrumbLd(crumbs);
 
   // Build the locale-aware overview from the detected material/template +
@@ -390,7 +390,7 @@ function ProductView({ p, locale }) {
   const productLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: stripHtml(p.title),
+    name: decodeEntities(stripHtml(p.title)),
     description: (stripHtml(p.excerpt).length > 80
       ? stripHtml(p.excerpt)
       : overview).slice(0, 5000),
@@ -463,7 +463,7 @@ function ProductView({ p, locale }) {
               {p.featured_image ? (
                 <Image
                   src={p.featured_image}
-                  alt={stripHtml(p.title)}
+                  alt={decodeEntities(stripHtml(p.title))}
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
@@ -479,7 +479,7 @@ function ProductView({ p, locale }) {
                   <div key={i} className="relative aspect-square bg-stone-100 rounded overflow-hidden">
                     <Image
                       src={g}
-                      alt={`${stripHtml(p.title)} — detail ${i + 1}`}
+                      alt={`${decodeEntities(stripHtml(p.title))} — detail ${i + 1}`}
                       fill
                       sizes="(max-width: 768px) 25vw, 12vw"
                       className="object-cover"
@@ -492,7 +492,7 @@ function ProductView({ p, locale }) {
 
           <div>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-brand-ink leading-tight">
-              {p.title}
+              {decodeEntities(stripHtml(p.title))}
             </h1>
             {p.categories?.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
@@ -599,7 +599,7 @@ function ProductView({ p, locale }) {
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-wood mb-3">{t('ctaEyebrow')}</p>
               <h2 className="text-2xl md:text-3xl font-extrabold leading-tight">
-                {t('ctaTitle', { title: stripHtml(p.title).slice(0, 60) + (stripHtml(p.title).length > 60 ? '…' : '') })}
+                {t('ctaTitle', { title: decodeEntities(stripHtml(p.title)).slice(0, 60) + (decodeEntities(stripHtml(p.title)).length > 60 ? '…' : '') })}
               </h2>
               <p className="mt-3 text-white/85 leading-relaxed">
                 {t('ctaBody')}
