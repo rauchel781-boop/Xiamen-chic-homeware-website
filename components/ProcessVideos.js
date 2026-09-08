@@ -20,7 +20,11 @@ const VIDEOS = [
   { id: 'bEHuk8sLksc', titleKey: 'v3Title' },
 ];
 
-export default function ProcessVideos({ locale }) {
+// `emitSchema` lets secondary placements (homepage, landing pages) embed the
+// same clips WITHOUT repeating VideoObject markup. Google picks one canonical
+// page per video, so /material-guide stays the single schema owner and the
+// other placements are plain embeds.
+export default function ProcessVideos({ locale, emitSchema = true }) {
   const t = useTranslations('processVideos');
 
   // VideoObject schema for each clip — Google Video rich result eligibility.
@@ -41,7 +45,7 @@ export default function ProcessVideos({ locale }) {
 
   return (
     <section className="bg-white py-20 lg:py-24 border-b border-brand-line">
-      {videoLds.map((ld, i) => <JsonLd key={i} data={ld} />)}
+      {emitSchema && videoLds.map((ld, i) => <JsonLd key={i} data={ld} />)}
 
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-12">

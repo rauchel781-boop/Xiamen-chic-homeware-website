@@ -7,6 +7,7 @@ import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import ProofStrip from '@/components/ProofStrip';
 
 const SLUG = 'custom-wooden-products-manufacturer';
 const HERO_IMAGE = '/wp-images/2025/12/production.jpg';
@@ -243,6 +244,10 @@ export default function Page({ params }) {
           </div>
         </div>
       </section>
+
+      {/* Customer proof. The full 6-case grid lives on /about; these two
+          are the pair most relevant to this page's buyer. */}
+      <ProofStrip cases={[1, 3]} />
 
       <section className="bg-brand-green text-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-16 lg:py-20">

@@ -22,6 +22,7 @@ import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import ProofStrip from '@/components/ProofStrip';
 
 const SLUG = 'wholesale-pet-urns-manufacturer';
 
@@ -442,6 +443,10 @@ export default function Page({ params }) {
       </section>
 
       {/* ── Related + CTA ────────────────────────────────────────────── */}
+      {/* Customer proof. The full 6-case grid lives on /about; these two
+          are the pair most relevant to this page's buyer. */}
+      <ProofStrip cases={[6, 1]} />
+
       <section className="bg-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-16 lg:py-20">
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-brand-mute">{t('relTitle')}</h2>

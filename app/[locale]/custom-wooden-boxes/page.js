@@ -7,6 +7,7 @@ import { buildServiceLd } from '@/lib/service-schema';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
+import ProofStrip from '@/components/ProofStrip';
 
 const SLUG = 'custom-wooden-boxes';
 const HERO_IMAGE = '/wp-images/2026/03/natural-wood-box-8.png';
@@ -341,6 +342,10 @@ export default function Page({ params }) {
       </section>
 
       {/* FINAL CTA */}
+      {/* Customer proof. The full 6-case grid lives on /about; these two
+          are the pair most relevant to this page's buyer. */}
+      <ProofStrip cases={[5, 6]} />
+
       <section className="bg-brand-green text-white">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8 py-16 lg:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">

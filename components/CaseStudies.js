@@ -27,7 +27,7 @@ export default function CaseStudies() {
   }));
 
   return (
-    <section className="bg-white py-20 lg:py-24 border-b border-brand-line">
+    <section id="cases" className="bg-white py-20 lg:py-24 border-b border-brand-line">
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-14">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-green mb-3">

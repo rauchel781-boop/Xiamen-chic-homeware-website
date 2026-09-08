@@ -3066,7 +3066,10 @@
     "ctaTitle": "Vous voulez être notre prochain partenaire à long terme?",
     "ctaBody": "La plupart de nos acheteurs commencent avec un produit, un échantillon et une seule conversation. Dites-nous ce que vous essayez de trouver et nous reviendrons dans un délai d'un jour ouvrable avec une vraie proposition.",
     "ctaButton": "Parlez-nous de votre projet →",
-    "disclaimer": "Les études de cas sont anonymisées pour protéger la confidentialité des partenaires. Les volumes spécifiques, le nombre de SKU et les années reflètent les modèles d'engagement typiques et peuvent varier selon les comptes. Références disponibles après une NDA signée."
+    "disclaimer": "Les études de cas sont anonymisées pour protéger la confidentialité des partenaires. Les volumes spécifiques, le nombre de SKU et les années reflètent les modèles d'engagement typiques et peuvent varier selon les comptes. Références disponibles après une NDA signée.",
+    "proofEyebrow": "Éprouvé en production",
+    "proofTitle": "Ce que disent les acheteurs fidèles depuis plus de 4 ans",
+    "proofLink": "Voir les six partenariats →"
   },
   "team": {
     "metaTitle": "Rencontrez l'équipe-CHIC Wooden Expert",
