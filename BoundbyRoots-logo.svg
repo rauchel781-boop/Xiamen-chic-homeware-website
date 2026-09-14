@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="746" height="1000" viewBox="0 0 746 1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="746" height="1000" fill="#e8e5e0"/>
+
+  <!-- Title Text -->
+  <text x="373" y="140" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="400" text-anchor="middle" fill="#1a1a1a" letter-spacing="-1">BoundbyRoots</text>
+
+  <!-- Left Panel with organic wavy right edge -->
+  <path d="M 100,220
+           C 100,205 110,195 125,195
+           L 280,195
+           C 285,195 290,200 290,205
+           L 290,320
+           Q 285,380 280,440
+           Q 278,500 280,560
+           Q 283,620 280,680
+           Q 278,740 275,800
+           L 275,865
+           C 275,880 265,890 250,890
+           L 125,890
+           C 110,890 100,880 100,865
+           Z"
+        fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right Panel with organic wavy left edge -->
+  <path d="M 456,195
+           L 621,195
+           C 636,195 646,205 646,220
+           L 646,865
+           C 646,880 636,890 621,890
+           L 456,890
+           C 451,890 446,885 446,880
+           L 446,760
+           Q 449,700 446,640
+           Q 444,580 446,520
+           Q 448,460 451,400
+           Q 454,340 456,280
+           L 456,205
+           C 456,200 456,195 456,195
+           Z"
+        fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Tree Root System - Angular geometric shapes -->
+  <!-- Left large root -->
+  <path d="M 200,580 L 230,680 L 260,600 L 240,720 L 210,780 L 180,700 L 160,800 L 190,720 L 220,780 L 200,680"
+        fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Center root cluster -->
+  <path d="M 330,630 L 345,700 L 360,650 L 375,720 L 390,670 L 405,740 L 385,700 L 365,730 L 345,680"
+        fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right root cluster -->
+  <path d="M 500,650 L 520,720 L 540,680 L 560,750 L 580,700 L 600,770 L 575,720 L 550,760 L 525,710"
+        fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Additional root details -->
+  <path d="M 245,750 L 265,820 L 285,780 L 270,840"
+        fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M 390,740 L 410,810 L 430,770"
+        fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M 560,770 L 575,830 L 590,790"
+        fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

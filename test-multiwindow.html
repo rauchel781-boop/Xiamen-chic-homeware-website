@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>多窗口测试</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+.nav-item {
+  padding: 10px 20px;
+  margin: 5px;
+  background: #4a90e2;
+  color: white;
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 4px;
+}
+.nav-item:hover { background: #357abd; }
+</style>
+</head>
+<body>
+
+<h1>多窗口测试</h1>
+<p>按住 <strong>Ctrl</strong> 键（Mac: Cmd）+ 点击下面的按钮</p>
+
+<div class="nav-item" onclick="openWin('page1', '页面1')">页面1</div>
+<div class="nav-item" onclick="openWin('page2', '页面2')">页面2</div>
+<div class="nav-item" onclick="openWin('page3', '页面3')">页面3</div>
+
+<div id="windows-container" style="position:fixed;inset:0;pointer-events:none;z-index:999;"></div>
+
+<script>
+let winCounter = 0;
+
+function openWin(pageId, pageName) {
+  winCounter++;
+  const winId = 'win-' + winCounter;
+
+  const win = document.createElement('div');
+  win.id = winId;
+  win.style.cssText = `
+    position: fixed;
+    left: ${100 + winCounter * 30}px;
+    top: ${80 + winCounter * 30}px;
+    width: 600px;
+    height: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    z-index: ${1000 + winCounter};
+    pointer-events: auto;
+  `;
+
+  win.innerHTML = `
+    <div class="header" style="padding:12px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;cursor:move;background:#f5f5f5;">
+      <span style="font-weight:600;">${pageName}</span>
+      <button onclick="closeWin('${winId}')" style="background:none;border:none;cursor:pointer;font-size:18px;">×</button>
+    </div>
+    <div style="flex:1;padding:20px;overflow:auto;">
+      <h2>${pageName} 内容</h2>
+      <p>这是 ${pageName} 的内容区域</p>
+      <p>窗口ID: ${winId}</p>
+      <p>你可以拖动标题栏移动这个窗口</p>
+    </div>
+  `;
+
+  document.getElementById('windows-container').appendChild(win);
+  makeDraggable(winId);
+}
+
+function makeDraggable(winId) {
+  const win = document.getElementById(winId);
+  const header = win.querySelector('.header');
+
+  let dragging = false, startX = 0, startY = 0, winLeft = 0, winTop = 0;
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    winLeft = win.offsetLeft;
+    winTop = win.offsetTop;
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    win.style.left = (winLeft + e.clientX - startX) + 'px';
+    win.style.top = (winTop + e.clientY - startY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+}
+
+function closeWin(winId) {
+  const win = document.getElementById(winId);
+  if (win) win.remove();
+}
+
+// 监听 Ctrl+点击
+document.addEventListener('click', e => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    // 从 onclick 属性中提取参数
+    const onclick = item.getAttribute('onclick');
+    const match = onclick.match(/openWin\('([^']+)',\s*'([^']+)'\)/);
+    if (match) {
+      openWin(match[1], match[2]);
+    }
+  }
+});
+</script>
+
+</body>
+</html>

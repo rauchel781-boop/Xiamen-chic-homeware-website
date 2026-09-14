@@ -1,0 +1,63 @@
+# Dependabot — keep dependencies fresh without spamming PRs.
+#
+# Policy:
+#   - Patch + minor updates: auto-bundled into ONE weekly PR (safe-updates)
+#   - Major updates of core deps (next, react, next-intl, eslint, tailwind):
+#     IGNORED. Manual upgrade sprints only — these break too much to be
+#     handled by a bot.
+#   - Open-PR cap: 5 (prevents the inbox flood we hit in May 2026)
+#
+# Why this conservative posture: this site runs on Coolify with npm ci;
+# a broken lockfile bounces the build and the public site stops getting
+# new deploys. Quiet > noisy.
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      safe-updates:
+        applies-to: version-updates
+        update-types:
+          - "patch"
+          - "minor"
+    ignore:
+      # Core framework deps — major bumps require manual upgrade sprint
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "next-intl"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-config-next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github_actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

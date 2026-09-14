@@ -45,3 +45,11 @@ next-env.d.ts
 *.bak-py-*
 .translate-cache.json
 _to_delete/
+
+# raw product-photo intake folders — processed by prepare-*.mjs into
+# public/homeware-<date>/ and never served directly. ~100 MB per batch;
+# keeping them out of git is deliberate.
+/public/0908 product/
+/public/0914上传产品/
+/prepare-0914-images.mjs
+/0914-image-manifest.json

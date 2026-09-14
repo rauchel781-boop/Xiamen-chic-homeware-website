@@ -1,0 +1,22 @@
+name = "xmchic-crm"
+main = "crm-worker.js"
+compatibility_date = "2024-01-01"
+
+# KV namespace for image storage
+[[kv_namespaces]]
+binding = "CRM_IMAGES"
+id = "4f87badf5d5443e9be87060bca09c1a0"
+
+# 如果需要存储 HTML 等静态资源
+[[kv_namespaces]]
+binding = "CRM_ASSETS"
+id = "你的ASSETS_KV_ID"  # 可选
+
+# Workers 配置
+[build]
+command = ""
+
+# 路由配置
+routes = [
+  { pattern = "xmchic-crm.rauchel781.workers.dev", zone_name = "" }
+]

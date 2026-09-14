@@ -174,18 +174,32 @@ tbody tr:hover { background: #fafbfc; }
 /* ===== Modal ===== */
 .modal-mask {
   position: fixed; inset: 0; background: transparent;
-  display: none; align-items: center; justify-content: center; z-index: 100;
+  display: none; z-index: 100;
   pointer-events: none;
 }
-.modal-mask.show { display: flex; }
+.modal-mask.show { display: block; }
 .modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
   background: #fff; border-radius: 8px; width: 600px;
+  min-width: 400px; min-height: 300px;
   max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column;
   pointer-events: auto;
+  z-index: 101;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1);
 }
 .modal.modal-lg { width: 800px; }
 .modal.modal-xl { width: 1000px; }
+.modal.modal-xxl { width: 1280px; }
+.modal.modal-full { width: 95vw; height: 92vh; max-width: 95vw; max-height: 95vh; }
+.modal.is-maximized { width: 95vw !important; height: 92vh !important; max-width: 95vw !important; max-height: 95vh !important; }
+.modal.is-maximized .modal-body { max-height: none; }
+.modal-maximize-btn {
+  background:none; border:none; cursor:pointer; padding:0 8px;
+  font-size:16px; color:#9ca3af; line-height:1;
+}
+.modal-maximize-btn:hover { color:#1f2937; }
 .modal-header {
   padding: 14px 20px; border-bottom: 1px solid #e3e8ef;
   display: flex; justify-content: space-between; align-items: center;
@@ -200,6 +214,20 @@ tbody tr:hover { background: #fafbfc; }
   padding: 12px 20px; border-top: 1px solid #e3e8ef;
   display: flex; justify-content: flex-end; gap: 8px;
 }
+
+/* ===== 调整大小手柄 ===== */
+.resize-handle {
+  position: absolute;
+  z-index: 10;
+}
+.resize-handle-n { top: 0; left: 10px; right: 10px; height: 5px; cursor: ns-resize; }
+.resize-handle-s { bottom: 0; left: 10px; right: 10px; height: 5px; cursor: ns-resize; }
+.resize-handle-e { right: 0; top: 10px; bottom: 10px; width: 5px; cursor: ew-resize; }
+.resize-handle-w { left: 0; top: 10px; bottom: 10px; width: 5px; cursor: ew-resize; }
+.resize-handle-ne { top: 0; right: 0; width: 10px; height: 10px; cursor: nesw-resize; }
+.resize-handle-nw { top: 0; left: 0; width: 10px; height: 10px; cursor: nwse-resize; }
+.resize-handle-se { bottom: 0; right: 0; width: 10px; height: 10px; cursor: nwse-resize; }
+.resize-handle-sw { bottom: 0; left: 0; width: 10px; height: 10px; cursor: nesw-resize; }
 
 /* ===== Form ===== */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

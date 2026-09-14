@@ -1256,59 +1256,141 @@ function toast(msg, type = '') {
   setTimeout(() => { el.className = 'toast ' + type; }, 2200);
 }
 
+let modalCounter = 0;
+
 function openModal(title, bodyHtml, footerHtml, size) {
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalBody').innerHTML = bodyHtml;
-  document.getElementById('modalFooter').innerHTML = footerHtml || '';
-  const m = document.getElementById('modal');
-  // 支持 lg / xl / xxl / full
-  let cls = 'modal';
-  if (size === 'lg') cls += ' modal-lg';
-  else if (size === 'xl') cls += ' modal-xl';
-  else if (size === 'xxl') cls += ' modal-xxl';
-  else if (size === 'full') cls += ' modal-full';
-  m.className = cls;
-  document.getElementById('modalMask').classList.add('show');
-  // 确保 maximize 按钮存在
-  ensureMaximizeBtn();
+  modalCounter++;
+  const modalId = 'modal-' + modalCounter;
+  const maskId = 'modal-mask-' + modalCounter;
+
+  // 创建独立的模态框容器
+  const container = document.createElement('div');
+  container.id = maskId;
+  container.className = 'modal-mask show';
+  container.style.cssText = 'position:fixed;inset:0;background:transparent;z-index:' + (100 + modalCounter) + ';pointer-events:none;display:block;';
+
+  let modalClass = 'modal';
+  if (size === 'lg') modalClass += ' modal-lg';
+  else if (size === 'xl') modalClass += ' modal-xl';
+  else if (size === 'xxl') modalClass += ' modal-xxl';
+  else if (size === 'full') modalClass += ' modal-full';
+
+  const titleEscaped = title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  container.innerHTML = `
+    <div class="${modalClass}" id="${modalId}" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:auto;z-index:${101 + modalCounter};">
+      <div class="modal-header">
+        <div class="modal-title">${titleEscaped}</div>
+        <div style="display:flex;gap:8px;">
+          <button class="modal-maximize-btn" onclick="maximizeModal('${modalId}')" title="最大化">⛶</button>
+          <button class="modal-close" onclick="closeModalById('${maskId}')">×</button>
+        </div>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+      <div class="modal-footer">${footerHtml || ''}</div>
+    </div>
+  `;
+
+  document.body.appendChild(container);
+
+  const modal = document.getElementById(modalId);
+  setupModalDrag(modal);
+
+  return modalId;
 }
 
-function ensureMaximizeBtn() {
-  const closeBtn = document.querySelector('.modal-close');
-  if (!closeBtn) return;
-  if (closeBtn.parentElement.querySelector('.modal-maximize-btn')) return;
-  const maxBtn = document.createElement('button');
-  maxBtn.className = 'modal-maximize-btn';
-  maxBtn.title = '最大化/还原';
-  maxBtn.textContent = '⛶';
-  maxBtn.onclick = function() {
-    const m = document.getElementById('modal');
-    m.classList.toggle('is-maximized');
-    this.textContent = m.classList.contains('is-maximized') ? '⛝' : '⛶';
-  };
-  closeBtn.parentElement.insertBefore(maxBtn, closeBtn);
+function closeModalById(maskId) {
+  const mask = document.getElementById(maskId);
+  if (mask) mask.remove();
 }
-function closeModal() { document.getElementById('modalMask').classList.remove('show'); }
-// 键盘快捷键：弹窗打开时 Esc 关闭、Ctrl/⌘+Enter 触发主按钮（保存）
+
+function closeModal() {
+  // 关闭最新打开的模态框
+  const masks = document.querySelectorAll('.modal-mask');
+  if (masks.length > 0) {
+    masks[masks.length - 1].remove();
+  }
+}
+
+function maximizeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  if (modal.dataset.maximized === 'true') {
+    modal.style.left = modal.dataset.oldLeft;
+    modal.style.top = modal.dataset.oldTop;
+    modal.style.width = modal.dataset.oldWidth;
+    modal.style.height = modal.dataset.oldHeight;
+    modal.style.transform = modal.dataset.oldTransform;
+    modal.dataset.maximized = 'false';
+  } else {
+    modal.dataset.oldLeft = modal.style.left;
+    modal.dataset.oldTop = modal.style.top;
+    modal.dataset.oldWidth = modal.style.width;
+    modal.dataset.oldHeight = modal.style.height;
+    modal.dataset.oldTransform = modal.style.transform;
+    modal.style.left = '10px';
+    modal.style.top = '10px';
+    modal.style.width = 'calc(100vw - 20px)';
+    modal.style.height = 'calc(100vh - 20px)';
+    modal.style.transform = 'none';
+    modal.dataset.maximized = 'true';
+  }
+}
+
+function setupModalDrag(modal) {
+  const header = modal.querySelector('.modal-header');
+  if (!header) return;
+
+  let dragging = false, dragX = 0, dragY = 0, offsetX = 0, offsetY = 0;
+
+  header.style.cursor = 'move';
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
+    dragging = true;
+    dragX = e.clientX;
+    dragY = e.clientY;
+
+    const rect = modal.getBoundingClientRect();
+    offsetX = rect.left;
+    offsetY = rect.top;
+
+    modal.style.transform = 'none';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const newX = offsetX + (e.clientX - dragX);
+    const newY = offsetY + (e.clientY - dragY);
+    modal.style.left = newX + 'px';
+    modal.style.top = newY + 'px';
+    modal.style.transform = 'none';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+}
+
+// === 键盘快捷键：Esc 关闭最新的模态框 ===
 document.addEventListener('keydown', function(e) {
-  const mask = document.getElementById('modalMask');
-  if (!mask || !mask.classList.contains('show')) return;
-  if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    const btn = document.querySelector('#modalFooter .btn-primary');
-    if (btn) { e.preventDefault(); btn.click(); }
+  if (e.key === 'Escape') {
+    const masks = document.querySelectorAll('.modal-mask');
+    if (masks.length > 0) {
+      e.preventDefault();
+      masks[masks.length - 1].remove();
+    }
   }
 });
-// 已禁用点击 modal 外部关闭，避免误关丢失输入
-// document.getElementById('modalMask').addEventListener('click', e => {
-//   if (e.target.id === 'modalMask') closeModal();
-// });
 
 /* ============================================================
  * 路由
  * ============================================================ */
 
 let currentPage = 'dashboard';
+let windowCounter = 0;
 
 function renderNav() {
   const overdueCount = countOverdueFollowups();
@@ -1327,10 +1409,131 @@ function renderNav() {
 document.getElementById('nav').addEventListener('click', e => {
   const item = e.target.closest('.nav-item');
   if (!item) return;
-  currentPage = item.dataset.page;
+
+  const pageId = item.dataset.page;
+  const pageName = item.textContent.trim().replace(/\d+/g, '').trim();
+
+  // Ctrl/Cmd + 点击：在新浮动窗口打开（使用 iframe）
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    console.log('Ctrl+点击检测到！', pageId, pageName);
+    openIframeWindow(pageId, pageName);
+    return;
+  }
+
+  // 正常点击：在当前页面打开（不关闭已打开的模态框）
+  currentPage = pageId;
   renderNav();
   render();
 });
+
+// iframe 浮动窗口系统
+function openIframeWindow(pageId, pageName) {
+  windowCounter++;
+  const winId = 'iframe-win-' + windowCounter;
+
+  const win = document.createElement('div');
+  win.id = winId;
+  win.style.cssText = `
+    position: fixed;
+    left: ${100 + windowCounter * 30}px;
+    top: ${80 + windowCounter * 30}px;
+    width: 1000px;
+    height: 650px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    z-index: ${1000 + windowCounter};
+    pointer-events: auto;
+  `;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('page', pageId);
+  url.searchParams.set('inWindow', '1');
+
+  win.innerHTML = `
+    <div class="iframe-win-header" style="padding:12px 18px;border-bottom:1px solid #e3e8ef;display:flex;justify-content:space-between;align-items:center;cursor:move;background:linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);user-select:none;border-radius:8px 8px 0 0;">
+      <span style="font-weight:600;font-size:14px;color:#1f2937;">${pageName}</span>
+      <div style="display:flex;gap:6px;">
+        <button onclick="maximizeIframeWindow('${winId}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#9ca3af;padding:0 6px;" title="最大化">⛶</button>
+        <button onclick="closeIframeWindow('${winId}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:#9ca3af;padding:0 6px;" title="关闭">×</button>
+      </div>
+    </div>
+    <iframe src="${url.toString()}" style="flex:1;border:none;border-radius:0 0 8px 8px;"></iframe>
+  `;
+
+  let container = document.getElementById('iframe-windows-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'iframe-windows-container';
+    container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:999;';
+    document.body.appendChild(container);
+  }
+  container.appendChild(win);
+
+  makeIframeWindowDraggable(winId);
+}
+
+function makeIframeWindowDraggable(winId) {
+  const win = document.getElementById(winId);
+  const header = win.querySelector('.iframe-win-header');
+  if (!header) return;
+
+  let dragging = false, startX = 0, startY = 0, winLeft = 0, winTop = 0;
+
+  header.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON') return;
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    winLeft = win.offsetLeft;
+    winTop = win.offsetTop;
+
+    // 提到最前面
+    windowCounter++;
+    win.style.zIndex = 1000 + windowCounter;
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    win.style.left = (winLeft + e.clientX - startX) + 'px';
+    win.style.top = (winTop + e.clientY - startY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+}
+
+function maximizeIframeWindow(winId) {
+  const win = document.getElementById(winId);
+  if (!win) return;
+
+  if (win.dataset.maximized === 'true') {
+    win.style.left = win.dataset.oldLeft;
+    win.style.top = win.dataset.oldTop;
+    win.style.width = win.dataset.oldWidth;
+    win.style.height = win.dataset.oldHeight;
+    win.dataset.maximized = 'false';
+  } else {
+    win.dataset.oldLeft = win.style.left;
+    win.dataset.oldTop = win.style.top;
+    win.dataset.oldWidth = win.style.width;
+    win.dataset.oldHeight = win.style.height;
+    win.style.left = '10px';
+    win.style.top = '10px';
+    win.style.width = 'calc(100vw - 20px)';
+    win.style.height = 'calc(100vh - 20px)';
+    win.dataset.maximized = 'true';
+  }
+}
+
+function closeIframeWindow(winId) {
+  const win = document.getElementById(winId);
+  if (win) win.remove();
+}
 
 function render() {
   const fn = ({
@@ -1628,6 +1831,35 @@ let customerCountryFilter = '';
 let customerSortKey = 'createdAt';
 let customerSortDir = 'desc';
 let customerTagFilter = '';
+let customerDateFilter = ''; // 新增：日期筛选（all/week/month）
+
+// 获取本周开始日期
+function getWeekStart() {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // 周一为第一天
+  const monday = new Date(now.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+// 获取本月开始日期
+function getMonthStart() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+}
+
+// 判断日期是否在某个范围内
+function isDateInRange(dateStr, range) {
+  if (!dateStr) return false;
+  const date = new Date(dateStr);
+  if (range === 'week') {
+    return date >= getWeekStart();
+  } else if (range === 'month') {
+    return date >= getMonthStart();
+  }
+  return true;
+}
 
 function sortableTh(key, label) {
   const active = (typeof customerSortKey !== 'undefined' && customerSortKey === key);
@@ -1672,6 +1904,7 @@ function renderCustomers() {
     && (!customerGradeFilter || c.grade === customerGradeFilter)
     && (!customerSourceFilter || c.source === customerSourceFilter)
     && (!customerTagFilter || (c.tags || []).includes(customerTagFilter))
+    && (!customerDateFilter || isDateInRange(c.createdAt, customerDateFilter))
   ).sort((a, b) => {
     const dir = customerSortDir === 'asc' ? 1 : -1;
     const key = customerSortKey;
@@ -1707,6 +1940,14 @@ function renderCustomers() {
             <button class="cust-filter-opt ${!customerStatusFilter?'active':''}" onclick="customerStatusFilter='';renderCustomers()">全部 <span class="cust-filter-cnt">${DB.customers.length}</span></button>
             ${CUSTOMER_STATUSES.map(s => `<button class="cust-filter-opt ${customerStatusFilter===s.name?'active':''}" onclick="customerStatusFilter='${s.name}';renderCustomers()">${s.name} <span class="cust-filter-cnt">${statCount(c => c.status === s.name)}</span></button>`).join('')}
             <button class="cust-filter-opt ${customerStatusFilter==='__none__'?'active':''}" onclick="customerStatusFilter='__none__';renderCustomers()">无状态 <span class="cust-filter-cnt">${statCount(c => !c.status)}</span></button>
+          </div>
+        </div>
+        <div class="cust-filter-section">
+          <div class="cust-filter-title">新增时间</div>
+          <div class="cust-filter-options">
+            <button class="cust-filter-opt ${!customerDateFilter?'active':''}" onclick="customerDateFilter='';renderCustomers()">全部</button>
+            <button class="cust-filter-opt ${customerDateFilter==='week'?'active':''}" onclick="customerDateFilter='week';renderCustomers()">本周新增 <span class="cust-filter-cnt">${statCount(c => isDateInRange(c.createdAt, 'week'))}</span></button>
+            <button class="cust-filter-opt ${customerDateFilter==='month'?'active':''}" onclick="customerDateFilter='month';renderCustomers()">本月新增 <span class="cust-filter-cnt">${statCount(c => isDateInRange(c.createdAt, 'month'))}</span></button>
           </div>
         </div>
         <div class="cust-filter-section">
@@ -1757,6 +1998,7 @@ function renderCustomers() {
             ${sortableTh('source', '来源')}
             ${sortableTh('country', '区域')}
             ${sortableTh('contact', '联系人')}
+            ${sortableTh('createdAt', '新增日期')}
             <th>询盘产品 <span style="font-size:10px;color:#9ca3af;font-weight:normal;">(点击编辑)</span></th>
             <th>未合作原因 <span style="font-size:10px;color:#9ca3af;font-weight:normal;">(点击编辑)</span></th>
             ${sortableTh('lastFollowup', '最后跟进')}
@@ -1774,6 +2016,7 @@ function renderCustomers() {
               <td class="muted">${escapeHtml(c.source || '-')}</td>
               <td class="no-wrap">${flagFor(c.country) ? '<span class="flag">' + flagFor(c.country) + '</span>' : ''}${escapeHtml(c.country || '')}</td>
               <td>${escapeHtml(c.contact || '')}</td>
+              <td class="muted no-wrap">${c.createdAt ? fmtDate(c.createdAt.split('T')[0]) : '-'}</td>
               <td class="click" title="点击编辑询盘产品" onclick="editInquiryProduct('${c.id}')" style="cursor:pointer;max-width:180px;">${(function(){ const ip = getInquiryProduct(c); return ip ? '<span style="color:#1f2937;font-size:13px;">' + escapeHtml(truncate(ip, 30)) + '</span>' + (!c.inquiryProduct ? ' <span style="color:#9ca3af;font-size:10px;">(自动)</span>' : '') : '<span class="muted" style="font-size:12px;">+ 填询盘产品</span>'; })()}</td>
               <td class="click" title="点击编辑未合作原因" onclick="editNoDealReason('${c.id}')" style="cursor:pointer;max-width:180px;">${c.noDealReason ? '<span style="color:#b45309;font-size:13px;background:#fef3c7;padding:2px 6px;border-radius:3px;">' + escapeHtml(truncate(c.noDealReason, 30)) + '</span>' : '<span class="muted" style="font-size:12px;">+ 填原因</span>'}</td>
               <td class="muted no-wrap">${lastF ? fmtDate(lastF.date) + '<div style="font-size:10px;">' + escapeHtml(truncate(htmlToText(lastF.content), 20)) + '</div>' : '<span class="muted">-</span>'}</td>
@@ -3172,17 +3415,23 @@ function renderProducts() {
           ${list.length === 0 ? '<div class="empty">暂无产品</div>' : `
           <table>
             <thead><tr>
-              <th>缩略图</th><th>产品编号</th><th>英文名</th><th>中文名</th>
-              <th>分类</th><th class="text-right">价格</th><th>规格</th><th>装箱</th>
-              <th class="text-right">操作</th>
+              <th style="width:80px;">缩略图</th>
+              <th style="width:150px;">产品编号</th>
+              <th style="width:250px;">英文名</th>
+              <th style="width:200px;">中文名</th>
+              <th style="width:150px;">分类</th>
+              <th class="text-right" style="width:100px;">价格</th>
+              <th style="width:150px;">规格</th>
+              <th style="width:120px;">装箱</th>
+              <th class="text-right" style="width:200px;">操作</th>
             </tr></thead>
             <tbody>
             ${list.map(p => `
               <tr>
                 <td style="cursor:zoom-in;">${p.image ? `<img src="${imgUrl(p.image)}" class="product-thumb" title="点击放大" onclick="openProductImage('${p.id}')">` : `<div class="product-thumb" style="cursor:pointer;" onclick="viewProduct('${p.id}')"></div>`}</td>
                 <td class="code no-wrap"><a href="javascript:viewProduct('${p.id}')" style="color:#4f46e5;text-decoration:none;font-weight:500;">${escapeHtml(p.code || '')}</a></td>
-                <td onclick="viewProduct('${p.id}')" style="cursor:pointer;"><strong>${escapeHtml(p.nameEn || '')}</strong></td>
-                <td onclick="viewProduct('${p.id}')" style="cursor:pointer;">${escapeHtml(p.nameZh || '')}</td>
+                <td onclick="viewProduct('${p.id}')" style="cursor:pointer;max-width:250px;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(p.nameEn || '')}"><strong>${escapeHtml(p.nameEn || '')}</strong></td>
+                <td onclick="viewProduct('${p.id}')" style="cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(p.nameZh || '')}">${escapeHtml(p.nameZh || '')}</td>
                 <td>${p.category ? `<span class="tag tag-cyan" title="${escapeHtml(p.category)}">${catParent(p.category) ? '<span style="opacity:0.65;font-size:10px;">' + escapeHtml(catParent(p.category)) + ' › </span>' : ''}${escapeHtml(catLeaf(p.category))}</span>` : '<span class="muted">-</span>'}</td>
                 <td class="text-right no-wrap"><strong>${escapeHtml(p.currency || '')} ${escapeHtml(p.price || '0')}</strong></td>
                 <td class="muted">${escapeHtml(p.specs || '')}</td>
@@ -3251,9 +3500,14 @@ function renderCategoryTreeHtml() {
     const icon = hasChildren ? '📂' : '📁';
     const escC = escapeHtml(c);
     const escLeaf = escapeHtml(leaf);
-    return '<div class="tree-item ' + (productCatFilter === c ? 'active' : '') + '" style="padding-left:' + (12 + indent) + 'px;display:flex;align-items:center;justify-content:space-between;gap:4px;" onclick="productCatFilter=\'' + escC.replace(/'/g, "\\'") + '\';renderProducts()" ondblclick="event.stopPropagation();deleteCategory(\'' + escC.replace(/'/g, "\\'") + '\')">' +
+    return '<div class="tree-item ' + (productCatFilter === c ? 'active' : '') + '" style="padding-left:' + (12 + indent) + 'px;display:flex;align-items:center;justify-content:space-between;gap:4px;" onclick="productCatFilter=\'' + escC.replace(/'/g, "\\'") + '\';renderProducts()">' +
       '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + icon + ' ' + escLeaf + ' <span class="count">' + count + '</span></span>' +
-      '<button class="cat-add-sub" title="加子分类" onclick="event.stopPropagation();addSubCategory(\'' + escC.replace(/'/g, "\\'") + '\')" style="background:transparent;border:none;color:#9ca3af;font-size:13px;padding:0 6px;cursor:pointer;">➕</button>' +
+      '<div style="display:flex;gap:2px;">' +
+      '<button class="cat-btn" title="重命名" onclick="event.stopPropagation();renameCategory(\'' + escC.replace(/'/g, "\\'") + '\')" style="background:transparent;border:none;color:#9ca3af;font-size:11px;padding:2px 4px;cursor:pointer;">✏️</button>' +
+      '<button class="cat-btn" title="移动" onclick="event.stopPropagation();moveCategory(\'' + escC.replace(/'/g, "\\'") + '\')" style="background:transparent;border:none;color:#9ca3af;font-size:11px;padding:2px 4px;cursor:pointer;">📦</button>' +
+      '<button class="cat-btn" title="加子分类" onclick="event.stopPropagation();addSubCategory(\'' + escC.replace(/'/g, "\\'") + '\')" style="background:transparent;border:none;color:#9ca3af;font-size:11px;padding:2px 4px;cursor:pointer;">➕</button>' +
+      '<button class="cat-btn" title="双击删除" ondblclick="event.stopPropagation();deleteCategory(\'' + escC.replace(/'/g, "\\'") + '\')" style="background:transparent;border:none;color:#ef4444;font-size:11px;padding:2px 4px;cursor:pointer;">🗑️</button>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
@@ -3274,11 +3528,112 @@ function addSubCategory(parentPath) {
   if (!sub || !sub.trim()) return;
   const s = sub.trim();
   if (s.includes('/')) { toast('子分类名不能包含 /', 'error'); return; }
-  const full = parentPath + '/' + s;
+  const newPath = parentPath + '/' + s;
   DB.productCategories = DB.productCategories || [];
-  if (DB.productCategories.includes(full) || (DB.products || []).some(p => p.category === full)) { toast('该子分类已存在', 'error'); return; }
-  DB.productCategories.push(full);
-  saveDB(); renderProducts(); toast('已添加子分类 ' + full);
+  if (DB.productCategories.includes(newPath) || (DB.products || []).some(p => p.category === newPath)) { toast('分类已存在', 'error'); return; }
+  DB.productCategories.push(newPath);
+  saveDB(); renderProducts(); toast('已添加子分类');
+}
+
+function renameCategory(oldPath) {
+  const leaf = catLeaf(oldPath);
+  const newLeaf = prompt('重命名分类「' + leaf + '」，输入新名称：', leaf);
+  if (!newLeaf || !newLeaf.trim() || newLeaf.trim() === leaf) return;
+
+  const n = newLeaf.trim();
+  if (n.includes('/')) { toast('分类名不能包含 /', 'error'); return; }
+
+  const parent = catParent(oldPath);
+  const newPath = parent ? parent + '/' + n : n;
+
+  // 检查新名称是否已存在
+  if (allCategoryPaths().includes(newPath)) {
+    toast('分类名已存在', 'error');
+    return;
+  }
+
+  // 更新分类数组
+  DB.productCategories = DB.productCategories || [];
+  const idx = DB.productCategories.indexOf(oldPath);
+  if (idx >= 0) DB.productCategories[idx] = newPath;
+
+  // 更新所有产品的分类路径
+  (DB.products || []).forEach(p => {
+    if (p.category === oldPath) {
+      p.category = newPath;
+    } else if (p.category && p.category.startsWith(oldPath + '/')) {
+      p.category = p.category.replace(oldPath, newPath);
+    }
+  });
+
+  // 更新子分类路径
+  DB.productCategories.forEach((cat, i) => {
+    if (cat.startsWith(oldPath + '/')) {
+      DB.productCategories[i] = cat.replace(oldPath, newPath);
+    }
+  });
+
+  saveDB();
+  productCatFilter = productCatFilter === oldPath ? newPath : productCatFilter;
+  renderProducts();
+  toast('分类已重命名');
+}
+
+function moveCategory(catPath) {
+  const allCats = allCategoryPaths().filter(c => c !== catPath && !c.startsWith(catPath + '/'));
+
+  openModal('移动分类',
+    `<div class="form-grid cols-1">
+      <div class="field">
+        <label>将「${escapeHtml(catPath)}」移动到：</label>
+        <select id="moveCategoryTarget">
+          <option value="">-- 根目录 --</option>
+          ${allCats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="applyMoveCategory('${catPath.replace(/'/g, "\\'")}')">确定</button>`
+  );
+}
+
+function applyMoveCategory(oldPath) {
+  const target = document.getElementById('moveCategoryTarget').value;
+  const leaf = catLeaf(oldPath);
+  const newPath = target ? target + '/' + leaf : leaf;
+
+  // 检查新路径是否已存在
+  if (allCategoryPaths().includes(newPath)) {
+    toast('目标位置已存在同名分类', 'error');
+    return;
+  }
+
+  // 更新分类数组
+  DB.productCategories = DB.productCategories || [];
+  const idx = DB.productCategories.indexOf(oldPath);
+  if (idx >= 0) DB.productCategories[idx] = newPath;
+
+  // 更新所有产品的分类路径
+  (DB.products || []).forEach(p => {
+    if (p.category === oldPath) {
+      p.category = newPath;
+    } else if (p.category && p.category.startsWith(oldPath + '/')) {
+      p.category = p.category.replace(oldPath, newPath);
+    }
+  });
+
+  // 更新子分类路径
+  DB.productCategories.forEach((cat, i) => {
+    if (cat.startsWith(oldPath + '/')) {
+      DB.productCategories[i] = cat.replace(oldPath, newPath);
+    }
+  });
+
+  saveDB();
+  closeModal();
+  productCatFilter = productCatFilter === oldPath ? newPath : productCatFilter;
+  renderProducts();
+  toast('分类已移动');
 }
 
 function deleteCategory(name) {
@@ -5152,7 +5507,10 @@ function migrateSamples() {
 
 function renderSamples() {
   document.getElementById('pageTitle').textContent = '样品管理';
-  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editSample()">+ 新建样品单</button>`;
+  document.getElementById('topbarActions').innerHTML = `
+    <button class="btn" onclick="exportSamplesExcel()">📊 导出样品单</button>
+    <button class="btn btn-primary" onclick="editSample()">+ 新建样品单</button>
+  `;
   setTabs('');
   const kw = sampleFilter.toLowerCase();
   const list = (DB.samples || []).filter(s => {
@@ -6121,7 +6479,10 @@ function renderOrderExpandedItems(o) {
 
 function renderOrders() {
   document.getElementById('pageTitle').textContent = '订单管理';
-  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editOrder()">+ 新建订单</button>`;
+  document.getElementById('topbarActions').innerHTML = `
+    <button class="btn" onclick="exportOrdersExcel()">📊 导出订单</button>
+    <button class="btn btn-primary" onclick="editOrder()">+ 新建订单</button>
+  `;
   setTabs('');
   const kw = orderFilter.toLowerCase();
   const list = (DB.orders || []).filter(o => {
@@ -7126,18 +7487,68 @@ function renderPurchaseExpandedItems(p) {
 
 function renderPurchases() {
   document.getElementById('pageTitle').textContent = '采购管理';
-  document.getElementById('topbarActions').innerHTML = `<button class="btn btn-primary" onclick="editPurchase()">+ 新建采购单</button>`;
+  document.getElementById('topbarActions').innerHTML = `
+    <button class="btn" onclick="exportPurchasesExcel()">📊 导出采购单</button>
+    <button class="btn" onclick="togglePurchaseBatchMode()">批量操作</button>
+    <button class="btn btn-primary" onclick="editPurchase()">+ 新建采购单</button>
+  `;
   setTabs('');
   const kw = purchaseFilter.toLowerCase();
   const factories = [...new Set((DB.purchases || []).map(p => p.factoryName).filter(x => x))];
 
-  const list = (DB.purchases || []).filter(p => {
+  let list = (DB.purchases || []).filter(p => {
     const items = p.items || [];
     const productMatch = items.some(it => (it.productName||'').toLowerCase().includes(kw));
     return (!kw || (p.code||'').toLowerCase().includes(kw) || productMatch || (p.factoryName||'').toLowerCase().includes(kw))
         && (!purchaseStatusFilter || p.status === purchaseStatusFilter)
         && (!purchaseFactoryFilter || p.factoryName === purchaseFactoryFilter);
-  }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  });
+
+  // 排序
+  if (purchaseSortBy === 'date-desc') {
+    list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  } else if (purchaseSortBy === 'date-asc') {
+    list.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  } else if (purchaseSortBy === 'amount-desc') {
+    list.sort((a, b) => calcPurchaseTotal(b) - calcPurchaseTotal(a));
+  } else if (purchaseSortBy === 'amount-asc') {
+    list.sort((a, b) => calcPurchaseTotal(a) - calcPurchaseTotal(b));
+  } else if (purchaseSortBy === 'code') {
+    list.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+  }
+
+  // 按主采购单分组
+  const groupedByParent = {};
+  const processedPurchases = new Set();
+  const renderOrder = [];
+
+  list.forEach(p => {
+    if (processedPurchases.has(p.id)) return;
+
+    if (p.parentPurchaseId) {
+      // 如果还没处理这个采购单组
+      if (!groupedByParent[p.parentPurchaseId]) {
+        groupedByParent[p.parentPurchaseId] = [];
+        // 找到所有关联同一个主采购单的子采购单
+        list.forEach(p2 => {
+          if (p2.parentPurchaseId === p.parentPurchaseId) {
+            groupedByParent[p.parentPurchaseId].push(p2);
+            processedPurchases.add(p2.id);
+          }
+        });
+        // 找到主采购单本身
+        const parentPurchase = list.find(pur => pur.id === p.parentPurchaseId);
+        if (parentPurchase && !processedPurchases.has(parentPurchase.id)) {
+          processedPurchases.add(parentPurchase.id);
+          renderOrder.push({ type: 'group', parentId: p.parentPurchaseId, parent: parentPurchase, children: groupedByParent[p.parentPurchaseId] });
+        }
+      }
+    } else {
+      // 独立采购单（不是子采购单）
+      processedPurchases.add(p.id);
+      renderOrder.push({ type: 'single', purchase: p });
+    }
+  });
 
   const total = list.reduce((s, p) => s + calcPurchaseTotal(p), 0);
 
@@ -7153,14 +7564,25 @@ function renderPurchases() {
           <option value="">全部状态</option>
           ${PURCHASE_STATUSES.map(s => `<option ${purchaseStatusFilter===s.name?'selected':''}>${s.name}</option>`).join('')}
         </select>
+        <select class="btn" onchange="purchaseSortBy=this.value;renderPurchases()">
+          <option value="date-desc" ${purchaseSortBy==='date-desc'?'selected':''}>日期↓新→旧</option>
+          <option value="date-asc" ${purchaseSortBy==='date-asc'?'selected':''}>日期↑旧→新</option>
+          <option value="amount-desc" ${purchaseSortBy==='amount-desc'?'selected':''}>金额↓高→低</option>
+          <option value="amount-asc" ${purchaseSortBy==='amount-asc'?'selected':''}>金额↑低→高</option>
+          <option value="code" ${purchaseSortBy==='code'?'selected':''}>采购单号</option>
+        </select>
+        ${_purchaseBatchMode ? `
+          <button class="btn btn-primary" onclick="batchSetParentPurchase()">设置主采购单 (${_selectedPurchases.size})</button>
+        ` : ''}
         <span class="muted">共 ${list.length} 单 / 合计 ¥${total.toLocaleString()}</span>
       </div>
       ${list.length === 0 ? '<div class="empty">暂无采购单</div>' : `
       <table>
         <thead><tr>
+          ${_purchaseBatchMode ? '<th style="width:40px;"><input type="checkbox" onchange="toggleAllPurchases(this.checked)"></th>' : ''}
           <th style="width:30px;"></th>
           <th style="width:50px;">图片</th>
-          <th>采购单号</th><th>工厂</th>
+          <th>采购单号</th><th>客户</th><th>工厂</th>
           <th>产品</th><th class="text-right">产品数</th>
           <th class="text-right">金额(RMB)</th>
           <th>采购日期</th><th>预计到货</th>
@@ -7168,40 +7590,251 @@ function renderPurchases() {
           <th class="text-right">操作</th>
         </tr></thead>
         <tbody>
-        ${list.map(p => {
-          const items = p.items || [];
-          const firstProd = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
-          const amount = calcPurchaseTotal(p);
-          const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameZh || (productById(it.productId)||{}).nameEn || '-').join('; ');
-          const expanded = _expandedPurchases.has(p.id);
-          let html = `<tr>
-            <td class="text-center" style="cursor:pointer;user-select:none;" onclick="togglePurchaseExpand('${p.id}')">
-              <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
-            </td>
-            <td>${firstProd && firstProd.image ? '<img src="' + imgUrl(firstProd.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
-            <td class="code"><strong>${escapeHtml(p.code || '-')}</strong></td>
-            <td>${escapeHtml(p.factoryName || '-')}</td>
-            <td class="muted">${escapeHtml(truncate(productNames, 35))}</td>
-            <td class="text-right">${items.length}</td>
-            <td class="text-right no-wrap"><strong>¥${amount.toLocaleString()}</strong></td>
-            <td class="no-wrap">${fmtDate(p.date)}</td>
-            <td class="no-wrap muted">${fmtDate(p.expectedDate) || '-'}</td>
-            <td><span class="tag ${getStatus(PURCHASE_STATUSES, p.status).tag}">${escapeHtml(p.status || '-')}</span></td>
-            <td class="text-right no-wrap">
-              <button class="btn-link" onclick="downloadPurchaseContract('${p.id}')">📄 合同</button>
-              <button class="btn-link" onclick="editPurchase('${p.id}')">编辑</button>
-              <button class="btn-link danger" onclick="deletePurchase('${p.id}')">删除</button>
-            </td>
-          </tr>`;
-          if (expanded) {
-            html += '<tr><td colspan="11" style="padding:0;background:#fafbfc;"><div style="padding:8px 12px;">' + renderPurchaseExpandedItems(p) + '</div></td></tr>';
+        ${renderOrder.map(item => {
+          if (item.type === 'group') {
+            return renderPurchaseGroupByParent(item.parent, item.children);
+          } else {
+            return renderSinglePurchaseRow(item.purchase);
           }
-          return html;
         }).join('')}
         </tbody>
       </table>`}
     </div>
   `;
+}
+
+function renderPurchaseGroupByParent(parentPurchase, children) {
+  if (!parentPurchase || children.length === 0) return '';
+
+  const customer = parentPurchase.customerId ? customerById(parentPurchase.customerId) : null;
+  const customerName = customer ? (customer.company || '-') : '-';
+
+  const groupExpanded = _expandedPurchases.has('group-' + parentPurchase.id);
+  const totalAmount = children.reduce((s, p) => s + calcPurchaseTotal(p), 0) + calcPurchaseTotal(parentPurchase);
+
+  const items = parentPurchase.items || [];
+  const firstProd = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
+  const parentAmount = calcPurchaseTotal(parentPurchase);
+  const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameZh || (productById(it.productId)||{}).nameEn || '-').join('; ');
+
+  // 主行：显示主采购单
+  let html = `<tr style="background:#f0f9ff;border-top:2px solid #3b82f6;">
+    <td class="text-center" style="cursor:pointer;user-select:none;" onclick="togglePurchaseExpand('group-${parentPurchase.id}')">
+      <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${groupExpanded?'90deg':'0deg'});color:#3b82f6;font-size:12px;font-weight:bold;">▶</span>
+    </td>
+    <td>${firstProd && firstProd.image ? '<img src="' + imgUrl(firstProd.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+    <td class="code"><strong style="color:#1e40af;">${escapeHtml(parentPurchase.code || '-')}</strong> <span style="font-size:11px;color:#6b7280;">(主采购单 + ${children.length} 配件)</span></td>
+    <td><strong>${escapeHtml(customerName)}</strong></td>
+    <td>${escapeHtml(parentPurchase.factoryName || '-')}</td>
+    <td class="muted">${escapeHtml(truncate(productNames, 20))}</td>
+    <td class="text-right">${items.length}</td>
+    <td class="text-right no-wrap"><strong style="color:#1e40af;">¥${parentAmount.toLocaleString()}</strong></td>
+    <td class="no-wrap">${fmtDate(parentPurchase.date)}</td>
+    <td class="no-wrap muted">${fmtDate(parentPurchase.expectedDate) || '-'}</td>
+    <td><span class="tag ${getStatus(PURCHASE_STATUSES, parentPurchase.status).tag}">${escapeHtml(parentPurchase.status || '-')}</span></td>
+    <td class="text-right no-wrap">
+      <button class="btn-link" onclick="downloadPurchaseContract('${parentPurchase.id}')">📄 合同</button>
+      <button class="btn-link" onclick="copyPurchase('${parentPurchase.id}')">复制</button>
+      <button class="btn-link" onclick="editPurchase('${parentPurchase.id}')">编辑</button>
+      <button class="btn-link danger" onclick="deletePurchase('${parentPurchase.id}')">删除</button>
+    </td>
+  </tr>`;
+
+  // 子行：显示配件采购单
+  if (groupExpanded) {
+    children.forEach(p => {
+      html += renderChildPurchaseRow(p, customerName);
+    });
+    // 显示总计行
+    html += `<tr style="background:#e0f2fe;font-weight:600;">
+      <td colspan="7" class="text-right" style="padding-right:12px;">合计（含主采购单）：</td>
+      <td class="text-right no-wrap" style="color:#0369a1;">¥${totalAmount.toLocaleString()}</td>
+      <td colspan="4"></td>
+    </tr>`;
+  }
+
+  return html;
+}
+
+function renderSinglePurchaseRow(p) {
+  const items = p.items || [];
+  const firstProd = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
+  const amount = calcPurchaseTotal(p);
+  const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameZh || (productById(it.productId)||{}).nameEn || '-').join('; ');
+  const expanded = _expandedPurchases.has(p.id);
+
+  // 获取客户名称
+  let customerName = '-';
+  if (p.customerId) {
+    const customer = customerById(p.customerId);
+    customerName = customer ? (customer.company || '-') : '-';
+  }
+
+  const isSelected = _selectedPurchases.has(p.id);
+
+  let html = `<tr>
+    ${_purchaseBatchMode ? `<td class="text-center"><input type="checkbox" ${isSelected?'checked':''} onchange="togglePurchaseSelection('${p.id}')"></td>` : ''}
+    <td class="text-center" style="cursor:pointer;user-select:none;" onclick="togglePurchaseExpand('${p.id}')">
+      <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
+    </td>
+    <td>${firstProd && firstProd.image ? '<img src="' + imgUrl(firstProd.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+    <td class="code"><strong>${escapeHtml(p.code || '-')}</strong></td>
+    <td>${escapeHtml(customerName)}</td>
+    <td>${escapeHtml(p.factoryName || '-')}</td>
+    <td class="muted">${escapeHtml(truncate(productNames, 30))}</td>
+    <td class="text-right">${items.length}</td>
+    <td class="text-right no-wrap"><strong>¥${amount.toLocaleString()}</strong></td>
+    <td class="no-wrap">${fmtDate(p.date)}</td>
+    <td class="no-wrap muted">${fmtDate(p.expectedDate) || '-'}</td>
+    <td><span class="tag ${getStatus(PURCHASE_STATUSES, p.status).tag}">${escapeHtml(p.status || '-')}</span></td>
+    <td class="text-right no-wrap">
+      <button class="btn-link" onclick="downloadPurchaseContract('${p.id}')">📄 合同</button>
+      <button class="btn-link" onclick="copyPurchase('${p.id}')">复制</button>
+      <button class="btn-link" onclick="editPurchase('${p.id}')">编辑</button>
+      <button class="btn-link danger" onclick="deletePurchase('${p.id}')">删除</button>
+    </td>
+  </tr>`;
+
+  if (expanded) {
+    html += `<tr><td colspan="${_purchaseBatchMode ? '13' : '12'}" style="padding:0;background:#fafbfc;"><div style="padding:8px 12px;">` + renderPurchaseExpandedItems(p) + '</div></td></tr>';
+  }
+
+  return html;
+}
+
+function renderChildPurchaseRow(p, customerName) {
+  const items = p.items || [];
+  const firstProd = items.length > 0 && items[0].productId ? productById(items[0].productId) : null;
+  const amount = calcPurchaseTotal(p);
+  const productNames = items.map(it => it.productName || (productById(it.productId)||{}).nameZh || (productById(it.productId)||{}).nameEn || '-').join('; ');
+  const expanded = _expandedPurchases.has(p.id);
+
+  let html = `<tr style="background:#f9fafb;">
+    <td class="text-center" style="cursor:pointer;user-select:none;padding-left:30px;" onclick="togglePurchaseExpand('${p.id}')">
+      <span style="display:inline-block;transition:transform 0.15s;transform:rotate(${expanded?'90deg':'0deg'});color:#6b7280;font-size:11px;">▶</span>
+    </td>
+    <td>${firstProd && firstProd.image ? '<img src="' + imgUrl(firstProd.image) + '" class="product-thumb">' : '<div class="product-thumb"></div>'}</td>
+    <td class="code" style="padding-left:20px;"><span style="color:#9ca3af;">↳ </span><strong>${escapeHtml(p.code || '-')}</strong></td>
+    <td>${escapeHtml(customerName || '-')}</td>
+    <td>${escapeHtml(p.factoryName || '-')}</td>
+    <td class="muted">${escapeHtml(truncate(productNames, 30))}</td>
+    <td class="text-right">${items.length}</td>
+    <td class="text-right no-wrap"><strong>¥${amount.toLocaleString()}</strong></td>
+    <td class="no-wrap">${fmtDate(p.date)}</td>
+    <td class="no-wrap muted">${fmtDate(p.expectedDate) || '-'}</td>
+    <td><span class="tag ${getStatus(PURCHASE_STATUSES, p.status).tag}">${escapeHtml(p.status || '-')}</span></td>
+    <td class="text-right no-wrap">
+      <button class="btn-link" onclick="downloadPurchaseContract('${p.id}')">📄 合同</button>
+      <button class="btn-link" onclick="copyPurchase('${p.id}')">复制</button>
+      <button class="btn-link" onclick="editPurchase('${p.id}')">编辑</button>
+      <button class="btn-link danger" onclick="deletePurchase('${p.id}')">删除</button>
+    </td>
+  </tr>`;
+
+  if (expanded) {
+    html += '<tr style="background:#f9fafb;"><td colspan="12" style="padding:0;background:#fafbfc;"><div style="padding:8px 12px;">' + renderPurchaseExpandedItems(p) + '</div></td></tr>';
+  }
+
+  return html;
+}
+
+function copyPurchase(id) {
+  const p = (DB.purchases || []).find(x => x.id === id);
+  if (!p) return;
+
+  const newPurchase = JSON.parse(JSON.stringify(p));
+  newPurchase.id = uid();
+  newPurchase.code = nextCode('PUR');
+  newPurchase.createdAt = new Date().toISOString();
+
+  DB.purchases.push(newPurchase);
+  saveDB();
+  renderPurchases();
+  toast('采购单已复制', 'success');
+}
+
+let purchaseSortBy = 'date-desc';
+let _purchaseBatchMode = false;
+let _selectedPurchases = new Set();
+
+function togglePurchaseBatchMode() {
+  _purchaseBatchMode = !_purchaseBatchMode;
+  _selectedPurchases.clear();
+  renderPurchases();
+}
+
+function togglePurchaseSelection(id) {
+  if (_selectedPurchases.has(id)) {
+    _selectedPurchases.delete(id);
+  } else {
+    _selectedPurchases.add(id);
+  }
+  renderPurchases();
+}
+
+function batchSetParentPurchase() {
+  if (_selectedPurchases.size === 0) {
+    toast('请先选择采购单', 'error');
+    return;
+  }
+
+  const allPurchases = DB.purchases || [];
+  const selectedIds = Array.from(_selectedPurchases);
+
+  openModal('批量设置主采购单',
+    `<div class="form-grid cols-1">
+      <div class="field">
+        <label>选择主采购单</label>
+        <select id="batchParentSelect">
+          <option value="">-- 无（取消关联）--</option>
+          ${allPurchases.filter(p => !selectedIds.includes(p.id)).map(pur =>
+            `<option value="${pur.id}">${escapeHtml(pur.code || '-')} (${escapeHtml(pur.factoryName || '-')})</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="muted" style="margin-top:12px;">
+        已选择 ${_selectedPurchases.size} 个采购单
+      </div>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="applyBatchParentPurchase()">确定</button>`
+  );
+}
+
+function applyBatchParentPurchase() {
+  const parentId = document.getElementById('batchParentSelect').value;
+
+  _selectedPurchases.forEach(id => {
+    const p = DB.purchases.find(pur => pur.id === id);
+    if (p) {
+      p.parentPurchaseId = parentId || '';
+
+      // 如果设置了主采购单，自动继承客户
+      if (parentId) {
+        const parent = DB.purchases.find(pur => pur.id === parentId);
+        if (parent && parent.customerId) {
+          p.customerId = parent.customerId;
+        }
+      }
+    }
+  });
+
+  saveDB();
+  closeModal();
+  _purchaseBatchMode = false;
+  _selectedPurchases.clear();
+  renderPurchases();
+  toast('批量设置成功', 'success');
+}
+
+function toggleAllPurchases(checked) {
+  const allPurchases = DB.purchases || [];
+  if (checked) {
+    allPurchases.forEach(p => _selectedPurchases.add(p.id));
+  } else {
+    _selectedPurchases.clear();
+  }
+  renderPurchases();
 }
 
 function editPurchase(id) {
@@ -7215,6 +7848,8 @@ function editPurchase(id) {
       id: uid(),
       code: nextCode('PUR'),
       factoryName: '',
+      customerId: '',  // 客户ID
+      parentPurchaseId: '',  // 新增：关联主采购单ID（不是订单！）
       date: todayStr(),
       expectedDate: '',
       actualDate: '',
@@ -7234,12 +7869,26 @@ function editPurchase(id) {
 
 function renderPurchaseForm() {
   const p = _editingPurchase;
+  const allPurchases = (DB.purchases || []).filter(pur => pur.id !== p.id); // 排除自己
+  const allCustomers = DB.customers || [];
   return `
     <div class="form-grid cols-3" style="margin-bottom:14px;">
       <div class="field"><label>采购单号</label>
         <input value="${escapeHtml(p.code || '')}" oninput="_editingPurchase.code=this.value"></div>
       <div class="field"><label>工厂名称 <span class="req">*</span></label>
         <input value="${escapeHtml(p.factoryName || '')}" oninput="_editingPurchase.factoryName=this.value" placeholder="供应工厂"></div>
+      <div class="field"><label>客户</label>
+        <select id="purchaseCustomerSelect" onchange="_editingPurchase.customerId=this.value">
+          <option value="">-- 无 --</option>
+          ${allCustomers.map(c => `<option value="${c.id}" ${p.customerId===c.id?'selected':''}>${escapeHtml(c.company || '-')}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>关联主采购单</label>
+        <select onchange="onPurchaseParentChange(this.value)">
+          <option value="">-- 无（独立采购）--</option>
+          ${allPurchases.map(pur => `<option value="${pur.id}" ${p.parentPurchaseId===pur.id?'selected':''}>${escapeHtml(pur.code || '-')} (${escapeHtml(pur.factoryName || '-')})</option>`).join('')}
+        </select>
+      </div>
       <div class="field"><label>状态</label>
         <select onchange="_editingPurchase.status=this.value">${PURCHASE_STATUSES.map(s => `<option ${p.status===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>
       <div class="field"><label>采购日期</label>
@@ -7250,7 +7899,7 @@ function renderPurchaseForm() {
         <input type="date" value="${fmtDate(p.actualDate)}" onchange="_editingPurchase.actualDate=this.value"></div>
       <div class="field"><label>生产周期</label>
         <input value="${escapeHtml(p.productionDays || '')}" oninput="_editingPurchase.productionDays=this.value" placeholder="如 30 天"></div>
-      <div class="field full" style="grid-column: span 2;"><label>付款条款</label>
+      <div class="field full" style="grid-column: span 1;"><label>付款条款</label>
         <input value="${escapeHtml(p.paymentTerms || '')}" oninput="_editingPurchase.paymentTerms=this.value" placeholder="如 30% 定金 70% 见提单复印件"></div>
       <div class="field full"><label>备注</label>
         <textarea oninput="_editingPurchase.notes=this.value">${escapeHtml(p.notes || '')}</textarea></div>
@@ -7261,8 +7910,20 @@ function renderPurchaseForm() {
       <button type="button" class="btn btn-sm btn-primary" onclick="addPurchaseItem()">+ 添加产品</button>
     </div>
     <div id="purchaseItems">${p.items.length === 0 ? '<div class="empty" style="padding:24px;background:#fafbfc;border-radius:6px;">暂无产品，点上方按钮添加</div>' : p.items.map(it => purchaseItemHtml(it)).join('')}</div>
-    <div id="purchaseTotal" style="margin-top:14px;">${purchaseTotalHtml()}</div>
   `;
+}
+
+function onPurchaseParentChange(parentPurchaseId) {
+  _editingPurchase.parentPurchaseId = parentPurchaseId;
+
+  if (parentPurchaseId) {
+    const parentPurchase = (DB.purchases || []).find(pur => pur.id === parentPurchaseId);
+    if (parentPurchase && parentPurchase.customerId) {
+      _editingPurchase.customerId = parentPurchase.customerId;
+      const select = document.getElementById('purchaseCustomerSelect');
+      if (select) select.value = parentPurchase.customerId;
+    }
+  }
 }
 
 function purchaseItemHtml(item) {
@@ -7477,54 +8138,92 @@ async function deletePurchase(id) {
 function createPurchaseFromOrder(orderId) {
   const o = (DB.orders || []).find(x => x.id === orderId);
   if (!o) return;
-  if (!confirm('基于此订单创建采购单？产品/数量自动带入，单价默认用产品的采购价（含税）')) return;
-  const newItems = (o.items || []).map(it => {
+
+  // 按工厂名称分组产品
+  const groupedByFactory = {};
+  const noFactoryItems = [];
+
+  (o.items || []).forEach(it => {
     const prod = it.productId ? productById(it.productId) : null;
-    return {
+    const factoryName = (prod && prod.factoryName) || '';
+
+    if (!factoryName) {
+      noFactoryItems.push(it);
+      return;
+    }
+
+    if (!groupedByFactory[factoryName]) {
+      groupedByFactory[factoryName] = [];
+    }
+
+    groupedByFactory[factoryName].push({
       id: uid(),
       productId: it.productId || '',
       productName: it.productName || (prod && (prod.nameZh || prod.nameEn)) || '',
       specs: it.specs || (prod && prod.specs) || '',
       qty: Number(it.qty) || 0,
-      unitPriceNoTax: (prod && prod.purchasePriceNoTax) || '',
-      unitPriceWithTax: (prod && prod.purchasePriceWithTax) || '',
+      priceNoTax: (prod && prod.purchasePriceNoTax) || '',
+      priceWithTax: (prod && prod.purchasePriceWithTax) || '',
       productionDays: '',
       productCraft: it.descriptionZh || (prod && (prod.descriptionZh || prod.description)) || '',
-    };
+    });
   });
-  // 选第一个产品的工厂名作默认
-  const firstProd = newItems[0] && newItems[0].productId ? productById(newItems[0].productId) : null;
-  const factoryName = (firstProd && firstProd.factoryName) || '';
-  currentPage = 'purchases';
-  renderNav();
-  render();
-  setTimeout(() => {
-    _editingPurchase = {
+
+  const factoryCount = Object.keys(groupedByFactory).length;
+  const noFactoryCount = noFactoryItems.length;
+
+  // 提示信息
+  let message = `将根据产品的供应商自动创建 ${factoryCount} 个采购单：\n\n`;
+  Object.keys(groupedByFactory).forEach(factory => {
+    message += `• ${factory}: ${groupedByFactory[factory].length} 个产品\n`;
+  });
+
+  if (noFactoryCount > 0) {
+    message += `\n⚠️ 有 ${noFactoryCount} 个产品没有设置工厂名，将跳过。`;
+  }
+
+  message += `\n\n确认创建采购单吗？`;
+
+  if (!confirm(message)) return;
+
+  // 创建采购单
+  DB.purchases = DB.purchases || [];
+  let createdCount = 0;
+
+  Object.entries(groupedByFactory).forEach(([factoryName, items]) => {
+    const newPurchase = {
       id: uid(),
       code: nextCode('PUR'),
       factoryName: factoryName,
+      customerId: o.customerId || '',
+      parentPurchaseId: '',
       date: todayStr(),
       expectedDate: o.deliveryDate || '',
       actualDate: '',
       status: '待下单',
       paymentTerms: '',
-      notes: '基于订单 ' + (o.orderNo || '') + ' 创建',
-      sourceOrderId: o.id,
-      items: newItems,
+      notes: `从订单 ${o.orderNo || '-'} 自动生成`,
+      items: items,
       createdAt: new Date().toISOString(),
     };
-    openModal('新建采购单 ' + _editingPurchase.code,
-      renderPurchaseForm(),
-      '<button class="btn" onclick="closeModal()">取消</button>' +
-      `<button class="btn btn-primary" onclick="savePurchaseForm('')">保存</button>`,
-      'xl');
-    toast('已从订单 ' + (o.orderNo || '') + ' 创建采购单（请确认工厂和单价）', 'success');
-  }, 100);
+
+    DB.purchases.push(newPurchase);
+    createdCount++;
+  });
+
+  saveDB();
+
+  // 跳转到采购管理页面
+  currentPage = 'purchases';
+  renderNav();
+  render();
+
+  toast(`已创建 ${createdCount} 个采购单`, 'success');
 }
 
 // === 收款/付款（财务流水）模块 ===
 
-const PAYMENT_METHODS = ['T/T', 'PayPal', '现金', '支票', '微信', '支付宝', '银行转账', '其他'];
+const PAYMENT_METHODS = ['阿里国际站', '1688', '公账转款', '微信', '支付宝', 'PayPal', '其他'];
 
 let financeTab = 'receivable'; // 'receivable' | 'payable' | 'flow'
 
@@ -7571,7 +8270,9 @@ function calcDocPaid(payments, docCur, docTotal) {
   const incomeByCur = {};
   (payments || []).forEach(p => {
     if (p.type === 'expense') return; // 只算收款
-    const amt = Number(p.netAmount || p.amount) || 0;
+    // 使用 amount（金额），而不是 netAmount（实收）
+    // 这样已收 = amount，待收 = total - amount（手续费不算在待收里）
+    const amt = Number(p.amount) || 0;
     const pc = p.currency || docCur;
     incomeByCur[pc] = (incomeByCur[pc] || 0) + amt;
   });
@@ -8499,14 +9200,14 @@ function paymentRelatedSelectorHtml(p) {
         ${(function(){
           if (p.relatedType === 'order') {
             if (orders.length === 0) return '<div class="muted" style="font-size:12px;padding:6px;">该客户暂无订单</div>';
-            return `<select onchange="_editingPayment.relatedId=this.value;var o=(DB.orders||[]).find(x=>x.id===this.value);if(o)_editingPayment.relatedNo=o.orderNo||'';">
+            return `<select onchange="_editingPayment.relatedId=this.value;var o=(DB.orders||[]).find(x=>x.id===this.value);if(o){_editingPayment.relatedNo=o.orderNo||'';_editingPayment.customerId=o.customerId||'';var c=customerById(o.customerId);if(c)_editingPayment.counterparty=c.company||'';refreshPaymentForm();refreshPaymentRelatedWrap();}">
               <option value="">-- 选订单 --</option>
               ${orders.map(o => `<option value="${o.id}" ${p.relatedId===o.id?'selected':''}>${escapeHtml(o.orderNo || '-')} · ${escapeHtml(o.currency || '')} ${Number(o.amount||0).toLocaleString()} · ${fmtDate(o.orderDate)}${o.paymentStatus?' · '+escapeHtml(o.paymentStatus):''}</option>`).join('')}
             </select>`;
           }
           if (p.relatedType === 'sample') {
             if (samples.length === 0) return '<div class="muted" style="font-size:12px;padding:6px;">该客户暂无样品单</div>';
-            return `<select onchange="_editingPayment.relatedId=this.value;var s=(DB.samples||[]).find(x=>x.id===this.value);if(s)_editingPayment.relatedNo=s.code||s.sampleNo||'';">
+            return `<select onchange="_editingPayment.relatedId=this.value;var s=(DB.samples||[]).find(x=>x.id===this.value);if(s){_editingPayment.relatedNo=s.code||s.sampleNo||'';_editingPayment.customerId=s.customerId||'';var c=customerById(s.customerId);if(c)_editingPayment.counterparty=c.company||'';refreshPaymentForm();refreshPaymentRelatedWrap();}">
               <option value="">-- 选样品 --</option>
               ${samples.map(s => `<option value="${s.id}" ${p.relatedId===s.id?'selected':''}>${escapeHtml(s.code || s.sampleNo || '-')} · ${escapeHtml(s.status || '')} · ${fmtDate(s.sentDate || s.orderDate)}</option>`).join('')}
             </select>`;
@@ -8547,11 +9248,21 @@ function refreshPaymentRelatedWrap() {
 }
 
 function refreshPaymentForm() {
-  // 刷新整个表单（用于更新对方名称等字段）
+  // 刷新整个表单（用于更新客户和对方名称等字段）
+  if (!_editingPayment) return;
+
+  // 更新客户选择器
+  const customerSelect = document.querySelector('select[onchange*="customerId"]');
+  if (customerSelect && _editingPayment.customerId) {
+    customerSelect.value = _editingPayment.customerId;
+  }
+
+  // 更新对方名称
   const counterpartyInput = document.querySelector('input[placeholder="工厂名 / 其他对象"]');
-  if (counterpartyInput && _editingPayment) {
+  if (counterpartyInput) {
     counterpartyInput.value = _editingPayment.counterparty || '';
   }
+
   refreshPaymentRelatedWrap();
 }
 
@@ -12266,9 +12977,493 @@ function exportCustomersCSV() {
   const rows = DB.customers.map(c => ({
     客户编号: c.code, 公司名称: c.company, 状态: c.status, 等级: c.grade || c.rating || '',
     联系人: c.contact, 国家: c.country, 邮箱: c.email, 电话: c.phone,
-    来源: c.source, 备注: c.notes
+    来源: c.source, 新增日期: c.createdAt ? c.createdAt.split('T')[0] : '', 备注: c.notes
   }));
   downloadCSV(rows, '客户');
+}
+
+function exportOrdersExcel() {
+  const orders = DB.orders || [];
+  if (orders.length === 0) {
+    toast('没有订单数据可导出', 'error');
+    return;
+  }
+
+  // 显示选择对话框
+  openModal('选择要导出的订单',
+    `<div style="max-height:400px;overflow-y:auto;">
+      <div style="margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="selectAllOrders" onchange="toggleAllOrdersSelection(this.checked)">
+          <strong>全选</strong>
+        </label>
+      </div>
+      ${orders.map(o => {
+        const customer = customerById(o.customerId);
+        const customerName = customer ? customer.company : '-';
+        const total = calcOrderTotal(o);
+        return `<div style="margin-bottom:8px;">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" class="order-export-checkbox" value="${o.id}" checked>
+            <span>${escapeHtml(o.orderNo || '-')} - ${escapeHtml(customerName)} - ${o.currency || 'USD'} ${total}</span>
+          </label>
+        </div>`;
+      }).join('')}
+    </div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="confirmExportOrders()">导出选中的订单</button>`
+  );
+}
+
+function toggleAllOrdersSelection(checked) {
+  document.querySelectorAll('.order-export-checkbox').forEach(cb => cb.checked = checked);
+}
+
+function confirmExportOrders() {
+  const selectedIds = Array.from(document.querySelectorAll('.order-export-checkbox:checked')).map(cb => cb.value);
+
+  if (selectedIds.length === 0) {
+    toast('请至少选择一个订单', 'error');
+    return;
+  }
+
+  const orders = DB.orders.filter(o => selectedIds.includes(o.id));
+
+  // 生成HTML表格（包含图片）
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>订单汇总</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 40px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    img { max-width: 60px; max-height: 60px; object-fit: contain; }
+    .products-table { margin-top: 10px; font-size: 12px; }
+    .products-table th { background-color: #2196F3; }
+  </style>
+</head>
+<body>
+  <h1>订单汇总 - ${todayStr()}</h1>
+  <p>共 ${orders.length} 个订单</p>
+`;
+
+  orders.forEach(o => {
+    const customer = customerById(o.customerId);
+    const items = o.items || [];
+    const total = calcOrderTotal(o);
+    const paid = calcDocPaid(o);
+
+    html += `
+  <table>
+    <tr>
+      <th colspan="4" style="font-size:16px;">订单号: ${escapeHtml(o.orderNo || '-')}</th>
+    </tr>
+    <tr>
+      <td><strong>客户:</strong> ${escapeHtml(customer ? customer.company : '-')}</td>
+      <td><strong>状态:</strong> ${escapeHtml(o.status || '-')}</td>
+      <td><strong>类型:</strong> ${escapeHtml(o.type || '-')}</td>
+      <td><strong>订单金额:</strong> ${o.currency || 'USD'} ${total}</td>
+    </tr>
+    <tr>
+      <td><strong>订单日期:</strong> ${fmtDate(o.date) || '-'}</td>
+      <td><strong>交货日期:</strong> ${fmtDate(o.deliveryDate) || '-'}</td>
+      <td><strong>已收:</strong> ${o.currency || 'USD'} ${paid}</td>
+      <td><strong>待收:</strong> ${o.currency || 'USD'} ${total - paid}</td>
+    </tr>
+    ${o.notes ? `<tr><td colspan="4"><strong>备注:</strong> ${escapeHtml(o.notes)}</td></tr>` : ''}
+  </table>
+
+  <table class="products-table">
+    <thead>
+      <tr>
+        <th>图片</th>
+        <th>产品编号</th>
+        <th>产品名称</th>
+        <th>规格</th>
+        <th>数量</th>
+        <th>单价</th>
+        <th>小计</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+    items.forEach(it => {
+      const prod = it.productId ? productById(it.productId) : null;
+      const qty = Number(it.qty) || 0;
+      const price = Number(it.price) || 0;
+      const subtotal = qty * price;
+      const imgSrc = prod && prod.image ? imgUrl(prod.image) : '';
+
+      html += `
+      <tr>
+        <td>${imgSrc ? `<img src="${imgSrc}" alt="产品图片">` : '-'}</td>
+        <td>${escapeHtml((prod && prod.code) || '-')}</td>
+        <td>${escapeHtml(it.productName || (prod && (prod.nameZh || prod.nameEn)) || '-')}</td>
+        <td>${escapeHtml(it.specs || '-')}</td>
+        <td>${qty}</td>
+        <td>${o.currency || 'USD'} ${price.toFixed(2)}</td>
+        <td>${o.currency || 'USD'} ${subtotal.toFixed(2)}</td>
+      </tr>`;
+    });
+
+    html += `
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="6" style="text-align:right;"><strong>合计:</strong></td>
+        <td><strong>${o.currency || 'USD'} ${total.toFixed(2)}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+`;
+  });
+
+  html += `
+</body>
+</html>`;
+
+  // 下载HTML文件
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', '订单汇总_' + todayStr() + '.html');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  closeModal();
+  toast(`已导出 ${selectedIds.length} 个订单（含产品图片）`, 'success');
+}
+
+function exportSamplesExcel() {
+  const samples = DB.samples || [];
+  if (samples.length === 0) {
+    toast('没有样品单数据可导出', 'error');
+    return;
+  }
+
+  // 显示选择对话框
+  openModal('选择要导出的样品单',
+    `<div style="max-height:400px;overflow-y:auto;">
+      <div style="margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="selectAllSamples" onchange="toggleAllSamplesSelection(this.checked)">
+          <strong>全选</strong>
+        </label>
+      </div>
+      ${samples.map(s => {
+        const customer = customerById(s.customerId);
+        const customerName = customer ? customer.company : '-';
+        const total = calcSampleTotal(s);
+        return `<div style="margin-bottom:8px;">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" class="sample-export-checkbox" value="${s.id}" checked>
+            <span>${escapeHtml(s.code || '-')} - ${escapeHtml(customerName)} - ${s.currency || 'USD'} ${total}</span>
+          </label>
+        </div>`;
+      }).join('')}
+    </div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="confirmExportSamples()">导出选中的样品单</button>`
+  );
+}
+
+function toggleAllSamplesSelection(checked) {
+  document.querySelectorAll('.sample-export-checkbox').forEach(cb => cb.checked = checked);
+}
+
+function confirmExportSamples() {
+  const selectedIds = Array.from(document.querySelectorAll('.sample-export-checkbox:checked')).map(cb => cb.value);
+
+  if (selectedIds.length === 0) {
+    toast('请至少选择一个样品单', 'error');
+    return;
+  }
+
+  const samples = DB.samples.filter(s => selectedIds.includes(s.id));
+
+  // 生成HTML表格（包含图片）
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>样品单汇总</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 40px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    img { max-width: 60px; max-height: 60px; object-fit: contain; }
+    .products-table { margin-top: 10px; font-size: 12px; }
+    .products-table th { background-color: #2196F3; }
+  </style>
+</head>
+<body>
+  <h1>样品单汇总 - ${todayStr()}</h1>
+  <p>共 ${samples.length} 个样品单</p>
+`;
+
+  samples.forEach(s => {
+    const customer = customerById(s.customerId);
+    const items = s.items || [];
+    const total = calcSampleTotal(s);
+
+    html += `
+  <table>
+    <tr>
+      <th colspan="4" style="font-size:16px;">样品单号: ${escapeHtml(s.code || '-')}</th>
+    </tr>
+    <tr>
+      <td><strong>客户:</strong> ${escapeHtml(customer ? customer.company : '-')}</td>
+      <td><strong>状态:</strong> ${escapeHtml(s.status || '-')}</td>
+      <td><strong>样品日期:</strong> ${fmtDate(s.date) || '-'}</td>
+      <td><strong>样品金额:</strong> ${s.currency || 'USD'} ${total}</td>
+    </tr>
+    <tr>
+      <td><strong>发货日期:</strong> ${fmtDate(s.shipDate) || '-'}</td>
+      <td><strong>快递单号:</strong> ${escapeHtml(s.trackingNo || '-')}</td>
+      <td colspan="2"></td>
+    </tr>
+    ${s.notes ? `<tr><td colspan="4"><strong>备注:</strong> ${escapeHtml(s.notes)}</td></tr>` : ''}
+  </table>
+
+  <table class="products-table">
+    <thead>
+      <tr>
+        <th>图片</th>
+        <th>产品编号</th>
+        <th>产品名称</th>
+        <th>规格</th>
+        <th>数量</th>
+        <th>单价</th>
+        <th>小计</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+    items.forEach(it => {
+      const prod = it.productId ? productById(it.productId) : null;
+      const qty = Number(it.qty) || 0;
+      const price = Number(it.price) || 0;
+      const subtotal = qty * price;
+      const imgSrc = prod && prod.image ? imgUrl(prod.image) : '';
+
+      html += `
+      <tr>
+        <td>${imgSrc ? `<img src="${imgSrc}" alt="产品图片">` : '-'}</td>
+        <td>${escapeHtml((prod && prod.code) || '-')}</td>
+        <td>${escapeHtml(it.productName || (prod && (prod.nameZh || prod.nameEn)) || '-')}</td>
+        <td>${escapeHtml(it.specs || '-')}</td>
+        <td>${qty}</td>
+        <td>${s.currency || 'USD'} ${price.toFixed(2)}</td>
+        <td>${s.currency || 'USD'} ${subtotal.toFixed(2)}</td>
+      </tr>`;
+    });
+
+    html += `
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="6" style="text-align:right;"><strong>合计:</strong></td>
+        <td><strong>${s.currency || 'USD'} ${total.toFixed(2)}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+`;
+  });
+
+  html += `
+</body>
+</html>`;
+
+  // 下载HTML文件
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', '样品单汇总_' + todayStr() + '.html');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  closeModal();
+  toast(`已导出 ${selectedIds.length} 个样品单（含产品图片）`, 'success');
+}
+
+function exportPurchasesExcel() {
+  const purchases = DB.purchases || [];
+  if (purchases.length === 0) {
+    toast('没有采购单数据可导出', 'error');
+    return;
+  }
+
+  // 显示选择对话框
+  openModal('选择要导出的采购单',
+    `<div style="max-height:400px;overflow-y:auto;">
+      <div style="margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="selectAllPurchases" onchange="toggleAllPurchasesSelection(this.checked)">
+          <strong>全选</strong>
+        </label>
+      </div>
+      ${purchases.map(p => {
+        const customer = p.customerId ? customerById(p.customerId) : null;
+        const customerName = customer ? customer.company : '-';
+        const total = calcPurchaseTotal(p);
+        return `<div style="margin-bottom:8px;">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" class="purchase-export-checkbox" value="${p.id}" checked>
+            <span>${escapeHtml(p.code || '-')} - ${escapeHtml(customerName)} - ¥${total}</span>
+          </label>
+        </div>`;
+      }).join('')}
+    </div>`,
+    `<button class="btn" onclick="closeModal()">取消</button>
+     <button class="btn btn-primary" onclick="confirmExportPurchases()">导出选中的采购单</button>`
+  );
+}
+
+function toggleAllPurchasesSelection(checked) {
+  document.querySelectorAll('.purchase-export-checkbox').forEach(cb => cb.checked = checked);
+}
+
+function confirmExportPurchases() {
+  const selectedIds = Array.from(document.querySelectorAll('.purchase-export-checkbox:checked')).map(cb => cb.value);
+
+  if (selectedIds.length === 0) {
+    toast('请至少选择一个采购单', 'error');
+    return;
+  }
+
+  const purchases = DB.purchases.filter(p => selectedIds.includes(p.id));
+
+  // 生成HTML表格（包含图片）
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>采购单汇总</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 40px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    img { max-width: 60px; max-height: 60px; object-fit: contain; }
+    .products-table { margin-top: 10px; font-size: 12px; }
+    .products-table th { background-color: #2196F3; }
+  </style>
+</head>
+<body>
+  <h1>采购单汇总 - ${todayStr()}</h1>
+  <p>共 ${purchases.length} 个采购单</p>
+`;
+
+  purchases.forEach(p => {
+    const customer = p.customerId ? customerById(p.customerId) : null;
+    const items = p.items || [];
+    const total = calcPurchaseTotal(p);
+    const parent = p.parentPurchaseId ? (DB.purchases || []).find(pur => pur.id === p.parentPurchaseId) : null;
+
+    html += `
+  <table>
+    <tr>
+      <th colspan="4" style="font-size:16px;">采购单号: ${escapeHtml(p.code || '-')}</th>
+    </tr>
+    <tr>
+      <td><strong>客户:</strong> ${escapeHtml(customer ? customer.company : '-')}</td>
+      <td><strong>工厂:</strong> ${escapeHtml(p.factoryName || '-')}</td>
+      <td><strong>状态:</strong> ${escapeHtml(p.status || '-')}</td>
+      <td><strong>采购金额:</strong> ¥${total}</td>
+    </tr>
+    <tr>
+      <td><strong>采购日期:</strong> ${fmtDate(p.date) || '-'}</td>
+      <td><strong>预计到货:</strong> ${fmtDate(p.expectedDate) || '-'}</td>
+      <td><strong>实际到货:</strong> ${fmtDate(p.actualDate) || '-'}</td>
+      <td><strong>主采购单:</strong> ${escapeHtml(parent ? parent.code : '-')}</td>
+    </tr>
+    ${p.notes ? `<tr><td colspan="4"><strong>备注:</strong> ${escapeHtml(p.notes)}</td></tr>` : ''}
+  </table>
+
+  <table class="products-table">
+    <thead>
+      <tr>
+        <th>图片</th>
+        <th>产品编号</th>
+        <th>产品名称</th>
+        <th>规格</th>
+        <th>数量</th>
+        <th>单价(不含税)</th>
+        <th>单价(含税)</th>
+        <th>小计</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+    items.forEach(it => {
+      const prod = it.productId ? productById(it.productId) : null;
+      const qty = Number(it.qty) || 0;
+      const priceNoTax = Number(it.priceNoTax) || 0;
+      const priceWithTax = Number(it.priceWithTax) || 0;
+      const subtotal = qty * priceWithTax;
+      const imgSrc = prod && prod.image ? imgUrl(prod.image) : '';
+
+      html += `
+      <tr>
+        <td>${imgSrc ? `<img src="${imgSrc}" alt="产品图片">` : '-'}</td>
+        <td>${escapeHtml((prod && prod.code) || '-')}</td>
+        <td>${escapeHtml(it.productName || (prod && (prod.nameZh || prod.nameEn)) || '-')}</td>
+        <td>${escapeHtml(it.specs || '-')}</td>
+        <td>${qty}</td>
+        <td>¥${priceNoTax.toFixed(2)}</td>
+        <td>¥${priceWithTax.toFixed(2)}</td>
+        <td>¥${subtotal.toFixed(2)}</td>
+      </tr>`;
+    });
+
+    html += `
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="7" style="text-align:right;"><strong>合计:</strong></td>
+        <td><strong>¥${total.toFixed(2)}</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+`;
+  });
+
+  html += `
+</body>
+</html>`;
+
+  // 下载HTML文件
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', '采购单汇总_' + todayStr() + '.html');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  closeModal();
+  toast(`已导出 ${selectedIds.length} 个采购单（含产品图片）`, 'success');
 }
 
 function exportExcel() {

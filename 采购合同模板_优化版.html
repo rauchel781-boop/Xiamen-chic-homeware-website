@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>采购合同 Purchase Contract</title>
+<style>
+body {
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  margin: 20px;
+  font-size: 12px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.header h1 {
+  font-size: 24px;
+  margin: 10px 0;
+  color: #333;
+}
+.header h2 {
+  font-size: 18px;
+  margin: 5px 0;
+  color: #666;
+  font-weight: normal;
+}
+.contract-no {
+  text-align: right;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+table, th, td {
+  border: 1px solid #333;
+}
+th {
+  background: #f0f0f0;
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 13px;
+}
+td {
+  padding: 8px;
+  vertical-align: top;
+}
+.section-title {
+  background: #4a90e2;
+  color: white;
+  padding: 8px 12px;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+.label {
+  font-weight: bold;
+  color: #333;
+  width: 150px;
+}
+.value {
+  border-bottom: 1px solid #ccc;
+  min-height: 24px;
+  color: #666;
+}
+.product-table th {
+  background: #e8f4f8;
+  text-align: center;
+  font-size: 12px;
+}
+.product-table td {
+  text-align: center;
+}
+.product-table .left {
+  text-align: left;
+  padding-left: 8px;
+}
+.product-table .right {
+  text-align: right;
+  padding-right: 8px;
+}
+.spec-box {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+}
+.spec-label {
+  font-weight: bold;
+  color: #4a90e2;
+  display: inline-block;
+  width: 120px;
+}
+.mark-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 10px;
+}
+.mark-box {
+  border: 2px dashed #999;
+  min-height: 200px;
+  padding: 15px;
+  background: #fafafa;
+  position: relative;
+}
+.mark-title {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: #333;
+  border-bottom: 2px solid #4a90e2;
+  padding-bottom: 5px;
+}
+.process-table td {
+  padding: 12px 8px;
+}
+.process-step {
+  font-weight: bold;
+  color: #4a90e2;
+}
+.notes-box {
+  background: #fffdf0;
+  border: 1px solid #ffd700;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+.signature-section {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+.signature-box {
+  border: 1px solid #ccc;
+  padding: 20px;
+  min-height: 120px;
+}
+.signature-title {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 15px;
+  color: #333;
+}
+@media print {
+  body { margin: 10px; }
+  .section-title { page-break-after: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>采购合同</h1>
+  <h2>PURCHASE CONTRACT</h2>
+</div>
+
+<div class="contract-no">
+  合同编号 Contract No.: <span style="color: #d00;">PUR202604210001</span>
+</div>
+
+<!-- 基本信息 -->
+<div class="section-title">📋 基本信息 Basic Information</div>
+<table>
+  <tr>
+    <td class="label">采购方 Buyer:</td>
+    <td class="value">厦门趣可家居用品有限公司 XIAMEN CHIC HOMEWARE CO., LTD</td>
+    <td class="label">签订日期 Date:</td>
+    <td class="value">2026-04-21</td>
+  </tr>
+  <tr>
+    <td class="label">供应商 Supplier:</td>
+    <td class="value" colspan="3">[填写工厂名称和地址]</td>
+  </tr>
+  <tr>
+    <td class="label">客户订单号 Customer PO:</td>
+    <td class="value">PO 2680383</td>
+    <td class="label">客户名称 End Customer:</td>
+    <td class="value">Beauty Page Inc</td>
+  </tr>
+  <tr>
+    <td class="label">交货日期 Delivery Date:</td>
+    <td class="value">[填写]</td>
+    <td class="label">付款方式 Payment:</td>
+    <td class="value">[如：30%定金，余款货前付清]</td>
+  </tr>
+</table>
+
+<!-- 产品明细与工艺 -->
+<div class="section-title">📦 产品明细与工艺 Product Details & Process</div>
+<table class="product-table">
+  <thead>
+    <tr>
+      <th style="width: 35px;">序号<br>No.</th>
+      <th style="width: 150px;">产品图片<br>Product Image</th>
+      <th style="width: 100px;">产品编号<br>Item Code</th>
+      <th style="width: 150px;">产品名称<br>Product Name</th>
+      <th style="width: 180px;">材质<br>Material</th>
+      <th style="width: 180px;">表面处理<br>Surface Finish</th>
+      <th style="width: 200px;">其他细节<br>Other Details</th>
+      <th style="width: 180px;">包装要求<br>Packing</th>
+      <th style="width: 60px;">数量<br>Qty</th>
+      <th style="width: 80px;">单价<br>Unit Price</th>
+      <th style="width: 80px;">金额<br>Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="height: 140px;">
+      <td>1</td>
+      <td style="text-align: center; vertical-align: middle;">
+        <div style="border: 2px dashed #ccc; width: 130px; height: 120px; margin: 5px auto; display: flex; align-items: center; justify-content: center; color: #999; font-size: 11px; background: #fafafa;">
+          粘贴产品图片<br>Paste Image
+        </div>
+      </td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td></td>
+      <td class="right"></td>
+      <td class="right"></td>
+    </tr>
+    <tr style="height: 140px;">
+      <td>2</td>
+      <td style="text-align: center; vertical-align: middle;">
+        <div style="border: 2px dashed #ccc; width: 130px; height: 120px; margin: 5px auto; display: flex; align-items: center; justify-content: center; color: #999; font-size: 11px; background: #fafafa;">
+          粘贴产品图片<br>Paste Image
+        </div>
+      </td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td></td>
+      <td class="right"></td>
+      <td class="right"></td>
+    </tr>
+    <tr style="height: 140px;">
+      <td>3</td>
+      <td style="text-align: center; vertical-align: middle;">
+        <div style="border: 2px dashed #ccc; width: 130px; height: 120px; margin: 5px auto; display: flex; align-items: center; justify-content: center; color: #999; font-size: 11px; background: #fafafa;">
+          粘贴产品图片<br>Paste Image
+        </div>
+      </td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td class="left"></td>
+      <td></td>
+      <td class="right"></td>
+      <td class="right"></td>
+    </tr>
+    <tr>
+      <td colspan="10" style="text-align: right; font-weight: bold; background: #f8f8f8;">合计 Total Amount:</td>
+      <td class="right" style="font-weight: bold; font-size: 14px; background: #fff3cd;">¥</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border-left: 3px solid #4a90e2; font-size: 11px; color: #666;">
+  <strong>填写说明：</strong>材质如：竹木/松木/橡胶木 | 表面处理如：食品级清漆/木蜡油/不处理 | 其他细节如：尺寸、颜色、配件等 | 包装如：气泡袋+纸箱，6个/箱
+</div>
+
+
+<!-- 唛头 -->
+<div class="section-title">📝 唛头 Shipping Marks</div>
+
+<table>
+  <tr>
+    <td style="width: 50%; padding: 15px; vertical-align: top;">
+      <div style="font-weight: bold; margin-bottom: 10px; color: #4a90e2;">主唛 Main Mark (箱子正面)</div>
+      <div style="border: 2px solid #999; padding: 15px; min-height: 180px; background: #fafafa; font-family: 'Courier New', monospace; font-size: 12px;">
+        <div>BEAUTY PAGE INC.</div>
+        <div style="margin: 8px 0;">PO NO.: 2680383</div>
+        <div>ITEM NO.: __________</div>
+        <div style="margin: 8px 0;">MADE IN CHINA</div>
+        <div>CARTON NO.: ___/___</div>
+      </div>
+    </td>
+    <td style="width: 50%; padding: 15px; vertical-align: top;">
+      <div style="font-weight: bold; margin-bottom: 10px; color: #4a90e2;">侧唛 Side Mark (箱子侧面)</div>
+      <div style="border: 2px solid #999; padding: 15px; min-height: 180px; background: #fafafa; text-align: center;">
+        <div style="font-size: 24px; margin: 10px 0;">⚠</div>
+        <div style="margin: 8px 0;">FRAGILE 易碎</div>
+        <div style="font-size: 24px; margin: 10px 0;">⬆</div>
+        <div style="margin: 8px 0;">THIS SIDE UP 此面向上</div>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<!-- 质量标准 -->
+<div class="section-title">✅ 质量标准 Quality Standards</div>
+
+<table>
+  <tr>
+    <td style="width: 200px; font-weight: bold;">尺寸公差 Size Tolerance:</td>
+    <td>±2mm (可接受范围)</td>
+  </tr>
+  <tr>
+    <td style="font-weight: bold;">外观瑕疵 Defects:</td>
+    <td>无明显刮痕、凹陷、色差；允许微小色差但不影响整体美观</td>
+  </tr>
+  <tr>
+    <td style="font-weight: bold;">功能测试 Function Test:</td>
+    <td>[如：抽屉开合顺畅，磁铁吸附牢固，承重测试≥5kg等]</td>
+  </tr>
+  <tr>
+    <td style="font-weight: bold;">AQL标准 AQL Level:</td>
+    <td>Major defects: 2.5, Minor defects: 4.0</td>
+  </tr>
+</table>
+
+<!-- 特殊要求与备注 -->
+<div class="section-title">⭐ 特殊要求与备注 Special Requirements & Notes</div>
+
+<div style="border: 1px solid #ddd; padding: 15px; min-height: 100px; background: #fff;">
+  <p style="color: #666; font-size: 12px;">[在此填写任何特殊要求]</p>
+</div>
+
+<!-- 签字栏 -->
+<div class="signature-section">
+  <div class="signature-box">
+    <div class="signature-title">采购方 (Buyer)</div>
+    <div style="margin-top: 20px;">
+      <div>公司 Company: 厦门趣可家居用品有限公司</div>
+      <div style="margin-top: 30px;">签字 Signature: _______________________</div>
+      <div style="margin-top: 15px;">日期 Date: _______________________</div>
+    </div>
+  </div>
+
+  <div class="signature-box">
+    <div class="signature-title">供应商 (Supplier)</div>
+    <div style="margin-top: 20px;">
+      <div>公司 Company: _______________________</div>
+      <div style="margin-top: 30px;">签字 Signature: _______________________</div>
+      <div style="margin-top: 15px;">日期 Date: _______________________</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 30px; text-align: center; color: #999; font-size: 11px; border-top: 1px solid #ddd; padding-top: 15px;">
+  本合同一式两份，采购方与供应商各执一份，具有同等法律效力<br>
+  This contract is made in duplicate, one for each party, both having equal legal effect.
+</div>
+
+</body>
+</html>

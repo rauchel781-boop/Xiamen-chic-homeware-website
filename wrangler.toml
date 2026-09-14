@@ -1,0 +1,20 @@
+name = "chic-homeware-cdn"
+main = "src/index.ts"
+compatibility_date = "2026-06-20"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+routes = [
+  { pattern = "xmchichomeware.com/*", zone_name = "xmchichomeware.com" }
+]
+
+# Cache rules
+[[rules]]
+type = "CompiledContentType"
+globs = ["*.woff2", "*.woff"]
+fallthrough = true
+
+[[rules]]
+type = "Mime"
+globs = ["*.txt", "*.json"]
+fallthrough = true

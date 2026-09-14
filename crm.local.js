@@ -1032,10 +1032,93 @@ function openModal(title, bodyHtml, footerHtml, size) {
   document.getElementById('modalBody').innerHTML = bodyHtml;
   document.getElementById('modalFooter').innerHTML = footerHtml || '';
   const m = document.getElementById('modal');
-  m.className = 'modal' + (size === 'lg' ? ' modal-lg' : size === 'xl' ? ' modal-xl' : '');
-  document.getElementById('modalMask').classList.add('show');
+  let cls = 'modal';
+  if (size === 'lg') cls += ' modal-lg';
+  else if (size === 'xl') cls += ' modal-xl';
+  else if (size === 'xxl') cls += ' modal-xxl';
+  else if (size === 'full') cls += ' modal-full';
+  m.className = cls;
+
+  const mask = document.getElementById('modalMask');
+  mask.classList.add('show');
+  mask.style.pointerEvents = 'none';
+  m.style.pointerEvents = 'auto';
+
+  // 重置为居中
+  m.style.top = '50%';
+  m.style.left = '50%';
+  m.style.transform = 'translate(-50%, -50%)';
+  m.style.width = '';
+  m.style.height = '';
+
+  ensureMaximizeBtn();
+  makeModalDraggable(m);
 }
-function closeModal() { document.getElementById('modalMask').classList.remove('show'); }
+
+function makeModalDraggable(modal) {
+  const header = modal.querySelector('.modal-header');
+  if (!header) return;
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let modalX = 0, modalY = 0;
+
+  header.style.cursor = 'move';
+  header.style.userSelect = 'none';
+
+  header.addEventListener('mousedown', function(e) {
+    // 不能点击按钮
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    // 获取当前位置
+    const rect = modal.getBoundingClientRect();
+    modalX = rect.left;
+    modalY = rect.top;
+
+    // 改为绝对定位
+    modal.style.position = 'fixed';
+    modal.style.transform = 'none';
+    modal.style.top = modalY + 'px';
+    modal.style.left = modalX + 'px';
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    modal.style.top = (modalY + dy) + 'px';
+    modal.style.left = (modalX + dx) + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+  });
+}
+
+function ensureMaximizeBtn() {
+  const closeBtn = document.querySelector('.modal-close');
+  if (!closeBtn) return;
+  if (closeBtn.parentElement.querySelector('.modal-maximize-btn')) return;
+
+  const maxBtn = document.createElement('button');
+  maxBtn.className = 'modal-maximize-btn';
+  maxBtn.title = '最大化/还原';
+  maxBtn.textContent = '⛶';
+  maxBtn.onclick = function() {
+    document.getElementById('modal').classList.toggle('is-maximized');
+  };
+  closeBtn.parentElement.insertBefore(maxBtn, closeBtn);
+}
+
+function closeModal() {
+  document.getElementById('modalMask').classList.remove('show');
+}
 // 已禁用点击 modal 外部关闭，避免误关丢失输入
 // document.getElementById('modalMask').addEventListener('click', e => {
 //   if (e.target.id === 'modalMask') closeModal();
@@ -5579,6 +5662,7 @@ function renderPurchases() {
             <td class="no-wrap muted">${fmtDate(p.expectedDate) || '-'}</td>
             <td><span class="tag ${getStatus(PURCHASE_STATUSES, p.status).tag}">${escapeHtml(p.status || '-')}</span></td>
             <td class="text-right no-wrap">
+              <button class="btn-link" onclick="downloadPurchaseContract('${p.id}')">📄 下载合同</button>
               <button class="btn-link" onclick="editPurchase('${p.id}')">编辑</button>
               <button class="btn-link danger" onclick="deletePurchase('${p.id}')">删除</button>
             </td>
@@ -8788,5 +8872,598 @@ function closeProductPicker() {
   render();
   checkAutoBackup();
 })();
+
+/* ============================================================
+ * 采购合同下载功能
+ * ============================================================ */
+
+// 生成客户代码（国家+首字母，确保唯一）
+function generateCustomerCode(customerName, country) {
+  if (!customerName) return 'CUST001';
+
+  // 提取英文单词首字母
+  const words = customerName.trim().split(/\s+/).filter(w => /^[A-Za-z]/.test(w));
+  let initials = words.map(w => w[0].toUpperCase()).join('');
+  if (initials.length === 0) initials = 'CUST';
+
+  // 国家代码（前2个字母）
+  let countryCode = '';
+  if (country) {
+    const c = countryByName(country);
+    countryCode = c ? c[2] : country.substring(0, 2).toUpperCase();
+  } else {
+    countryCode = 'XX';
+  }
+
+  // 检查唯一性
+  let code = countryCode + '-' + initials;
+  let suffix = 1;
+  const existingCodes = new Set((DB.customers || []).map(c => c.code).filter(Boolean));
+
+  while (existingCodes.has(code)) {
+    code = countryCode + '-' + initials + suffix;
+    suffix++;
+  }
+
+  return code;
+}
+
+// 下载采购合同
+async function downloadPurchaseContract(purchaseId) {
+  const purchase = (DB.purchases || []).find(p => p.id === purchaseId);
+  if (!purchase) {
+    toast('采购单不存在', 'error');
+    return;
+  }
+
+  // 检查是否有产品
+  if (!purchase.items || purchase.items.length === 0) {
+    toast('该采购单没有产品，无法生成合同', 'error');
+    return;
+  }
+
+  toast('正在生成合同...', 'success');
+
+  try {
+    // 准备合同数据
+    const contractData = prepareContractData(purchase);
+
+    // 生成Excel XML
+    const xmlContent = generateContractXML(contractData);
+
+    // 下载文件
+    const blob = new Blob([xmlContent], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `采购合同_${purchase.code || 'PUR'}_${todayStr()}.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast('合同已生成', 'success');
+  } catch (e) {
+    console.error('生成合同失败', e);
+    toast('生成合同失败：' + e.message, 'error');
+  }
+}
+
+// 准备合同数据
+function prepareContractData(purchase) {
+  const today = new Date().toISOString().split('T')[0];
+
+  // 查找关联订单（如果有）
+  let customerPO = '';
+  let customerName = '';
+  let customerCountry = '';
+
+  // 尝试从备注或其他字段获取客户信息
+  const relatedOrder = (DB.orders || []).find(o => {
+    return (o.items || []).some(oi => {
+      return (purchase.items || []).some(pi => pi.productId === oi.productId);
+    });
+  });
+
+  if (relatedOrder) {
+    customerPO = relatedOrder.orderNo || '';
+    const customer = customerById(relatedOrder.customerId);
+    if (customer) {
+      customerCountry = customer.country || '';
+      // 生成客户代码（如果还没有）
+      if (!customer.code) {
+        customer.code = generateCustomerCode(customer.company, customer.country);
+        saveDB();
+      }
+      customerName = customer.code || generateCustomerCode(customer.company, customer.country);
+    }
+  }
+
+  return {
+    contractNo: purchase.code || 'PUR000001',
+    buyer: '厦门趣可家居用品有限公司',
+    buyerFull: 'XIAMEN CHIC HOMEWARE CO., LTD',
+    signDate: today,
+    supplier: purchase.factoryName || '',
+    supplierAddress: purchase.factoryAddress || '',
+    customerPO: customerPO,
+    customerName: customerName,
+    deliveryDate: purchase.expectedDate || '',
+    paymentTerms: purchase.paymentTerms || '',
+    items: (purchase.items || []).map(item => {
+      const product = productById(item.productId);
+      return {
+        productCode: product ? (product.code || '') : '',
+        productName: item.productName || (product ? (product.nameZh || product.nameEn) : ''),
+        material: extractMaterial(item, product),
+        surfaceFinish: extractSurfaceFinish(item, product),
+        otherDetails: extractOtherDetails(item, product),
+        packing: extractPacking(item, product),
+        qty: item.qty || 0,
+        unitPrice: item.unitPriceWithTax || item.unitPriceNoTax || 0,
+        amount: (item.qty || 0) * (item.unitPriceWithTax || item.unitPriceNoTax || 0),
+        image: product && product.image ? product.image : null
+      };
+    }),
+    marks: purchase.marks || {},
+    specialRequirements: purchase.notes || '',
+    totalAmount: calcPurchaseTotal(purchase)
+  };
+}
+
+// 从产品信息中提取材质
+function extractMaterial(item, product) {
+  if (item.productCraft) {
+    const craftLower = item.productCraft.toLowerCase();
+    // 尝试提取材质关键词
+    const materials = ['竹', '木', '松木', '橡胶木', '榉木', '桦木', 'bamboo', 'wood', 'pine', 'oak'];
+    for (const m of materials) {
+      if (craftLower.includes(m)) {
+        return item.productCraft.substring(0, 50);
+      }
+    }
+  }
+  if (product && product.descriptionZh) {
+    return product.descriptionZh.substring(0, 50);
+  }
+  return '';
+}
+
+// 提取表面处理
+function extractSurfaceFinish(item, product) {
+  if (item.productCraft) {
+    const craftLower = item.productCraft.toLowerCase();
+    const finishes = ['清漆', '木蜡油', '烤漆', '炭化', 'varnish', 'oil', 'paint'];
+    for (const f of finishes) {
+      if (craftLower.includes(f)) {
+        return item.productCraft.substring(0, 50);
+      }
+    }
+  }
+  return '';
+}
+
+// 提取其他细节
+function extractOtherDetails(item, product) {
+  let details = [];
+  if (item.specs) details.push(item.specs);
+  if (product && product.specs) details.push(product.specs);
+  return details.join('; ').substring(0, 100);
+}
+
+// 提取包装要求
+function extractPacking(item, product) {
+  if (product && product.packingZh) return product.packingZh;
+  if (product && product.packingEn) return product.packingEn;
+  return '';
+}
+
+// 生成Excel XML
+function generateContractXML(data) {
+  const escapeXML = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  };
+
+  // 生成产品行
+  let productRows = '';
+  data.items.forEach((item, index) => {
+    productRows += `
+   <Row ss:Height="100">
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${index + 1}</Data></Cell>
+    <Cell ss:StyleID="imagePlaceholder"><Data ss:Type="String">图片占位&#10;(粘贴图片)</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${escapeXML(item.productCode)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${escapeXML(item.productName)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${escapeXML(item.material)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${escapeXML(item.surfaceFinish)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${escapeXML(item.otherDetails)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${escapeXML(item.packing)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${item.qty}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${item.unitPrice.toFixed(2)}</Data></Cell>
+    <Cell ss:StyleID="tableCell"><Data ss:Type="String">${item.amount.toFixed(2)}</Data></Cell>
+   </Row>`;
+  });
+
+  // 唛头信息
+  const mainMark = data.marks.mainMark || `${data.customerName || 'CUSTOMER NAME'}
+PO NO.: ${data.customerPO || '_________'}
+ITEM NO.: __________
+MADE IN CHINA
+CARTON NO.: ___/___`;
+
+  const sideMark = data.marks.sideMark || `⚠ FRAGILE 易碎
+⬆ THIS SIDE UP 此面向上`;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="header">
+   <Font ss:Bold="1" ss:Size="18"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+  <Style ss:ID="sectionTitle">
+   <Font ss:Bold="1" ss:Size="12" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#4A90E2" ss:Pattern="Solid"/>
+   <Alignment ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="tableHeader">
+   <Font ss:Bold="1" ss:Size="10"/>
+   <Interior ss:Color="#E8F4F8" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="tableCell">
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="imagePlaceholder">
+   <Interior ss:Color="#FAFAFA" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Dot" ss:Weight="2" ss:Color="#CCCCCC"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Dot" ss:Weight="2" ss:Color="#CCCCCC"/>
+    <Border ss:Position="Left" ss:LineStyle="Dot" ss:Weight="2" ss:Color="#CCCCCC"/>
+    <Border ss:Position="Right" ss:LineStyle="Dot" ss:Weight="2" ss:Color="#CCCCCC"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="label">
+   <Font ss:Bold="1"/>
+   <Interior ss:Color="#F0F0F0" ss:Pattern="Solid"/>
+   <Alignment ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="value">
+   <Alignment ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="totalRow">
+   <Font ss:Bold="1" ss:Size="11"/>
+   <Interior ss:Color="#FFF3CD" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="specialReq">
+   <Font ss:Bold="1" ss:Size="14" ss:Color="#D00000"/>
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="采购合同">
+  <Table>
+   <Column ss:Width="35"/>
+   <Column ss:Width="130"/>
+   <Column ss:Width="90"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="120"/>
+   <Column ss:Width="120"/>
+   <Column ss:Width="60"/>
+   <Column ss:Width="70"/>
+   <Column ss:Width="80"/>
+
+   <Row ss:Height="30">
+    <Cell ss:MergeAcross="10" ss:StyleID="header">
+     <Data ss:Type="String">采购合同 PURCHASE CONTRACT</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="22">
+    <Cell ss:MergeAcross="7"><Data ss:Type="String"></Data></Cell>
+    <Cell ss:MergeAcross="2">
+     <Data ss:Type="String">合同编号 Contract No.: ${escapeXML(data.contractNo)}</Data>
+     <Font ss:Bold="1" ss:Color="#D00000"/>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="5">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="10" ss:StyleID="sectionTitle">
+     <Data ss:Type="String">📋 基本信息 Basic Information</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">采购方 Buyer:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.buyerFull)}</Data>
+    </Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">签订日期 Date:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.signDate)}</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">供应商 Supplier:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="8" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.supplier)} ${escapeXML(data.supplierAddress)}</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">客户订单号 Customer PO:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.customerPO)}</Data>
+    </Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">客户名称 End Customer:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.customerName)}</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">交货日期 Delivery Date:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="2" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.deliveryDate)}</Data>
+    </Cell>
+    <Cell ss:MergeAcross="1" ss:StyleID="label">
+     <Data ss:Type="String">付款方式 Payment:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="value">
+     <Data ss:Type="String">${escapeXML(data.paymentTerms)}</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="10">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="10" ss:StyleID="sectionTitle">
+     <Data ss:Type="String">📦 产品明细与工艺 Product Details &amp; Process</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="50">
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">序号&#10;No.</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">产品图片&#10;Product Image</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">产品编号&#10;Item Code</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">产品名称&#10;Product Name</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">材质&#10;Material</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">表面处理&#10;Surface Finish</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">其他细节&#10;Other Details</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">包装要求&#10;Packing</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">数量&#10;Qty</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">单价&#10;Unit Price</Data></Cell>
+    <Cell ss:StyleID="tableHeader"><Data ss:Type="String">金额&#10;Amount</Data></Cell>
+   </Row>
+
+   ${productRows}
+
+   <Row ss:Height="28">
+    <Cell ss:MergeAcross="9" ss:StyleID="totalRow">
+     <Data ss:Type="String">合计 Total Amount:</Data>
+    </Cell>
+    <Cell ss:StyleID="totalRow">
+     <Data ss:Type="String">¥${data.totalAmount.toFixed(2)}</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="32">
+    <Cell ss:MergeAcross="10">
+     <Data ss:Type="String">填写说明：材质如：竹木/松木/橡胶木 | 表面处理如：食品级清漆/木蜡油/不处理 | 其他细节如：尺寸、颜色、配件等 | 包装如：气泡袋+纸箱，6个/箱</Data>
+     <Font ss:Size="9" ss:Color="#666666"/>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="10">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="10" ss:StyleID="sectionTitle">
+     <Data ss:Type="String">📝 唛头 Shipping Marks</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="20">
+    <Cell ss:MergeAcross="5" ss:StyleID="label">
+     <Data ss:Type="String">主唛 Main Mark (箱子正面)</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="label">
+     <Data ss:Type="String">侧唛 Side Mark (箱子侧面)</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="140">
+    <Cell ss:MergeAcross="5" ss:StyleID="tableCell">
+     <Data ss:Type="String">${escapeXML(mainMark)}</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="tableCell">
+     <Data ss:Type="String">${escapeXML(sideMark)}</Data>
+     <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="10">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="10" ss:StyleID="sectionTitle">
+     <Data ss:Type="String">✅ 质量标准 Quality Standards</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="2" ss:StyleID="label">
+     <Data ss:Type="String">尺寸公差 Size Tolerance:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="7" ss:StyleID="value">
+     <Data ss:Type="String">±2mm (可接受范围)</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="2" ss:StyleID="label">
+     <Data ss:Type="String">外观瑕疵 Defects:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="7" ss:StyleID="value">
+     <Data ss:Type="String">无明显刮痕、凹陷、色差；允许微小色差但不影响整体美观</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="2" ss:StyleID="label">
+     <Data ss:Type="String">功能测试 Function Test:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="7" ss:StyleID="value">
+     <Data ss:Type="String"></Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="2" ss:StyleID="label">
+     <Data ss:Type="String">AQL标准 AQL Level:</Data>
+    </Cell>
+    <Cell ss:MergeAcross="7" ss:StyleID="value">
+     <Data ss:Type="String">Major defects: 2.5, Minor defects: 4.0</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="10">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="25">
+    <Cell ss:MergeAcross="10" ss:StyleID="sectionTitle">
+     <Data ss:Type="String">⭐ 特殊要求与备注 Special Requirements &amp; Notes</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="80">
+    <Cell ss:MergeAcross="10" ss:StyleID="specialReq">
+     <Data ss:Type="String">${escapeXML(data.specialRequirements)}</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="15">
+    <Cell ss:MergeAcross="10"><Data ss:Type="String"></Data></Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="5" ss:StyleID="label">
+     <Data ss:Type="String">采购方 (Buyer) - 带公章</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="label">
+     <Data ss:Type="String">供应商 (Supplier)</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="5" ss:StyleID="value">
+     <Data ss:Type="String">公司 Company: ${escapeXML(data.buyer)}</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="value">
+     <Data ss:Type="String">公司 Company:</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="60">
+    <Cell ss:MergeAcross="5" ss:StyleID="value">
+     <Data ss:Type="String">签字 Signature:
+
+
+【此处应有公章图片 - 请手动添加电子章图片】</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="value">
+     <Data ss:Type="String">签字 Signature:</Data>
+    </Cell>
+   </Row>
+
+   <Row ss:Height="24">
+    <Cell ss:MergeAcross="5" ss:StyleID="value">
+     <Data ss:Type="String">日期 Date: ${escapeXML(data.signDate)}</Data>
+    </Cell>
+    <Cell ss:MergeAcross="4" ss:StyleID="value">
+     <Data ss:Type="String">日期 Date:</Data>
+    </Cell>
+   </Row>
+
+  </Table>
+ </Worksheet>
+</Workbook>`;
+}
 
 window.addEventListener('beforeunload', saveDB);
