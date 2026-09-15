@@ -91,7 +91,14 @@ function fixCase(t) {
   return t
     .split(/( \| | \u2014 | \u2013 | - )/)
     .map((seg) => (/[A-Z]/.test(seg) ? seg : seg.replace(/\b[a-z]/g, (c) => c.toUpperCase())))
-    .join('');
+    .join('')
+    // Restore unit abbreviations that sit directly after a number. The
+    // segment-wise rule above only title-cases a segment with NO uppercase
+    // in it, so "... - 35x15x17 cm" became "35x15x17 Cm" while
+    // "... - 22x22 cm Set" was left alone — the same unit rendered two ways
+    // across the catalogue, visible in search results.
+    .replace(/(\d\s*)(Cm|Mm|Ml|Cl|Oz|Pcs|Kg|In|Ft|Lb|Inch)\b/g,
+             (_, num, unit) => num + unit.toLowerCase());
 }
 
 function productSeoTitle(metaTitle, rawTitle) {
