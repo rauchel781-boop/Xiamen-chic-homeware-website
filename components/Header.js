@@ -61,6 +61,7 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Document Trays',   href: '/products/wooden-document-trays' },
       { label: 'Wooden Valet Trays',      href: '/products/wooden-valet-trays' },
       { label: 'Wooden Desk Organizer',  href: '/products/wooden-desk-organizer' },
+      { label: 'Wooden Cable Organizers', href: '/products/wooden-cable-organizers' },
     ],
   },
   {
