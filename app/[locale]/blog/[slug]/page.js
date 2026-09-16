@@ -346,7 +346,18 @@ export default function BlogPost({ params }) {
                   <h2 className="text-2xl md:text-3xl font-extrabold text-brand-ink leading-tight mb-4">
                     {video.title}
                   </h2>
-                  <div className="relative w-full overflow-hidden rounded-2xl border border-brand-line bg-brand-cream aspect-video">
+                  {/* Shorts are 9:16. Rendered in a 16:9 box they sit between
+                      two thick black bars, which is what every clip embedded
+                      here has been doing. Posts that declare `video.vertical`
+                      get a portrait frame instead, width-capped so it does not
+                      run the whole column height on a desktop screen. */}
+                  <div
+                    className={
+                      video.vertical
+                        ? 'relative overflow-hidden rounded-2xl border border-brand-line bg-brand-cream aspect-[9/16] w-full max-w-[340px] mx-auto'
+                        : 'relative w-full overflow-hidden rounded-2xl border border-brand-line bg-brand-cream aspect-video'
+                    }
+                  >
                     <iframe
                       src={`https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1`}
                       title={video.title}
