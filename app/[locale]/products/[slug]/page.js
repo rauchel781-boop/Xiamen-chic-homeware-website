@@ -26,6 +26,7 @@ import { localizeProduct } from '@/lib/translated-content';
 import { schemaLang } from '@/i18n/seo';
 import { getPriceRangeForProduct } from '@/lib/product-pricing';
 import PageFAQ from '@/components/PageFAQ';
+import ProductGallery from '@/components/ProductGallery';
 
 // Map category slug → which FAQ template applies. Wider matches than the
 // product-content.js TEMPLATE_KEYS because category slugs are themselves
@@ -91,14 +92,7 @@ function fixCase(t) {
   return t
     .split(/( \| | \u2014 | \u2013 | - )/)
     .map((seg) => (/[A-Z]/.test(seg) ? seg : seg.replace(/\b[a-z]/g, (c) => c.toUpperCase())))
-    .join('')
-    // Restore unit abbreviations that sit directly after a number. The
-    // segment-wise rule above only title-cases a segment with NO uppercase
-    // in it, so "... - 35x15x17 cm" became "35x15x17 Cm" while
-    // "... - 22x22 cm Set" was left alone — the same unit rendered two ways
-    // across the catalogue, visible in search results.
-    .replace(/(\d\s*)(Cm|Mm|Ml|Cl|Oz|Pcs|Kg|In|Ft|Lb|Inch)\b/g,
-             (_, num, unit) => num + unit.toLowerCase());
+    .join('');
 }
 
 function productSeoTitle(metaTitle, rawTitle) {
@@ -466,35 +460,24 @@ function ProductView({ p, locale }) {
 
         <div className="grid lg:grid-cols-2 gap-10 mb-12">
           <div>
-            <div className="relative aspect-square bg-stone-100 rounded-xl overflow-hidden">
-              {p.featured_image ? (
-                <Image
-                  src={p.featured_image}
-                  alt={decodeEntities(stripHtml(p.title))}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                  className="object-cover"
+            {/* The thumbnails used to be plain divs with no handler, so
+                clicking one did nothing. ProductGallery already existed as a
+                client component and was simply never wired up. The featured
+                image is prepended so the hero shot stays reachable after the
+                visitor has clicked away from it. */}
+            {(() => {
+              const galleryImages = [p.featured_image, ...(p.gallery || [])].filter(Boolean);
+              return galleryImages.length > 0 ? (
+                <ProductGallery
+                  images={galleryImages}
+                  name={decodeEntities(stripHtml(p.title))}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-brand-mute">No image</div>
-              )}
-            </div>
-            {p.gallery?.length > 0 && (
-              <div className="grid grid-cols-4 gap-3 mt-4">
-                {p.gallery.slice(0, 8).map((g, i) => (
-                  <div key={i} className="relative aspect-square bg-stone-100 rounded overflow-hidden">
-                    <Image
-                      src={g}
-                      alt={`${decodeEntities(stripHtml(p.title))} — detail ${i + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 25vw, 12vw"
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+                <div className="relative aspect-square bg-stone-100 rounded-xl overflow-hidden flex items-center justify-center text-brand-mute">
+                  No image
+                </div>
+              );
+            })()}
           </div>
 
           <div>
