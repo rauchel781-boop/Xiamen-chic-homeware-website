@@ -461,10 +461,16 @@ function HardnessChart() {
   const t = useTranslations('materialGuide');
   // Notes mapping: index into jankaNote1..jankaNote7 (some rows have no note)
   const JANKA = [
-    { name: 'Acacia',    lbf: 2200, noteKey: 'jankaNote1' },
+    // 'Acacia' is a trade name covering many species, and the 2,200 lbf that
+    // circulates in homeware and flooring copy does not match the species we
+    // actually buy. The Wood Database lists Acacia mangium at 1,430 lbf and
+    // Acacia melanoxylon at 1,160 lbf, and publishes no official figure for
+    // Acacia confusa (Hainan acacia), which is what we use. Shown as a range
+    // and sorted on its midpoint rather than on a number we cannot support.
     { name: 'Sapele',    lbf: 1410 },
     { name: 'Bamboo',    lbf: 1380, noteKey: 'jankaNote2' },
     { name: 'Oak',       lbf: 1360, noteKey: 'jankaNote3' },
+    { name: 'Acacia',    lbf: 1310, lbfLabel: '1,160\u20131,460', noteKey: 'jankaNote1' },
     { name: 'Beech',     lbf: 1300 },
     { name: 'Teak',      lbf: 1155 },
     { name: 'Walnut',    lbf: 1010, noteKey: 'jankaNote4' },
@@ -504,7 +510,7 @@ function HardnessChart() {
                 />
               </div>
               <div className="text-right">
-                <div className="text-sm font-extrabold text-brand-ink tabular-nums">{w.lbf.toLocaleString()} lbf</div>
+                <div className="text-sm font-extrabold text-brand-ink tabular-nums">{w.lbfLabel || w.lbf.toLocaleString()} lbf</div>
                 {w.noteKey && <div className="text-[11px] text-brand-mute">{t(w.noteKey)}</div>}
               </div>
             </div>
