@@ -13,6 +13,22 @@ export const routing = defineRouting({
   locales: ['en', 'es', 'de', 'fr', 'ja'],
   defaultLocale: 'en',
   localePrefix: 'as-needed',
+
+  // Automatic locale detection is OFF, deliberately.
+  //
+  // next-intl turns it on by default, which makes the middleware redirect a
+  // request based on the visitor's accept-language header or a NEXT_LOCALE
+  // cookie. For a crawler that is a redirect away from the URL it asked for:
+  // Googlebot requesting /products/foo can be bounced to /de/products/foo,
+  // and Search Console reports that as a redirect error instead of indexing
+  // the page. Google's multi-regional guidance is to serve the URL that was
+  // requested and let hreflang advertise the alternates, rather than
+  // auto-redirecting on language.
+  //
+  // Visitors still reach their language through the switcher in the header,
+  // which navigates to the prefixed URL explicitly. Nothing else depends on
+  // detection.
+  localeDetection: false,
 });
 
 export const locales = routing.locales;

@@ -103,12 +103,24 @@ const nextConfig = {
   async redirects() {
     return [
       // ── Canonical host: force www → non-www as a 301 (permanent) ───
-      // The edge proxy currently answers www with a 302. This app-level
-      // rule makes the host redirect a proper 301 *if* the proxy forwards
-      // www requests to the app, so Google consolidates www + non-www.
+      // Both hostnames currently answer 200 with the same content, so the
+      // site is fully duplicated across two hosts while the sitemap and every
+      // canonical tag point at the non-www one. This consolidates them.
+      //
+      // Two rules, because behind a proxy the app does not always see the
+      // browser's Host. Traefik/Cloudflare forward the original hostname in
+      // x-forwarded-host, and the `host` matcher reads the Host header — so
+      // matching only on `host` silently does nothing in that setup, which
+      // is what has been happening here.
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.xmchichomeware.com' }],
+        destination: 'https://xmchichomeware.com/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'header', key: 'x-forwarded-host', value: 'www.xmchichomeware.com' }],
         destination: 'https://xmchichomeware.com/:path*',
         permanent: true,
       },
