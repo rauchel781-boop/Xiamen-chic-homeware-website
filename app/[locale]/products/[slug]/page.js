@@ -22,6 +22,8 @@ import {
   stripHtml,
 } from '@/lib/wp-data';
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
+import { optimizeContentImages } from '@/lib/article-enhance';
+import { relatedGuidesFor, relatedProductsFor } from '@/lib/related-guides';
 import { localizeProduct } from '@/lib/translated-content';
 import { schemaLang } from '@/i18n/seo';
 import { getPriceRangeForProduct } from '@/lib/product-pricing';
@@ -285,7 +287,7 @@ function CategoryView({ cat, locale }) {
         <header className="mb-10 max-w-3xl">
           <h1 className="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight">{cat.name}</h1>
           {cat.description ? (
-            <div className="mt-4 text-brand-ink/85 wp-content" dangerouslySetInnerHTML={{__html: cat.description}} />
+            <div className="mt-4 text-brand-ink/85 wp-content" dangerouslySetInnerHTML={{__html: optimizeContentImages(cat.description)}} />
           ) : (
             <p className="mt-3 text-brand-mute">{t('categoryProductCount', { count: items.length })}</p>
           )}
@@ -348,9 +350,17 @@ function ProductView({ p, locale }) {
   const t = useTranslations('productDetail');
   const tPc = useTranslations('productContent');
   const tCta = useTranslations('cta');
-  const related = wpProducts()
-    .filter(x => x.id !== p.id && x.categories?.some(c => p.categories?.some(pc => pc.slug === c.slug)))
-    .slice(0, 4);
+  // Sibling products. This used to be .slice(0, 4) on the filtered list,
+  // which meant that inside a 30-product category the same four products
+  // absorbed every sibling link and the other 26 received none.
+  // relatedProductsFor() walks a rotating window from this product's own
+  // position instead, so inbound links spread across the whole category.
+  const related = relatedProductsFor(p, wpProducts(), 4);
+
+  // Articles a buyer on this page would plausibly read next. Previously a
+  // product page carried no link to the blog at all, so the catalogue and
+  // the guides were two disconnected islands in the internal link graph.
+  const guides = relatedGuidesFor(p, 3);
 
   // Breadcrumb + Product JSON-LD
   const crumbs = [
@@ -541,7 +551,13 @@ function ProductView({ p, locale }) {
         {/* Original WP content — cleaned of Elementor cruft, only renders if
             substantial content exists beyond what's auto-generated above. */}
         {p.content && (() => {
-          const cleaned = cleanProductWpContent(p.content);
+          // Route the imported WP body images through the Next.js image
+          // optimiser. blog/[slug] and briefs/[slug] already did this; the
+          // product template did not, so 82 product pages were serving 476
+          // untouched /wp-images/ originals (several of them multi-megabyte
+          // PNGs) straight to mobile visitors. Adds srcset, lazy loading and
+          // AVIF/WebP negotiation for free.
+          const cleaned = optimizeContentImages(cleanProductWpContent(p.content));
           if (cleaned && cleaned.length > 200) {
             return (
               <section className="mt-12 border-t border-brand-line pt-10">
@@ -552,6 +568,34 @@ function ProductView({ p, locale }) {
           }
           return null;
         })()}
+
+        {guides.length > 0 && (
+          <section className="mt-16 border-t border-brand-line pt-12">
+            <h2 className="text-2xl font-bold text-brand-ink mb-2">{t('relatedGuides')}</h2>
+            <p className="text-brand-mute mb-8 max-w-2xl">{t('relatedGuidesSub')}</p>
+            <div className="grid gap-4 md:grid-cols-3">
+              {guides.map(g => (
+                <Link
+                  key={g.slug}
+                  href={`/blog/${g.slug}`}
+                  className="group flex flex-col rounded-xl border border-brand-line bg-white p-5 hover:border-brand-green hover:shadow-md transition"
+                >
+                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-wood mb-2">
+                    {t('relatedGuidesEyebrow')}
+                  </span>
+                  <span className="text-[15px] font-semibold text-brand-ink group-hover:text-brand-green leading-snug">
+                    {g.title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-6 text-sm">
+              <Link href="/material-guide" className="text-brand-green font-semibold underline underline-offset-4">
+                {t('materialGuideLink')}
+              </Link>
+            </p>
+          </section>
+        )}
 
         {related.length > 0 && (
           <section className="mt-16 border-t border-brand-line pt-12">

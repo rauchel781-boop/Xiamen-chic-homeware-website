@@ -342,7 +342,11 @@
     "categoryNoProducts": "No products in this category yet.",
     "categoryBrowseAll": "Browse all products",
     "categoryProductCount": "{count} products in this category",
-    "categoryFallbackDesc": "Custom {category} — wholesale wooden & bamboo manufacturing for retailers and brands."
+    "categoryFallbackDesc": "Custom {category} — wholesale wooden & bamboo manufacturing for retailers and brands.",
+    "relatedGuides": "Buying guides for this product",
+    "relatedGuidesSub": "Written by our own engineers and sales team, from the questions buyers actually ask us about this kind of product.",
+    "relatedGuidesEyebrow": "Guide",
+    "materialGuideLink": "Compare the woods we work with →"
   },
   "pageFaqs": {
     "eyebrow": "FAQ",

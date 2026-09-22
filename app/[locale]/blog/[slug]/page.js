@@ -60,6 +60,53 @@ function decodeEntities(s) {
     .replace(/&gt;/g, '>');
 }
 
+// Google renders roughly 60 characters of <title> and 160 of meta description.
+// The product template has clamped both for a while; this page did not, so 7
+// article titles (up to 83 chars) and 10 descriptions (up to 217) shipped
+// truncated mid-word in the SERP. Same rules as products/[slug]/page.js:
+// prefer a clean separator cut, otherwise cut on a word boundary.
+//
+// This also protects the translated locales: localizePost() can return a
+// machine-translated string that runs longer than the English source, and
+// that string never passed through any length check before.
+function clampTitle(s, max = 60) {
+  const t = decodeEntities(stripHtml(s || '')).replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+
+  // Longest separator-delimited prefix that still fits — the Industry Brief
+  // titles carry a " | CHIC Industry Brief Vol. 04" suffix that is pure
+  // branding, and dropping it at the separator keeps the headline intact.
+  let sepCut = '';
+  for (const sep of [' | ', ' — ', ' – ', ' - ']) {
+    const i = t.indexOf(sep);
+    if (i >= 20 && i <= max && i > sepCut.length) sepCut = t.slice(0, i).trim();
+  }
+
+  // A separator cut that is long enough to stand on its own always wins.
+  // Taking the longer of the two (what the product template does) produced
+  // "US-China Tariff & Freight Window June 2026 | CHIC Industry" — a dangling
+  // fragment of the brand suffix that reads worse than dropping it outright.
+  if (sepCut.length >= 30) return sepCut;
+
+  const cut = t.slice(0, max);
+  const sp  = cut.lastIndexOf(' ');
+  const wordCut = (sp >= 30 ? cut.slice(0, sp) : cut)
+    .replace(/[\s|,;:\-\u2013\u2014]+$/, '')
+    .trim();
+
+  return wordCut.length > sepCut.length ? wordCut : sepCut;
+}
+
+function clampDesc(s, max = 160) {
+  const t = decodeEntities(stripHtml(s || '')).replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sp  = cut.lastIndexOf(' ');
+  return (sp >= max - 30 ? cut.slice(0, sp) : cut)
+    .replace(/[\s|,;:\-\u2013\u2014]+$/, '')
+    .trim();
+}
+
 export async function generateMetadata({ params }) {
   const rawP = wpBlogPostBySlug(params.slug);
   if (!rawP) return {};
@@ -73,8 +120,8 @@ export async function generateMetadata({ params }) {
   const metaDesc  = decodeEntities(stripHtml(p.meta_desc  || ''));
   const localizedDesc = stripHtml(p.excerpt || p.content).slice(0, 160);
 
-  const title = metaTitle || stripHtml(p.title);
-  const desc  = metaDesc || localizedDesc;
+  const title = clampTitle(metaTitle || stripHtml(p.title));
+  const desc  = clampDesc(metaDesc || localizedDesc);
   const path  = `/blog/${p.slug}`;
   const img   = p.featured_image || `${SITE.siteUrl}${SITE.defaultOgImage}`;
   return {

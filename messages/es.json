@@ -342,7 +342,11 @@
     "categoryNoProducts": "No hay productos en esta categoría todavía.",
     "categoryBrowseAll": "Examinar todos los productos",
     "categoryProductCount": "{count} productos de esta categoría",
-    "categoryFallbackDesc": "Custom {category} -fabricación al por mayor de madera y bambú para minoristas y marcas."
+    "categoryFallbackDesc": "Custom {category} -fabricación al por mayor de madera y bambú para minoristas y marcas.",
+    "relatedGuides": "Guías de compra para este producto",
+    "relatedGuidesSub": "Escritas por nuestros propios ingenieros y equipo comercial, a partir de las preguntas que los compradores nos hacen sobre este tipo de producto.",
+    "relatedGuidesEyebrow": "Guía",
+    "materialGuideLink": "Compara las maderas con las que trabajamos →"
   },
   "capabilities": {
     "metaTitle": "Capacidades-fábrica de productos de madera CHIC",

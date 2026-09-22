@@ -21,6 +21,8 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Spice Rack',      href: '/products/wooden-spice-rack' },
       { label: 'Wooden Coffee Organizer', href: '/products/wooden-coffee-organizer' },
       { label: 'Picnic Baskets & Hampers', href: '/products/picnic-baskets-hampers' },
+      { label: 'Wooden Coasters',         href: '/products/wooden-coasters' },
+      { label: 'Wooden Cake Stands',      href: '/products/wooden-cake-stands' },
     ],
   },
   {
@@ -50,6 +52,8 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Jewelry Boxes', href: '/products/wooden-jewelry-boxes' },
       { label: 'Wooden Tea Box',      href: '/products/wooden-tea-box' },
       { label: 'Wooden Wine Box',     href: '/products/wooden-wine-box' },
+      { label: 'Custom Wooden Packaging Box', href: '/products/custom-wooden-packaging-box' },
+      { label: 'Wooden Stash Box',    href: '/products/wooden-stash-box' },
     ],
   },
   {
@@ -62,6 +66,7 @@ const PRODUCT_GROUPS = [
       { label: 'Wooden Valet Trays',      href: '/products/wooden-valet-trays' },
       { label: 'Wooden Desk Organizer',  href: '/products/wooden-desk-organizer' },
       { label: 'Wooden Cable Organizers', href: '/products/wooden-cable-organizers' },
+      { label: 'Wooden Photo Frame',      href: '/products/wooden-photo-frame' },
     ],
   },
   {
@@ -72,6 +77,7 @@ const PRODUCT_GROUPS = [
       { label: 'Restaurant Table Caddies',  href: '/products/restaurant-table-caddies' },
       { label: 'Bathroom Vanity Trays',     href: '/products/bathroom-vanity-trays' },
       { label: 'Airbnb Welcome Trays',      href: '/products/airbnb-welcome-trays' },
+      { label: 'Room Service Trays',        href: '/products/room-service-trays' },
     ],
   },
   {

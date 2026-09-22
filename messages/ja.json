@@ -342,7 +342,11 @@
     "categoryNoProducts": "このカテゴリの製品はまだありません。",
     "categoryBrowseAll": "すべての商品を見る",
     "categoryProductCount": "このカテゴリの {count} 個の商品",
-    "categoryFallbackDesc": "カスタム {category} -小売店やブランド向けの卸売木と竹の製造。"
+    "categoryFallbackDesc": "カスタム {category} -小売店やブランド向けの卸売木と竹の製造。",
+    "relatedGuides": "この製品の購入ガイド",
+    "relatedGuidesSub": "この種の製品について実際にバイヤーから寄せられる質問をもとに、当社のエンジニアと営業担当が執筆しています。",
+    "relatedGuidesEyebrow": "ガイド",
+    "materialGuideLink": "当社が扱う木材を比較する →"
   },
   "capabilities": {
     "metaTitle": "機能-シック木製品工場",

@@ -342,7 +342,11 @@
     "categoryNoProducts": "Noch keine Produkte in dieser Kategorie.",
     "categoryBrowseAll": "Alle Produkte durchsuchen",
     "categoryProductCount": "{count} Produkte in dieser Kategorie",
-    "categoryFallbackDesc": "Custom {category} -Großhandel aus Holz und Bambus für Einzel händler und Marken."
+    "categoryFallbackDesc": "Custom {category} -Großhandel aus Holz und Bambus für Einzel händler und Marken.",
+    "relatedGuides": "Einkaufsratgeber zu diesem Produkt",
+    "relatedGuidesSub": "Geschrieben von unseren eigenen Technikern und dem Vertriebsteam — aus den Fragen, die Einkäufer uns zu dieser Produktart tatsächlich stellen.",
+    "relatedGuidesEyebrow": "Ratgeber",
+    "materialGuideLink": "Vergleichen Sie die Hölzer, mit denen wir arbeiten →"
   },
   "capabilities": {
     "metaTitle": "Fähigkeiten-CHIC Holzproduktefabrik",

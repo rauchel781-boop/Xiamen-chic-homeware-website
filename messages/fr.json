@@ -342,7 +342,11 @@
     "categoryNoProducts": "Aucun produit dans cette catégorie pour le moment.",
     "categoryBrowseAll": "Parcourir tous les produits",
     "categoryProductCount": "{count} produits dans cette catégorie",
-    "categoryFallbackDesc": "Custom {category} -fabrication en gros en bois et en bambou pour les détaillants et les marques."
+    "categoryFallbackDesc": "Custom {category} -fabrication en gros en bois et en bambou pour les détaillants et les marques.",
+    "relatedGuides": "Guides d'achat pour ce produit",
+    "relatedGuidesSub": "Rédigés par nos ingénieurs et notre équipe commerciale, à partir des questions que les acheteurs nous posent réellement sur ce type de produit.",
+    "relatedGuidesEyebrow": "Guide",
+    "materialGuideLink": "Comparez les bois que nous travaillons →"
   },
   "capabilities": {
     "metaTitle": "Capacités-Usine de produits en bois CHIC",
