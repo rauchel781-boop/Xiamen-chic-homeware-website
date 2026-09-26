@@ -40,8 +40,54 @@ if (!AK_ID || !AK_SECRET) {
 }
 
 const ENDPOINT = 'https://mt.aliyuncs.com';
-const LANGS = ['es', 'de', 'fr', 'ja'];
+const ALL_LANGS = ['es', 'de', 'fr', 'ja'];
 const CACHE_FILE = path.join(ROOT, '.translate-cache.json');
+
+// ── Flags ───────────────────────────────────────────────────────────────
+// Every content command is INCREMENTAL by default: it loads the existing
+// messages/<file>.<lang>.json, translates only the entries that are missing,
+// and merges. That is deliberate. The old behaviour rebuilt each file from
+// scratch and overwrote it, so a single run cost the full corpus — which is
+// why products.*.json sat untouched from 28 May while the catalogue grew by
+// 92 products, and every one of those shipped an English page on a /es/,
+// /de/, /fr/ or /ja/ URL.
+//
+//   --all          retranslate everything, not just what is missing
+//   --limit=N      stop after N items per language (stay inside the quota)
+//   --langs=es,de  restrict to some locales
+//   --dry-run      report what WOULD be sent, call nothing
+const FLAGS = Object.fromEntries(
+  process.argv.slice(3)
+    .filter((a) => a.startsWith('--'))
+    .map((a) => {
+      const [k, v] = a.replace(/^--/, '').split('=');
+      return [k, v === undefined ? true : v];
+    })
+);
+const ONLY_MISSING = !FLAGS.all;
+const LIMIT   = FLAGS.limit ? parseInt(FLAGS.limit, 10) : Infinity;
+const DRY_RUN = !!FLAGS['dry-run'];
+
+const LANGS = FLAGS.langs
+  ? String(FLAGS.langs).split(',').map((x) => x.trim()).filter((x) => ALL_LANGS.includes(x))
+  : ALL_LANGS;
+
+async function loadExisting(file) {
+  try {
+    return JSON.parse(await readFile(path.join(ROOT, file), 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+// One place that decides whether an entry still needs work, so every command
+// agrees on what "already translated" means.
+function needsWork(existing, slug, fields) {
+  if (!ONLY_MISSING) return true;
+  const e = existing[slug];
+  if (!e) return true;
+  return fields.some((f) => !e[f]);
+}
 
 // --- Cache ---
 let cache = {};
@@ -350,30 +396,157 @@ async function cmdProducts() {
     await readFile(path.join(ROOT, 'wp-data/products.json'), 'utf8')
   );
   console.log(`Loaded ${products.length} products from wp-data/products.json.`);
+  console.log(ONLY_MISSING
+    ? 'Mode: incremental (only products with no translation yet). Pass --all to redo everything.'
+    : 'Mode: FULL retranslation of every product.');
 
   for (const lang of LANGS) {
-    console.log(`\n→ ${lang.toUpperCase()}:`);
-    const out = {};
+    const out = await loadExisting(`messages/products.${lang}.json`);
+    const todo = products.filter((p) => needsWork(out, p.slug, ['title', 'overview']));
+    const batch = todo.slice(0, LIMIT);
+    console.log(`\n→ ${lang.toUpperCase()}: ${todo.length} missing` +
+      (batch.length < todo.length ? `, doing ${batch.length} this run (--limit)` : ''));
+    if (DRY_RUN) { console.log('  (dry run, nothing sent)'); continue; }
+    if (batch.length === 0) { console.log('  ✓ nothing to do'); continue; }
+
     let i = 0;
-    for (const p of products) {
+    for (const p of batch) {
       i++;
       const title = stripHtml(p.title || '');
       const overview = buildOverview(p);
       out[p.slug] = {
+        ...(out[p.slug] || {}),
         title: title ? await tr(title, lang) : '',
         overview: overview ? await tr(overview, lang) : '',
       };
-      process.stdout.write(`\r  ${i}/${products.length}`);
-      if (i % 10 === 0) await saveCache();
+      process.stdout.write(`\r  ${i}/${batch.length}`);
+      if (i % 10 === 0) {
+        await saveCache();
+        await writeFile(path.join(ROOT, `messages/products.${lang}.json`),
+          JSON.stringify(out, null, 2) + '\n');
+      }
     }
-    await writeFile(
-      path.join(ROOT, `messages/products.${lang}.json`),
-      JSON.stringify(out, null, 2) + '\n'
-    );
+    await writeFile(path.join(ROOT, `messages/products.${lang}.json`),
+      JSON.stringify(out, null, 2) + '\n');
+    await saveCache();
+    console.log(`\n  ✓ messages/products.${lang}.json (${Object.keys(out).length} entries)`);
+  }
+  console.log('\n✓ Product title/overview translation done.');
+}
+
+// ── Product body copy ───────────────────────────────────────────────────
+// The imported WP body ("More about this product") has never been translated
+// in any locale — localizeProduct only ever merged title and overview. On a
+// localized page that left the longest block of text on the page in English,
+// which is a large part of why Google treats the /es/, /de/, /fr/ and /ja/
+// product URLs as duplicates of the English one.
+//
+// The body is HTML, so it goes through trBlogContent(): the same smart-parse
+// path the blog uses, which translates text nodes and alt attributes and
+// leaves tags, block comments and image paths alone.
+//
+// This is by far the most expensive command in the file — roughly 134k words
+// of English source, so about 4x that across the four locales. Run it with
+// --limit and --langs, a slice at a time, and watch the quota.
+async function cmdBodies() {
+  const products = JSON.parse(
+    await readFile(path.join(ROOT, 'wp-data/products.json'), 'utf8')
+  );
+  const withBody = products.filter((p) => String(p.content || '').trim().length > 0);
+  console.log(`${withBody.length} of ${products.length} products have body copy.`);
+  console.log(ONLY_MISSING
+    ? 'Mode: incremental (only bodies not translated yet).'
+    : 'Mode: FULL retranslation of every body.');
+
+  for (const lang of LANGS) {
+    const out = await loadExisting(`messages/products.${lang}.json`);
+    const todo = withBody.filter((p) => needsWork(out, p.slug, ['content']));
+    const batch = todo.slice(0, LIMIT);
+    const chars = batch.reduce((a, p) => a + String(p.content).length, 0);
+    console.log(`\n→ ${lang.toUpperCase()}: ${todo.length} missing` +
+      (batch.length < todo.length ? `, doing ${batch.length} this run (--limit)` : '') +
+      ` — about ${(chars / 1000).toFixed(0)}k source chars`);
+    if (DRY_RUN) { console.log('  (dry run, nothing sent)'); continue; }
+    if (batch.length === 0) { console.log('  ✓ nothing to do'); continue; }
+
+    let i = 0;
+    for (const p of batch) {
+      i++;
+      try {
+        out[p.slug] = {
+          ...(out[p.slug] || {}),
+          content: await trBlogContent(p.content, lang),
+        };
+      } catch (e) {
+        console.error(`\n  ✗ Failed body "${p.slug}": ${e.message}`);
+        await writeFile(path.join(ROOT, `messages/products.${lang}.json`),
+          JSON.stringify(out, null, 2) + '\n');
+        await saveCache();
+        throw e;
+      }
+      process.stdout.write(`\r  ${i}/${batch.length} | billed ${(billedChars / 1000).toFixed(0)}k chars`);
+      if (i % 5 === 0) {
+        await saveCache();
+        await writeFile(path.join(ROOT, `messages/products.${lang}.json`),
+          JSON.stringify(out, null, 2) + '\n');
+      }
+    }
+    await writeFile(path.join(ROOT, `messages/products.${lang}.json`),
+      JSON.stringify(out, null, 2) + '\n');
     await saveCache();
     console.log(`\n  ✓ messages/products.${lang}.json`);
   }
-  console.log('\n✓ Product translation done.');
+  console.log('\n✓ Product body translation done.');
+}
+
+// ── Product categories ──────────────────────────────────────────────────
+// Categories had no translation pipeline at all, which meant 53 category
+// pages x 4 locales rendered an English <h1> and description inside
+// translated chrome. The four messages/categories.<lang>.json files were
+// written by hand; this command exists so a category added later does not
+// silently fall back to English again.
+//
+// It is incremental and it will NOT overwrite an existing entry unless you
+// pass --all. Do not pass --all casually: it replaces hand-written copy with
+// machine output.
+async function cmdCategories() {
+  const cats = JSON.parse(
+    await readFile(path.join(ROOT, 'wp-data/product_categories.json'), 'utf8')
+  ).filter((c) => c.slug !== 'uncategorized');
+  console.log(`Loaded ${cats.length} categories.`);
+  if (!ONLY_MISSING) {
+    console.log('⚠  --all will overwrite the hand-written category translations with machine output.');
+  }
+
+  for (const lang of LANGS) {
+    const out = await loadExisting(`messages/categories.${lang}.json`);
+    const todo = cats.filter((c) => needsWork(out, c.slug, ['name', 'description']));
+    const batch = todo.slice(0, LIMIT);
+    console.log(`\n→ ${lang.toUpperCase()}: ${todo.length} missing`);
+    if (DRY_RUN) { console.log('  (dry run, nothing sent)'); continue; }
+    if (batch.length === 0) { console.log('  ✓ nothing to do'); continue; }
+
+    let i = 0;
+    for (const c of batch) {
+      i++;
+      const name = stripHtml(c.name || '');
+      const desc = String(c.description || '');
+      const metaTitle = stripHtml(c.meta_title || '');
+      out[c.slug] = {
+        ...(out[c.slug] || {}),
+        name: name ? await tr(name, lang) : '',
+        description: desc ? await trHtml(desc, lang) : '',
+        ...(metaTitle ? { meta_title: await tr(metaTitle, lang) } : {}),
+      };
+      process.stdout.write(`\r  ${i}/${batch.length}`);
+      if (i % 10 === 0) await saveCache();
+    }
+    await writeFile(path.join(ROOT, `messages/categories.${lang}.json`),
+      JSON.stringify(out, null, 2) + '\n');
+    await saveCache();
+    console.log(`\n  ✓ messages/categories.${lang}.json (${Object.keys(out).length} entries)`);
+  }
+  console.log('\n✓ Category translation done.');
 }
 
 // ============================================================================
@@ -626,14 +799,22 @@ async function cmdBlogs() {
   const posts = JSON.parse(
     await readFile(path.join(ROOT, 'wp-data/posts.json'), 'utf8')
   );
-  console.log(`Loaded ${posts.length} blog posts. Using smart-parse mode.\n`);
+  console.log(`Loaded ${posts.length} blog posts. Using smart-parse mode.`);
+  console.log(ONLY_MISSING
+    ? 'Mode: incremental (only posts with no translation yet). Pass --all to redo everything.\n'
+    : 'Mode: FULL retranslation of every post.\n');
 
   for (const lang of LANGS) {
-    console.log(`→ ${lang.toUpperCase()}:`);
-    const out = {};
+    const out = await loadExisting(`messages/blogs.${lang}.json`);
+    const todo = posts.filter((p) => needsWork(out, p.slug, ['title', 'content']));
+    const batch = todo.slice(0, LIMIT);
+    console.log(`→ ${lang.toUpperCase()}: ${todo.length} missing` +
+      (batch.length < todo.length ? `, doing ${batch.length} this run (--limit)` : ''));
+    if (DRY_RUN) { console.log('  (dry run, nothing sent)'); continue; }
+    if (batch.length === 0) { console.log('  ✓ nothing to do'); continue; }
     let i = 0;
     const startBilled = billedChars;
-    for (const p of posts) {
+    for (const p of batch) {
       i++;
       const title = String(p.title || '').replace(/<[^>]+>/g, '').trim();
       const excerpt = String(p.excerpt || '').replace(/<[^>]+>/g, '').trim();
@@ -656,7 +837,7 @@ async function cmdBlogs() {
       }
       const billedThisLang = billedChars - startBilled;
       process.stdout.write(
-        `\r  ${i}/${posts.length} posts | sent ${(billedThisLang / 1000).toFixed(0)}k chars | total billed: ${(billedChars / 1000).toFixed(0)}k`
+        `\r  ${i}/${batch.length} posts | sent ${(billedThisLang / 1000).toFixed(0)}k chars | total billed: ${(billedChars / 1000).toFixed(0)}k`
       );
       // Save every post — blog content is expensive to redo
       await saveCache();
@@ -678,60 +859,51 @@ async function cmdBlogs() {
 // COUNT — estimate character usage before running
 // ============================================================================
 async function cmdCount() {
-  const ui = JSON.parse(await readFile(path.join(ROOT, 'messages/en.json'), 'utf8'));
   const products = JSON.parse(await readFile(path.join(ROOT, 'wp-data/products.json'), 'utf8'));
-  const posts = JSON.parse(await readFile(path.join(ROOT, 'wp-data/posts.json'), 'utf8'));
+  const posts    = JSON.parse(await readFile(path.join(ROOT, 'wp-data/posts.json'), 'utf8'));
+  const cats     = JSON.parse(await readFile(path.join(ROOT, 'wp-data/product_categories.json'), 'utf8'))
+    .filter((c) => c.slug !== 'uncategorized');
 
-  // UI
-  let uiChars = 0;
-  (function walk(v) {
-    if (typeof v === 'string') uiChars += v.length;
-    else if (Array.isArray(v)) v.forEach(walk);
-    else if (v && typeof v === 'object') Object.values(v).forEach(walk);
-  })(ui);
-
-  // Products
-  let prodChars = 0;
-  for (const p of products) {
-    prodChars += String(p.title || '').length;
-    prodChars += 500; // rough overview length
-  }
-
-  // Blogs
-  let blogChars = 0;
-  for (const p of posts) {
-    blogChars += String(p.title || '').length;
-    blogChars += String(p.excerpt || '').length;
-    blogChars += String(p.content || '').length;
-  }
-
-  const langs = LANGS.length;
   const fmt = (n) => n.toLocaleString();
-  const cost = (chars) => {
-    // First 1M chars/month free, then ¥50 per 1M
-    const billable = Math.max(0, chars - 1_000_000);
-    return (billable / 1_000_000 * 50).toFixed(2);
-  };
+  console.log('\n=== What is still untranslated ===');
+  console.log(`English source: ${products.length} products, ${posts.length} posts, ${cats.length} categories`);
+  console.log(`Free quota: 1,000,000 chars/month. Past that, about ¥50 per 1M.\n`);
 
-  console.log('\n=== Translation cost estimate ===\n');
-  console.log(`Free quota: 1,000,000 chars/month for TranslateGeneral`);
-  console.log(`Past quota: ¥50 (~$7) per 1M chars\n`);
+  let grand = 0;
+  for (const lang of ALL_LANGS) {
+    const tp = await loadExisting(`messages/products.${lang}.json`);
+    const tb = await loadExisting(`messages/blogs.${lang}.json`);
+    const tc = await loadExisting(`messages/categories.${lang}.json`);
 
-  const rows = [
-    ['UI strings', uiChars],
-    ['Products (178 × title+overview)', prodChars],
-    ['Blogs (71 × title+excerpt+content)', blogChars],
-  ];
-  let total = 0;
-  for (const [name, chars] of rows) {
-    const tot = chars * langs;
-    total += tot;
-    console.log(`${name.padEnd(40)} ${fmt(chars).padStart(10)} × ${langs} = ${fmt(tot).padStart(10)} chars`);
+    const pMissing = products.filter((p) => !tp[p.slug] || !tp[p.slug].title);
+    const bodyMissing = products.filter((p) => String(p.content || '').trim() && (!tp[p.slug] || !tp[p.slug].content));
+    const postMissing = posts.filter((p) => !tb[p.slug] || !tb[p.slug].title);
+    const catMissing  = cats.filter((c) => !tc[c.slug] || !tc[c.slug].name);
+
+    const pChars = pMissing.reduce((a, p) => a + String(p.title || '').length + 500, 0);
+    const bodyChars = bodyMissing.reduce((a, p) => a + String(p.content || '').length, 0);
+    const postChars = postMissing.reduce((a, p) => a + String(p.title || '').length + String(p.excerpt || '').length + String(p.content || '').length, 0);
+    const catChars  = catMissing.reduce((a, c) => a + String(c.name || '').length + String(c.description || '').length + String(c.meta_title || '').length, 0);
+    const total = pChars + bodyChars + postChars + catChars;
+    grand += total;
+
+    console.log(`${lang.toUpperCase()}`);
+    console.log(`  product title+overview  ${String(pMissing.length).padStart(4)} missing  ${fmt(pChars).padStart(9)} chars`);
+    console.log(`  product body copy       ${String(bodyMissing.length).padStart(4)} missing  ${fmt(bodyChars).padStart(9)} chars`);
+    console.log(`  blog posts              ${String(postMissing.length).padStart(4)} missing  ${fmt(postChars).padStart(9)} chars`);
+    console.log(`  categories              ${String(catMissing.length).padStart(4)} missing  ${fmt(catChars).padStart(9)} chars`);
+    console.log(`  ${'subtotal'.padEnd(23)}${' '.repeat(14)}${fmt(total).padStart(9)} chars\n`);
   }
-  console.log('-'.repeat(70));
-  console.log(`${'TOTAL'.padEnd(40)} ${' '.padStart(10)}     ${fmt(total).padStart(10)} chars`);
-  console.log(`\nEstimated cost: ¥${cost(total)} (~$${(cost(total) / 7).toFixed(2)})`);
-  console.log(`(${total <= 1_000_000 ? '✓ Within free quota' : '⚠ Exceeds free quota'})\n`);
+
+  console.log('─'.repeat(58));
+  console.log(`TOTAL still to send${' '.repeat(18)}${fmt(grand).padStart(9)} chars`);
+  const over = Math.max(0, grand - 1_000_000);
+  console.log(`Beyond the free 1M: ${fmt(over)} chars → about ¥${(over / 1_000_000 * 50).toFixed(2)}`);
+  console.log(`\nSuggested order (cheapest and highest impact first):`);
+  console.log(`  node scripts/translate.mjs categories`);
+  console.log(`  node scripts/translate.mjs products`);
+  console.log(`  node scripts/translate.mjs blogs`);
+  console.log(`  node scripts/translate.mjs bodies --langs=de --limit=50   # then repeat\n`);
 }
 
 // --- Dispatch ---
@@ -745,8 +917,29 @@ try {
     case 'productContent': await cmdProductContent(); break;
     case 'products':       await cmdProducts();       break;
     case 'blogs':          await cmdBlogs();          break;
+    case 'bodies':         await cmdBodies();         break;
+    case 'categories':     await cmdCategories();     break;
     default:
-      console.log('Usage: node scripts/translate.mjs <test|count|ui|namespace <ns>|productContent|products|blogs>');
+      console.log(`Usage: node scripts/translate.mjs <command> [flags]
+
+Commands
+  count        Report what is still untranslated, per locale, in characters
+  test         Check the Aliyun credentials and connection
+  categories   Product category name + description + meta title
+  products     Product title + generated overview
+  bodies       Product body copy (the imported WP "More about this product")
+  blogs        Blog post title, excerpt, body, meta and FAQ
+  ui           Whole messages/en.json (rarely what you want)
+  namespace <ns>  One top-level namespace of messages/en.json
+
+Flags
+  --all          Retranslate everything, not only what is missing
+  --limit=N      Stop after N items per locale
+  --langs=es,de  Restrict to some locales
+  --dry-run      Report what would be sent without calling the API
+
+Content commands are incremental by default and merge into the existing
+file, so it is safe to stop a run and resume it later.`);
       process.exit(1);
   }
 } catch (e) {
