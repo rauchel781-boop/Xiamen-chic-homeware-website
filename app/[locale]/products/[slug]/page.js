@@ -24,7 +24,7 @@ import {
 import { generateProductContent, cleanProductWpContent } from '@/lib/product-content';
 import { optimizeContentImages } from '@/lib/article-enhance';
 import { relatedGuidesFor, relatedProductsFor } from '@/lib/related-guides';
-import { localizeProduct } from '@/lib/translated-content';
+import { localizeProduct, localizeCategory } from '@/lib/translated-content';
 import { schemaLang } from '@/i18n/seo';
 import { getPriceRangeForProduct } from '@/lib/product-pricing';
 import PageFAQ from '@/components/PageFAQ';
@@ -143,7 +143,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const path = `/products/${params.slug}`;
   const t = await getTranslations({ locale: params.locale, namespace: 'productDetail' });
-  const cat  = wpCategoryBySlug(params.slug);
+  // Localize BEFORE reading name / description / meta_title: without this the
+  // Spanish, German, French and Japanese category pages shipped an English
+  // <title>, meta description and <h1> inside otherwise translated chrome.
+  const cat  = localizeCategory(wpCategoryBySlug(params.slug), params.locale);
   if (cat) {
     const desc = clampDesc(cat.description)
       || t('categoryFallbackDesc', { category: cat.name.toLowerCase() });
@@ -195,7 +198,7 @@ export async function generateMetadata({ params }) {
 
 export default function ProductOrCategoryPage({ params }) {
   unstable_setRequestLocale(params.locale);
-  const cat  = wpCategoryBySlug(params.slug);
+  const cat  = localizeCategory(wpCategoryBySlug(params.slug), params.locale);
   if (cat)  return <CategoryView cat={cat} locale={params.locale} />;
   const rawP = wpProductBySlug(params.slug);
   if (rawP) {
@@ -250,7 +253,7 @@ function CategoryView({ cat, locale }) {
   // `parent` holds the parent's SLUG in our data; comparing it to cat.id meant
   // this list was ALWAYS empty and subcategories were never linked from their
   // parent page.
-  const subCats = wpCategoryChildren(cat);
+  const subCats = wpCategoryChildren(cat).map((sc) => localizeCategory(sc, locale));
 
   // Breadcrumb + ItemList JSON-LD for category landing
   const breadcrumb = breadcrumbLd([

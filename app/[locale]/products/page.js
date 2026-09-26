@@ -8,7 +8,7 @@ import { Link } from '@/i18n/navigation';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/data/site-config';
 import { wpProducts, wpProductCategories, wpProductCategoryTree } from '@/lib/wp-data';
-import { localizeProduct } from '@/lib/translated-content';
+import { localizeProduct, localizeCategory } from '@/lib/translated-content';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import PageFAQ from '@/components/PageFAQ';
 
@@ -52,8 +52,11 @@ export default function ProductsIndex({ params: { locale } }) {
 
   // Localize product titles for the active locale (English passes through).
   const products = wpProducts().map((p) => localizeProduct(p, locale));
-  const categoryTree = wpProductCategoryTree();
-  const allCats = wpProductCategories();
+  const categoryTree = wpProductCategoryTree().map((c) => ({
+    ...localizeCategory(c, locale),
+    children: (c.children || []).map((sc) => localizeCategory(sc, locale)),
+  }));
+  const allCats = wpProductCategories().map((c) => localizeCategory(c, locale));
   // categoryTree returns ROOTS (it is a real tree now that parent resolution
   // is fixed), so headline counts must use the full list, not roots.
   const categoryCount = allCats.filter((c) => c.slug !== 'uncategorized').length;
