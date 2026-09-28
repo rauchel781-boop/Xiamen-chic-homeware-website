@@ -1,0 +1,463 @@
+{
+  "_note": "Hand-written by Claude, not machine translation. The overview paragraph on every product page is assembled from these pieces. Agreement-safe by design: every adjective and participle in a frame attaches to a FIXED noun (esta pieza / cette piece / dieses Stueck), never to the variable {type}, so gender and case can never go wrong no matter which product type is substituted.",
+  "es": {
+    "withMaterial": "{lead}. Esta pieza está diseñada para {app0} y mucho más, y la fabrica CHIC, fabricante directo de productos de madera en China que combina la artesanía tradicional con técnicas de producción modernas para garantizar una calidad constante en volúmenes mayoristas. Tanto si busca proveedor para {app1} como para {app2}, ofrecemos personalización OEM completa: medidas, acabado, marcado de logotipo y embalaje de marca blanca.",
+    "noMaterial": "{lead} de CHIC, fabricante de productos de madera en China especializado en producción OEM y de marca blanca para marcas internacionales. Esta pieza está pensada para {app0} y {app1}, y es totalmente personalizable: medidas, material, acabado, logotipo y embalaje, para encajar en su programa minorista, su línea de regalos o su cuenta de hostelería.",
+    "materials": {
+      "Bamboo": "de bambú",
+      "Acacia Wood": "de madera de acacia",
+      "Black Walnut": "de nogal americano",
+      "Pine Wood": "de madera de pino",
+      "Paulownia": "de madera de paulonia",
+      "Oak Wood": "de madera de roble",
+      "Beech Wood": "de madera de haya",
+      "Rubberwood": "de madera de caucho",
+      "Teak": "de teca",
+      "Sapele": "de sapeli",
+      "MDF": "de MDF",
+      "Plywood": "de contrachapado"
+    },
+    "types": {
+      "cheese-board": {
+        "premium": "una tabla de quesos premium",
+        "custom": "una tabla de quesos personalizada"
+      },
+      "cutting-board": {
+        "premium": "una tabla de cortar premium",
+        "custom": "una tabla de cortar personalizada"
+      },
+      "serving-tray": {
+        "premium": "una bandeja de servicio premium",
+        "custom": "una bandeja de servicio personalizada"
+      },
+      "spice-rack": {
+        "premium": "un especiero premium",
+        "custom": "un especiero personalizado"
+      },
+      "jewelry-box": {
+        "premium": "un joyero premium",
+        "custom": "un joyero personalizado"
+      },
+      "wine-box": {
+        "premium": "una caja de vino premium",
+        "custom": "una caja de vino personalizada"
+      },
+      "tea-box": {
+        "premium": "una caja de té premium",
+        "custom": "una caja de té personalizada"
+      },
+      "gift-box": {
+        "premium": "una caja de regalo premium",
+        "custom": "una caja de regalo personalizada"
+      },
+      "storage-box": {
+        "premium": "una caja de almacenaje premium",
+        "custom": "una caja de almacenaje personalizada"
+      },
+      "default": {
+        "premium": "un artículo premium",
+        "custom": "un producto de madera personalizado"
+      }
+    },
+    "apps": {
+      "cheese-board": [
+        "el servicio de charcutería",
+        "eventos de vino y queso",
+        "sets de regalo"
+      ],
+      "cutting-board": [
+        "la preparación diaria en cocina",
+        "carnicerías y hostelería",
+        "programas de regalo"
+      ],
+      "serving-tray": [
+        "el desayuno en la cama",
+        "el servicio en cafeterías y restaurantes",
+        "la decoración del hogar"
+      ],
+      "spice-rack": [
+        "la organización de la encimera",
+        "el almacenaje en armarios",
+        "cocinas de restaurante"
+      ],
+      "jewelry-box": [
+        "la exposición de joyería en tienda",
+        "el packaging de regalo nupcial",
+        "el almacenaje personal"
+      ],
+      "wine-box": [
+        "el packaging premium de vino de regalo",
+        "el almacenaje en bodega",
+        "regalos de empresa"
+      ],
+      "tea-box": [
+        "el packaging de marcas de té en hoja",
+        "la organización de bolsitas de té",
+        "el servicio en cafeterías"
+      ],
+      "gift-box": [
+        "el packaging de regalo para retail",
+        "regalos de empresa",
+        "detalles de boda y eventos"
+      ],
+      "storage-box": [
+        "la organización del hogar",
+        "el almacenaje en armarios y despensa",
+        "la exposición en tienda"
+      ],
+      "default": [
+        "el retail premium y el packaging de marca",
+        "el uso comercial y hostelero",
+        "programas de regalo y promoción"
+      ]
+    }
+  },
+  "de": {
+    "withMaterial": "{lead}. Dieses Stück ist für {app0} und vieles mehr ausgelegt und wird von CHIC gefertigt, einem Direkthersteller für Holzprodukte in China, der traditionelles Handwerk mit moderner Fertigung verbindet und so gleichbleibende Qualität in Großhandelsmengen liefert. Ob Sie für {app1} oder für {app2} einkaufen — wir bieten vollständige OEM-Anpassung: Maße, Oberfläche, Logoprägung und Verpackung als Eigenmarke.",
+    "noMaterial": "{lead} von CHIC, einem Hersteller für Holzprodukte in China, der auf OEM- und Eigenmarkenfertigung für internationale Marken spezialisiert ist. Dieses Stück ist für {app0} und {app1} gedacht und lässt sich vollständig anpassen: Maße, Material, Oberfläche, Logo und Verpackung — passend zu Ihrem Handelsprogramm, Ihrer Geschenklinie oder Ihrem Hotelkunden.",
+    "materials": {
+      "Bamboo": "aus Bambus",
+      "Acacia Wood": "aus Akazienholz",
+      "Black Walnut": "aus amerikanischem Nussbaum",
+      "Pine Wood": "aus Kiefernholz",
+      "Paulownia": "aus Paulowniaholz",
+      "Oak Wood": "aus Eichenholz",
+      "Beech Wood": "aus Buchenholz",
+      "Rubberwood": "aus Gummibaumholz",
+      "Teak": "aus Teakholz",
+      "Sapele": "aus Sapeliholz",
+      "MDF": "aus MDF",
+      "Plywood": "aus Sperrholz"
+    },
+    "types": {
+      "cheese-board": {
+        "premium": "ein hochwertiges Käsebrett",
+        "custom": "ein maßgefertigtes Käsebrett"
+      },
+      "cutting-board": {
+        "premium": "ein hochwertiges Schneidebrett",
+        "custom": "ein maßgefertigtes Schneidebrett"
+      },
+      "serving-tray": {
+        "premium": "ein hochwertiges Serviertablett",
+        "custom": "ein maßgefertigtes Serviertablett"
+      },
+      "spice-rack": {
+        "premium": "ein hochwertiges Gewürzregal",
+        "custom": "ein maßgefertigtes Gewürzregal"
+      },
+      "jewelry-box": {
+        "premium": "eine hochwertige Schmuckschatulle",
+        "custom": "eine maßgefertigte Schmuckschatulle"
+      },
+      "wine-box": {
+        "premium": "eine hochwertige Weinkiste",
+        "custom": "eine maßgefertigte Weinkiste"
+      },
+      "tea-box": {
+        "premium": "eine hochwertige Teebox",
+        "custom": "eine maßgefertigte Teebox"
+      },
+      "gift-box": {
+        "premium": "eine hochwertige Geschenkbox",
+        "custom": "eine maßgefertigte Geschenkbox"
+      },
+      "storage-box": {
+        "premium": "eine hochwertige Aufbewahrungsbox",
+        "custom": "eine maßgefertigte Aufbewahrungsbox"
+      },
+      "default": {
+        "premium": "ein hochwertiges Produkt",
+        "custom": "ein maßgefertigtes Holzprodukt"
+      }
+    },
+    "apps": {
+      "cheese-board": [
+        "Charcuterie-Platten",
+        "Wein- und Käseabende",
+        "Geschenksets"
+      ],
+      "cutting-board": [
+        "die tägliche Küchenvorbereitung",
+        "Metzgereien und Gastronomie",
+        "Geschenkprogramme"
+      ],
+      "serving-tray": [
+        "das Frühstück ans Bett",
+        "den Service in Cafés und Restaurants",
+        "die Wohndekoration"
+      ],
+      "spice-rack": [
+        "die Ordnung auf der Arbeitsplatte",
+        "die Aufbewahrung im Schrank",
+        "Restaurantküchen"
+      ],
+      "jewelry-box": [
+        "die Schmuckpräsentation im Handel",
+        "Hochzeitsgeschenk-Verpackungen",
+        "die private Aufbewahrung"
+      ],
+      "wine-box": [
+        "hochwertige Wein-Geschenkverpackungen",
+        "die Lagerung im Weinkeller",
+        "Firmengeschenke"
+      ],
+      "tea-box": [
+        "Verpackungen für lose Teemarken",
+        "die Ordnung von Teebeuteln",
+        "den Café-Service"
+      ],
+      "gift-box": [
+        "Geschenkverpackungen im Handel",
+        "Firmengeschenke",
+        "Gastgeschenke für Hochzeiten und Events"
+      ],
+      "storage-box": [
+        "die Ordnung im Haushalt",
+        "die Aufbewahrung in Schrank und Speisekammer",
+        "die Warenpräsentation im Handel"
+      ],
+      "default": [
+        "hochwertigen Einzelhandel und Markenverpackungen",
+        "den Einsatz in Hotellerie und Gewerbe",
+        "Geschenk- und Werbeprogramme"
+      ]
+    }
+  },
+  "fr": {
+    "withMaterial": "{lead}. Cette pièce est conçue pour {app0} et bien plus encore, et elle est fabriquée par CHIC, fabricant direct de produits en bois en Chine qui associe savoir-faire traditionnel et production moderne pour garantir une qualité constante en volumes de gros. Que vous achetiez pour {app1} ou pour {app2}, nous proposons une personnalisation OEM complète : dimensions, finition, marquage du logo et emballage en marque de distributeur.",
+    "noMaterial": "{lead} de CHIC, fabricant de produits en bois en Chine spécialisé dans la production OEM et en marque de distributeur pour les marques internationales. Cette pièce est pensée pour {app0} et {app1}, et elle est entièrement personnalisable : dimensions, matériau, finition, logo et emballage, pour s'intégrer à votre programme de vente, votre ligne de cadeaux ou votre compte hôtellerie.",
+    "materials": {
+      "Bamboo": "en bambou",
+      "Acacia Wood": "en bois d'acacia",
+      "Black Walnut": "en noyer noir",
+      "Pine Wood": "en bois de pin",
+      "Paulownia": "en bois de paulownia",
+      "Oak Wood": "en chêne",
+      "Beech Wood": "en hêtre",
+      "Rubberwood": "en bois d'hévéa",
+      "Teak": "en teck",
+      "Sapele": "en sapelli",
+      "MDF": "en MDF",
+      "Plywood": "en contreplaqué"
+    },
+    "types": {
+      "cheese-board": {
+        "premium": "une planche à fromage haut de gamme",
+        "custom": "une planche à fromage personnalisée"
+      },
+      "cutting-board": {
+        "premium": "une planche à découper haut de gamme",
+        "custom": "une planche à découper personnalisée"
+      },
+      "serving-tray": {
+        "premium": "un plateau de service haut de gamme",
+        "custom": "un plateau de service personnalisé"
+      },
+      "spice-rack": {
+        "premium": "une étagère à épices haut de gamme",
+        "custom": "une étagère à épices personnalisée"
+      },
+      "jewelry-box": {
+        "premium": "une boîte à bijoux haut de gamme",
+        "custom": "une boîte à bijoux personnalisée"
+      },
+      "wine-box": {
+        "premium": "un coffret à vin haut de gamme",
+        "custom": "un coffret à vin personnalisé"
+      },
+      "tea-box": {
+        "premium": "un coffret à thé haut de gamme",
+        "custom": "un coffret à thé personnalisé"
+      },
+      "gift-box": {
+        "premium": "un coffret cadeau haut de gamme",
+        "custom": "un coffret cadeau personnalisé"
+      },
+      "storage-box": {
+        "premium": "une boîte de rangement haut de gamme",
+        "custom": "une boîte de rangement personnalisée"
+      },
+      "default": {
+        "premium": "un article haut de gamme",
+        "custom": "un produit en bois personnalisé"
+      }
+    },
+    "apps": {
+      "cheese-board": [
+        "le service de charcuterie",
+        "les soirées vin et fromage",
+        "les coffrets cadeaux"
+      ],
+      "cutting-board": [
+        "la préparation quotidienne en cuisine",
+        "les boucheries et la restauration",
+        "les programmes cadeaux"
+      ],
+      "serving-tray": [
+        "le petit-déjeuner au lit",
+        "le service en café et en restaurant",
+        "la décoration d'intérieur"
+      ],
+      "spice-rack": [
+        "l'organisation du plan de travail",
+        "le rangement en placard",
+        "les cuisines de restaurant"
+      ],
+      "jewelry-box": [
+        "la présentation de bijoux en boutique",
+        "les coffrets cadeaux de mariage",
+        "le rangement personnel"
+      ],
+      "wine-box": [
+        "les coffrets cadeaux de vin haut de gamme",
+        "le rangement en cave",
+        "les cadeaux d'entreprise"
+      ],
+      "tea-box": [
+        "l'emballage des marques de thé en vrac",
+        "le rangement des sachets de thé",
+        "le service en café"
+      ],
+      "gift-box": [
+        "l'emballage cadeau en boutique",
+        "les cadeaux d'entreprise",
+        "les cadeaux d'invités pour mariages et événements"
+      ],
+      "storage-box": [
+        "l'organisation de la maison",
+        "le rangement en placard et en garde-manger",
+        "la présentation en magasin"
+      ],
+      "default": [
+        "la vente au détail haut de gamme et l'emballage de marque",
+        "l'usage hôtelier et commercial",
+        "les programmes cadeaux et promotionnels"
+      ]
+    }
+  },
+  "ja": {
+    "withMaterial": "{title}は、{material}を使用した{typePremium}です。{app0}をはじめとする用途に対応し、中国の木製品メーカー CHIC が自社工場で製造しています。伝統的な木工技術と近代的な生産設備を組み合わせ、卸ロットでも安定した品質をお届けします。{app1}や{app2}向けの調達でも、サイズ・塗装・ロゴ・プライベートブランド用パッケージまで OEM を全面的にサポートします。",
+    "noMaterial": "{title}は、中国の木製品メーカー CHIC が製造する{typeCustom}です。CHIC は海外ブランド向けの OEM・プライベートブランド生産を専門としています。{app0}や{app1}に適しており、サイズ・素材・塗装・ロゴ・パッケージまで自由にカスタマイズできるため、小売プログラム、ギフトライン、ホスピタリティ案件のいずれにも合わせられます。",
+    "materials": {
+      "Bamboo": "竹材",
+      "Acacia Wood": "アカシア材",
+      "Black Walnut": "ブラックウォールナット材",
+      "Pine Wood": "パイン材",
+      "Paulownia": "桐材",
+      "Oak Wood": "オーク材",
+      "Beech Wood": "ブナ材",
+      "Rubberwood": "ラバーウッド材",
+      "Teak": "チーク材",
+      "Sapele": "サペリ材",
+      "MDF": "MDF",
+      "Plywood": "合板"
+    },
+    "types": {
+      "cheese-board": {
+        "premium": "高級チーズボード",
+        "custom": "カスタムチーズボード"
+      },
+      "cutting-board": {
+        "premium": "高級カッティングボード",
+        "custom": "カスタムカッティングボード"
+      },
+      "serving-tray": {
+        "premium": "高級サービングトレー",
+        "custom": "カスタムサービングトレー"
+      },
+      "spice-rack": {
+        "premium": "高級スパイスラック",
+        "custom": "カスタムスパイスラック"
+      },
+      "jewelry-box": {
+        "premium": "高級ジュエリーボックス",
+        "custom": "カスタムジュエリーボックス"
+      },
+      "wine-box": {
+        "premium": "高級ワインボックス",
+        "custom": "カスタムワインボックス"
+      },
+      "tea-box": {
+        "premium": "高級ティーボックス",
+        "custom": "カスタムティーボックス"
+      },
+      "gift-box": {
+        "premium": "高級ギフトボックス",
+        "custom": "カスタムギフトボックス"
+      },
+      "storage-box": {
+        "premium": "高級収納ボックス",
+        "custom": "カスタム収納ボックス"
+      },
+      "default": {
+        "premium": "高級木製品",
+        "custom": "カスタム木製品"
+      }
+    },
+    "apps": {
+      "cheese-board": [
+        "シャルキュトリーの提供",
+        "ワインとチーズのイベント",
+        "ギフトセット"
+      ],
+      "cutting-board": [
+        "日々の調理作業",
+        "精肉店や飲食店",
+        "ギフト企画"
+      ],
+      "serving-tray": [
+        "ベッドでの朝食",
+        "カフェやレストランでの提供",
+        "インテリア装飾"
+      ],
+      "spice-rack": [
+        "カウンターの整理",
+        "キャビネット収納",
+        "レストランの厨房"
+      ],
+      "jewelry-box": [
+        "店頭でのジュエリー陳列",
+        "ブライダルギフトの包装",
+        "個人の収納"
+      ],
+      "wine-box": [
+        "高級ワインのギフト包装",
+        "セラーでの保管",
+        "法人ギフト"
+      ],
+      "tea-box": [
+        "リーフティーブランドのパッケージ",
+        "ティーバッグの整理",
+        "カフェでの提供"
+      ],
+      "gift-box": [
+        "小売向けギフト包装",
+        "法人ギフト",
+        "結婚式やイベントの引き出物"
+      ],
+      "storage-box": [
+        "家庭の整理収納",
+        "クローゼットやパントリーの収納",
+        "店頭ディスプレイ"
+      ],
+      "default": [
+        "高級小売やブランドパッケージ",
+        "ホスピタリティや業務用途",
+        "ギフト・販促企画"
+      ]
+    }
+  },
+  "_note2": "es/de/fr frames open with {lead}: the builder joins the localized title to the type phrase with an em-dash, or with a full stop when the title already contains an em-dash or a pipe, so no overview ever shows two dashes in a row. typeOverrides fixes products whose overview type is inferred wrongly from a category slug (a glasses case sitting in the wine-box category, etc).",
+  "typeOverrides": {
+    "wooden-glasses-case": "default",
+    "european-creative-wooden-wine-rack-wooden-wine-rack-desktop-decoration": "default",
+    "wooden-plate-creative-tableware-beech-cartoon-rabbit-wooden-meal-plate": "default",
+    "portable-wooden-sketch-box-wholesale": "storage-box",
+    "wicker-picnic-basket-set-for-2": "default",
+    "wooden-suggestion-box-with-lock": "default",
+    "rosewood-silk-lined-jewelry-display-tray": "default",
+    "nesting-wooden-tray-side-table-set": "default",
+    "round-rattan-tray-side-table-wholesale": "default"
+  }
+}
