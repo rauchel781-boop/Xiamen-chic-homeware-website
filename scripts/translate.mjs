@@ -65,6 +65,42 @@ const FLAGS = Object.fromEntries(
     })
 );
 const ONLY_MISSING = !FLAGS.all;
+
+// ── Engine ──────────────────────────────────────────────────────────────
+// Two Aliyun engines, and the difference matters a lot for this catalogue.
+//
+//   general (default)  Action TranslateGeneral, Scene 'general'. Free tier,
+//                      1M chars/month. Tuned for everyday prose. It does not
+//                      know product vocabulary: "chicken wire door" came back
+//                      as "poulet fil porte" in French and "Hühner draht tür"
+//                      in German — literally "chicken thread door", with the
+//                      German compound noun split into three lowercase words.
+//
+//   --pro              Action Translate, Scene 'title' or 'description'. The
+//                      paid professional edition — 60 CNY per million chars,
+//                      with its own separate 1M free chars/month. Trained on
+//                      e-commerce titles and descriptions, so product terms
+//                      survive.
+//
+// Professional edition has to be enabled separately in the Aliyun console;
+// enabling the general edition does not enable it. Run
+// `translate.mjs test --pro` first to confirm the account can call it.
+const PRO = !!FLAGS.pro;
+// --slugs=a,b,c restricts a run to named entries. Needed because --all is
+// too blunt: re-running every blog post through the professional engine is
+// 5.5M characters, while redoing the nine posts that the general engine
+// produced is about 600k.
+const ONLY_SLUGS = FLAGS.slugs
+  ? new Set(String(FLAGS.slugs).split(',').map((x) => x.trim()).filter(Boolean))
+  : null;
+// Scene for the call currently in flight. Commands set it around their loops
+// so titles get the title model and body copy gets the description model.
+let SCENE = 'description';
+function withScene(scene, fn) {
+  const prev = SCENE;
+  SCENE = scene;
+  return Promise.resolve(fn()).finally(() => { SCENE = prev; });
+}
 const LIMIT   = FLAGS.limit ? parseInt(FLAGS.limit, 10) : Infinity;
 const DRY_RUN = !!FLAGS['dry-run'];
 
@@ -83,6 +119,7 @@ async function loadExisting(file) {
 // One place that decides whether an entry still needs work, so every command
 // agrees on what "already translated" means.
 function needsWork(existing, slug, fields) {
+  if (ONLY_SLUGS) return ONLY_SLUGS.has(slug);
   if (!ONLY_MISSING) return true;
   const e = existing[slug];
   if (!e) return true;
@@ -118,13 +155,26 @@ function isoTime() {
 
 async function translateOne(text, source, target) {
   if (!text || typeof text !== 'string' || !text.trim()) return text;
+  // Both editions cap a request at 5,000 characters. Text nodes are normally
+  // far shorter, but a WP body can carry one enormous paragraph, so split on
+  // sentence boundaries rather than letting the call fail.
+  if (text.length > 4500) {
+    const parts = text.match(/[\s\S]{1,4000}(?:[.!?。！？]\s|$)/g) || [text.slice(0, 4000)];
+    const out = [];
+    for (const part of parts) out.push(await translateOne(part, source, target));
+    return out.join('');
+  }
 
+  // Professional edition uses Action=Translate with a vertical Scene;
+  // the free general edition uses Action=TranslateGeneral with Scene=general.
+  // Everything else about the request — signing, encoding, response shape —
+  // is identical, so only these three fields change.
   const params = {
     AccessKeyId: AK_ID,
-    Action: 'TranslateGeneral',
+    Action: PRO ? 'Translate' : 'TranslateGeneral',
     Format: 'JSON',
     FormatType: 'text',
-    Scene: 'general',
+    Scene: PRO ? SCENE : 'general',
     SignatureMethod: 'HMAC-SHA1',
     SignatureNonce: crypto.randomBytes(16).toString('hex'),
     SignatureVersion: '1.0',
@@ -168,7 +218,9 @@ async function translateOne(text, source, target) {
 
 async function tr(text, target, source = 'en') {
   if (!text || typeof text !== 'string') return text;
-  const key = `${source}|${target}|${text}`;
+  // The engine and scene are part of the key: a general-edition result must
+  // not be served back when the caller asked for the professional one.
+  const key = PRO ? `pro:${SCENE}|${source}|${target}|${text}` : `${source}|${target}|${text}`;
   if (cache[key] != null) return cache[key];
 
   // Retry once on transient errors
@@ -216,12 +268,23 @@ async function translateJson(obj, target, onProgress) {
 // ============================================================================
 
 async function cmdTest() {
-  console.log('Testing Aliyun connection…');
-  const samples = ['Hello, this is a test.', 'Wooden Box Manufacturer'];
-  for (const s of samples) {
+  console.log(`Testing Aliyun connection — engine: ${PRO ? 'PROFESSIONAL (Translate)' : 'general (TranslateGeneral)'}`);
+  if (PRO) console.log('If this fails with a permission error, the professional edition is not enabled on the account.\n');
+
+  // Deliberately the phrases the free engine mangled: "chicken wire" came
+  // back as chicken + thread in three languages, and German compound nouns
+  // were split into separate lowercase words. If the professional engine
+  // gets these right, it is worth re-running the catalogue through it.
+  const samples = [
+    ['title', 'Wall Mounted Wooden Spice Cabinet with Chicken Wire Door'],
+    ['title', 'Acacia Stackable Pantry Bin with Lid'],
+    ['description', 'The removable dividers sit in routed slots, so the layout can be changed without tools.'],
+  ];
+  for (const [scene, text] of samples) {
+    console.log(`\n[${scene}] ${text}`);
     for (const lang of LANGS) {
-      const out = await translateOne(s, 'en', lang);
-      console.log(`  EN → ${lang.toUpperCase()}: "${s}" → "${out}"`);
+      const out = await withScene(scene, () => translateOne(text, 'en', lang));
+      console.log(`  ${lang.toUpperCase()}: ${out}`);
     }
   }
   console.log('\n✓ Connection works.');
@@ -416,8 +479,8 @@ async function cmdProducts() {
       const overview = buildOverview(p);
       out[p.slug] = {
         ...(out[p.slug] || {}),
-        title: title ? await tr(title, lang) : '',
-        overview: overview ? await tr(overview, lang) : '',
+        title: title ? await withScene('title', () => tr(title, lang)) : '',
+        overview: overview ? await withScene('description', () => tr(overview, lang)) : '',
       };
       process.stdout.write(`\r  ${i}/${batch.length}`);
       if (i % 10 === 0) {
@@ -475,7 +538,7 @@ async function cmdBodies() {
       try {
         out[p.slug] = {
           ...(out[p.slug] || {}),
-          content: await trBlogContent(p.content, lang),
+          content: await withScene('description', () => trBlogContent(p.content, lang)),
         };
       } catch (e) {
         console.error(`\n  ✗ Failed body "${p.slug}": ${e.message}`);
@@ -514,8 +577,12 @@ async function cmdCategories() {
     await readFile(path.join(ROOT, 'wp-data/product_categories.json'), 'utf8')
   ).filter((c) => c.slug !== 'uncategorized');
   console.log(`Loaded ${cats.length} categories.`);
-  if (!ONLY_MISSING) {
-    console.log('⚠  --all will overwrite the hand-written category translations with machine output.');
+  // The four category files were written by hand and read better than any
+  // engine output, so --all alone is not enough to clobber them.
+  if (!ONLY_MISSING && !ONLY_SLUGS && !FLAGS.force) {
+    console.error('\n✗ --all on categories would replace hand-written translations with machine output.');
+    console.error('  If that is really what you want, add --force. To redo a few, use --slugs=a,b,c.\n');
+    process.exit(1);
   }
 
   for (const lang of LANGS) {
@@ -534,9 +601,9 @@ async function cmdCategories() {
       const metaTitle = stripHtml(c.meta_title || '');
       out[c.slug] = {
         ...(out[c.slug] || {}),
-        name: name ? await tr(name, lang) : '',
-        description: desc ? await trHtml(desc, lang) : '',
-        ...(metaTitle ? { meta_title: await tr(metaTitle, lang) } : {}),
+        name: name ? await withScene('title', () => tr(name, lang)) : '',
+        description: desc ? await withScene('description', () => trHtml(desc, lang)) : '',
+        ...(metaTitle ? { meta_title: await withScene('title', () => tr(metaTitle, lang)) } : {}),
       };
       process.stdout.write(`\r  ${i}/${batch.length}`);
       if (i % 10 === 0) await saveCache();
@@ -933,7 +1000,13 @@ Commands
   namespace <ns>  One top-level namespace of messages/en.json
 
 Flags
+  --pro          Use the paid professional engine (Scene title/description)
+                 instead of the free general one. Needs the professional
+                 edition enabled in the Aliyun console. Its free quota is
+                 separate: 1M chars/month, then 60 CNY per million.
   --all          Retranslate everything, not only what is missing
+  --slugs=a,b    Only these entries, by slug (use instead of --all to redo
+                 a named subset without paying for the whole corpus)
   --limit=N      Stop after N items per locale
   --langs=es,de  Restrict to some locales
   --dry-run      Report what would be sent without calling the API
