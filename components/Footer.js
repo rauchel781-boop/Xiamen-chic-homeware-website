@@ -49,6 +49,7 @@ export default function Footer() {
     { label: t('footer.solCarvedBoxes'),      href: '/carved-wooden-boxes-manufacturer' },
     { label: t('footer.solStorageBoxes'),     href: '/custom-wooden-storage-boxes-wholesale' },
     { label: t('footer.solStorageOrganizer'), href: '/wooden-storage-organizer-manufacturer' },
+    { label: t('footer.solTreasureChest'),    href: '/wholesale-treasure-chest-manufacturer' },
     { label: t('footer.solServingTrays'),     href: '/wholesale-wooden-serving-trays' },
     { label: t('footer.solSofaTray'),         href: '/wooden-sofa-tray-manufacturer' },
     { label: t('footer.solSpiceRack'),        href: '/custom-wooden-spice-rack' },

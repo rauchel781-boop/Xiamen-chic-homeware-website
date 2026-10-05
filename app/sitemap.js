@@ -86,6 +86,7 @@ export default function sitemap() {
     'premium-gift-packaging-manufacturer',
     'wholesale-pet-urns-manufacturer',
     'wooden-storage-organizer-manufacturer',
+    'wholesale-treasure-chest-manufacturer',
   ];
   for (const slug of LANDING_PAGES) {
     push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });
