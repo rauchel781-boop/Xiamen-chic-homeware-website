@@ -75,10 +75,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const p = wpPageBySlug(params.slug);
   if (!p) return {};
+  const robots = p.noindex ? { index: false, follow: p.nofollow !== true } : undefined;
   return {
     title: p.meta_title || stripHtml(p.title),
     description: p.meta_desc || stripHtml(p.excerpt || p.content).slice(0, 160),
     alternates: { canonical: canonicalFor(params.locale, `/${params.slug}`), languages: hreflangFor(SITE.siteUrl, `/${params.slug}`) },
+    ...(robots ? { robots } : {}),
   };
 }
 

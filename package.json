@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seo:audit": "node scripts/audit-seo-metadata.mjs",
+    "seo:fix-metadata": "node scripts/generate-category-metadata-proposals.mjs && node scripts/apply-seo-metadata-fixes.mjs"
   },
   "dependencies": {
     "next": "14.2.5",

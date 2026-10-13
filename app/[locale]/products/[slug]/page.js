@@ -148,7 +148,7 @@ export async function generateMetadata({ params }) {
   // <title>, meta description and <h1> inside otherwise translated chrome.
   const cat  = localizeCategory(wpCategoryBySlug(params.slug), params.locale);
   if (cat) {
-    const desc = clampDesc(cat.description)
+    const desc = clampDesc(cat.meta_desc || cat.description)
       || t('categoryFallbackDesc', { category: cat.name.toLowerCase() });
     // A hand-tuned meta_title on the category wins over the generic
     // "<name> — Wholesale Manufacturer" pattern. Needed because the three
