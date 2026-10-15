@@ -1,6 +1,6 @@
 # SEO Operations
 
-Last updated: 2026-10-13
+Last updated: 2026-10-14
 
 ## Current Site
 
@@ -55,20 +55,51 @@ After running `npm run seo:fix-metadata` on 2026-10-13:
 
 ## SEO Priorities
 
-1. Fix product category metadata first.
-   Product categories are commercial landing pages and many currently lack explicit metadata.
+1. Verify the production release in Coolify after every push. A GitHub push alone does not prove deployment.
+2. Review Search Console indexing and search-performance data before selecting the next commercial pages to improve.
+3. Improve the main product and category pages using verified specifications, real images, and buyer questions.
+4. Verify successful inquiry tracking separately from page-view tracking.
+5. Keep internal links relevant and structured data consistent with visible, verifiable content.
 
-2. Fix product metadata gaps.
-   Add unique `meta_title` for the 35 missing products and trim long descriptions.
+## International SEO And Internal Links: 2026-10-14
 
-3. Fix generic WP pages.
-   Pages with real search value need unique metadata. Legacy or low-value pages should be redirected or excluded.
+- Localized homepages use self-referencing canonicals and the existing translated metadata.
+- The sitemap contains 455 paths per language, 2,275 URLs in total, with reciprocal language alternates.
+- Team, capabilities, and wood-fabrication pages are included; duplicate and noindex entries are excluded.
+- Sitemap dates no longer change merely because of a build. Source update dates are not attributed to unchanged translations.
+- 36 English articles received a short, topic-specific paragraph linking to two relevant products or categories, with an inquiry link where missing.
+- Source articles retain their original publication dates and record actual modification dates.
+- Existing translated article bodies were not regenerated. Blog-body coverage is not a whole-site orphan-page audit.
+- Internal-link counts are diagnostic, not ranking quotas. FAQ content remains useful, but Google discontinued FAQ rich results on May 7, 2026.
 
-4. Strengthen internal links.
-   New blog posts should link to relevant products, categories, guides, and `/contact`. Existing high-value pages should link back to new posts.
+References:
+- https://developers.google.com/search/docs/specialty/international/localized-versions#sitemap
+- https://developers.google.com/search/docs/crawling-indexing/links-crawlable
+- https://developers.google.com/search/updates#may-2026
 
-5. Keep structured data clean.
-   Do not duplicate schema blocks unnecessarily. Product pages should have Product schema; blogs should have BlogPosting and optional FAQPage.
+### Release Verification
+
+```bash
+npm run build
+npm run seo:audit
+npm run seo:verify-build
+npm run seo:verify-live
+```
+
+The verification script checks canonical URLs, document languages, homepage titles, reciprocal sitemap entries, new article paragraphs, and selected paragraphs from the previous release. `--build` reads actual production output; live mode reads the public website and returns a nonzero exit code if the release markers are absent. Optional usage:
+
+```bash
+node scripts/verify-seo-deployment.mjs https://xmchichomeware.com --report live-check.json
+```
+
+Coolify's application must use the intended repository and `main` branch. Confirm a successful deployment for the pushed commit, then run the live check. Do not interpret an empty GitHub deployment/check list as a successful or failed Coolify deployment.
+
+The curated content update is repeatable without adding duplicate paragraphs:
+
+```bash
+node scripts/add-contextual-product-links.mjs
+node scripts/add-contextual-product-links.mjs --apply
+```
 
 ## Metadata Rules
 

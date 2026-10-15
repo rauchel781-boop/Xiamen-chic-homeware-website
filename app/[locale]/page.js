@@ -12,13 +12,13 @@
 //   10. FAQ (5 questions — content from WP)
 //   11. Final CTA strip
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import fs from 'fs';
 import path from 'path';
 import { wpProducts } from '@/lib/wp-data';
 import { SITE } from '@/data/site-config';
-import { hreflangFor } from '@/i18n/routing';
+import { hreflangFor, canonicalFor, routing } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import JsonLd from '@/components/JsonLd';
 import Hero from '@/components/Hero';
@@ -42,15 +42,21 @@ const HERO_LCP = '/wp-images/2026/02/CHIC-Factory.jpg';
 
 // Home page metadata override (locale layout already handles canonical/hreflang)
 export async function generateMetadata({ params: { locale } }) {
-  const title = 'Wooden Products Manufacturer & OEM Supplier in China';
-  const desc  = 'Custom wooden & bamboo home storage, kitchenware and gift packaging — factory-direct OEM/ODM with 60+ countries of export experience.';
+  const t = await getTranslations({ locale, namespace: 'meta' });
+  const title = locale === routing.defaultLocale
+    ? 'Wooden Products Manufacturer & OEM Supplier in China'
+    : t('siteTitle');
+  const desc = locale === routing.defaultLocale
+    ? 'Custom wooden & bamboo home storage, kitchenware and gift packaging — factory-direct OEM/ODM with 60+ countries of export experience.'
+    : t('siteDescription');
+  const homeUrl = `${SITE.siteUrl}${canonicalFor(locale, '')}`;
   return {
-    title,
+    title: { absolute: title },
     description: desc,
-    alternates: { canonical: '/', languages: hreflangFor(SITE.siteUrl, '') },
+    alternates: { canonical: homeUrl, languages: hreflangFor(SITE.siteUrl, '') },
     openGraph: {
       type: 'website',
-      url: `${SITE.siteUrl}`,
+      url: homeUrl,
       title,
       description: desc,
       siteName: SITE.company.brand,

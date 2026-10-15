@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "seo:audit": "node scripts/audit-seo-metadata.mjs",
-    "seo:fix-metadata": "node scripts/generate-category-metadata-proposals.mjs && node scripts/apply-seo-metadata-fixes.mjs"
+    "seo:fix-metadata": "node scripts/generate-category-metadata-proposals.mjs && node scripts/apply-seo-metadata-fixes.mjs",
+    "seo:verify-build": "node scripts/verify-seo-deployment.mjs --build",
+    "seo:verify-live": "node scripts/verify-seo-deployment.mjs"
   },
   "dependencies": {
     "next": "14.2.5",

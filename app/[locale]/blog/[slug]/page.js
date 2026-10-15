@@ -138,6 +138,7 @@ export async function generateMetadata({ params }) {
       description: desc,
       siteName: SITE.company.brand,
       publishedTime: p.date,
+      ...(params.locale === routing.defaultLocale && p.modified ? { modifiedTime: p.modified } : {}),
       images: [{ url: img, width: 1200, height: 630, alt: title }],
     },
     twitter: { card: 'summary_large_image', title, description: desc, images: [img] },
@@ -202,11 +203,7 @@ export default function BlogPost({ params }) {
       { '@type': 'ListItem', position: 3, name: stripHtml(p.title) },
     ],
   };
-  // For non-default-locale variants (de/es/fr/ja) the content WAS modified
-  // when we ran the machine-translation pipeline. Reflecting that honestly
-  // via dateModified gives Google a real freshness signal instead of the
-  // "datePublished === dateModified" red flag the original audit flagged.
-  // English variant keeps post.date because the source content is unchanged.
+  // Source updates do not change the publication date or the translation date.
   const isTranslated = params.locale !== routing.defaultLocale;
   const articleLd = {
     '@context': 'https://schema.org',
@@ -216,7 +213,7 @@ export default function BlogPost({ params }) {
       || stripHtml(p.excerpt || p.content).slice(0, 200),
     image: p.featured_image ? [p.featured_image.startsWith('http') ? p.featured_image : `${SITE.siteUrl}${p.featured_image}`] : undefined,
     datePublished: p.date,
-    dateModified: isTranslated ? SITE.lastLocalizationDate : p.date,
+    dateModified: isTranslated ? SITE.lastLocalizationDate : (p.modified || p.date),
     inLanguage: schemaLang(params.locale),
     // Named Person author (was Organization). Google's E-E-A-T evaluators
     // explicitly weight named human authors above corporate attribution.

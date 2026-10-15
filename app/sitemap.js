@@ -1,8 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Sitemap — multilingual (5 locales: en/es/de/fr/ja) B2B export site.
-// Each URL is emitted ONCE (as the default-locale English version) with
-// alternates pointing to all other locale variants. This is the format
-// Google recommends for hreflang sitemaps.
+// Each language version has its own URL entry, with reciprocal alternates.
 //
 // Refs:
 //   - https://developers.google.com/search/docs/specialty/international/localized-versions#sitemap
@@ -20,7 +18,12 @@ import {
 } from '@/lib/wp-data';
 import { routing } from '@/i18n/routing';
 
-const TODAY = new Date();
+function modifiedDate(record) {
+  const value = record.modified || record.date;
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
 
 function abs(imgPath) {
   if (!imgPath) return null;
@@ -46,17 +49,24 @@ function alternatesFor(path) {
 
 export default function sitemap() {
   const entries = [];
+  const seen = new Set();
   const push = (path, opts = {}) => {
-    const entry = {
-      // Canonical URL is the English (default-locale) one
-      url: urlFor(routing.defaultLocale, path === '/' ? '' : path),
-      lastModified: opts.lastModified || TODAY,
-      changeFrequency: opts.changeFrequency || 'monthly',
-      priority: opts.priority ?? 0.7,
-      alternates: alternatesFor(path === '/' ? '' : path),
-    };
-    if (opts.images && opts.images.length > 0) entry.images = opts.images;
-    entries.push(entry);
+    const normalizedPath = path === '/' ? '' : path;
+    for (const locale of routing.locales) {
+      const url = urlFor(locale, normalizedPath);
+      if (seen.has(url)) continue;
+      seen.add(url);
+      const entry = {
+        url,
+        changeFrequency: opts.changeFrequency || 'monthly',
+        priority: opts.priority ?? 0.7,
+        alternates: alternatesFor(normalizedPath),
+      };
+      // Omit dates we do not know; rebuilding is not a content update.
+      if (locale === routing.defaultLocale && opts.lastModified) entry.lastModified = opts.lastModified;
+      if (opts.images && opts.images.length > 0) entry.images = opts.images;
+      entries.push(entry);
+    }
   };
 
   // ── Static pages ───────────────────────────────────────────────────
@@ -64,6 +74,9 @@ export default function sitemap() {
   push('/products',        { priority: 0.9, changeFrequency: 'weekly'  });
   push('/material-guide',  { priority: 0.8, changeFrequency: 'monthly' });
   push('/about',           { priority: 0.7, changeFrequency: 'monthly' });
+  push('/about/team',      { priority: 0.6, changeFrequency: 'monthly' });
+  push('/capabilities',    { priority: 0.7, changeFrequency: 'monthly' });
+  push('/wood-fabrication', { priority: 0.7, changeFrequency: 'monthly' });
   push('/contact',         { priority: 0.6, changeFrequency: 'yearly'  });
   push('/blog',            { priority: 0.7, changeFrequency: 'weekly'  });
 
@@ -122,7 +135,7 @@ export default function sitemap() {
     if (p.featured_image) imgs.push({ url: abs(p.featured_image) });
     for (const g of p.gallery || []) if (g) imgs.push({ url: abs(g) });
     push(`/products/${p.slug}`, {
-      lastModified: p.date ? new Date(p.date) : TODAY,
+      lastModified: modifiedDate(p),
       priority: 0.7,
       changeFrequency: 'monthly',
       images: imgs.slice(0, 6),
@@ -153,6 +166,7 @@ export default function sitemap() {
   ]);
   for (const wp of wpPages()) {
     if (ALIAS_SLUGS.has(wp.slug)) continue;
+    if (wp.noindex) continue;
     if (!wp.content || wp.content.length < 50) continue;
     // Defensive: skip any slug with URL-encoded chars or non-ASCII (e.g. Chinese
     // wishlist page 心愿单 stored as %e5%bf%83...). These are legacy WP artifacts
@@ -160,7 +174,7 @@ export default function sitemap() {
     if (/%[0-9a-fA-F]{2}/.test(wp.slug)) continue;
     if (!/^[a-z0-9-]+$/i.test(wp.slug))   continue;
     push(`/${wp.slug}`, {
-      lastModified: wp.date ? new Date(wp.date) : TODAY,
+      lastModified: modifiedDate(wp),
       priority: 0.5,
       changeFrequency: 'monthly',
     });
@@ -170,7 +184,7 @@ export default function sitemap() {
   for (const post of wpBlogPosts()) {
     const imgs = post.featured_image ? [{ url: abs(post.featured_image) }] : [];
     push(`/blog/${post.slug}`, {
-      lastModified: post.date ? new Date(post.date) : TODAY,
+      lastModified: modifiedDate(post),
       priority: 0.6,
       changeFrequency: 'monthly',
       images: imgs,
@@ -183,7 +197,7 @@ export default function sitemap() {
   for (const brief of wpBriefs()) {
     const imgs = brief.featured_image ? [{ url: abs(brief.featured_image) }] : [];
     push(`/briefs/${brief.slug}`, {
-      lastModified: brief.date ? new Date(brief.date) : TODAY,
+      lastModified: modifiedDate(brief),
       priority: 0.7,
       changeFrequency: 'weekly',
       images: imgs,
