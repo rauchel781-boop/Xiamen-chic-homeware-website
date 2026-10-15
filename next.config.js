@@ -7,6 +7,10 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.js');
 //   - 10 empty-page category stubs: /<cat-slug> → /products/<cat-slug>
 //   - 5 long-slug aliases:     /complete-guide-… → /material-guide  etc.
 const dataRedirects = require('./wp-data/extracted/all_redirects.json');
+const { buildLegacyRedirects } = require('./lib/legacy-url-migrations.cjs');
+const legacyRedirects = buildLegacyRedirects().filter(rule =>
+  !dataRedirects.some(existing => existing.source === rule.source)
+);
 
 // Industry Briefs live under /briefs/<slug>, not /blog/<slug>. Auto-build a
 // 301 from the (non-existent) /blog/<slug> to the real /briefs/<slug> for every
@@ -137,6 +141,9 @@ const nextConfig = {
       // link to a brief — mistyped, shared, or previously indexed —
       // redirects to the real /briefs URL instead of showing a blank 404.
       ...briefBlogRedirects,
+
+      // Exact legacy category and renamed-article migrations, including locales.
+      ...legacyRedirects,
 
       // ── Per-slug redirects from the JSON data ──────────────────────
       // Blog posts (71) + empty-page category stubs (10) + alias pages (5).
