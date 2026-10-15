@@ -17,6 +17,7 @@ import {
   wpPages,
 } from '@/lib/wp-data';
 import { routing } from '@/i18n/routing';
+import { translatedPost } from '@/lib/translated-content';
 
 function modifiedDate(record) {
   const value = record.modified || record.date;
@@ -64,6 +65,10 @@ export default function sitemap() {
       };
       // Omit dates we do not know; rebuilding is not a content update.
       if (locale === routing.defaultLocale && opts.lastModified) entry.lastModified = opts.lastModified;
+      const localizedDate = opts.localizedModified?.[locale];
+      if (locale !== routing.defaultLocale && localizedDate && !Number.isNaN(new Date(localizedDate).getTime())) {
+        entry.lastModified = new Date(localizedDate);
+      }
       if (opts.images && opts.images.length > 0) entry.images = opts.images;
       entries.push(entry);
     }
@@ -185,6 +190,7 @@ export default function sitemap() {
     const imgs = post.featured_image ? [{ url: abs(post.featured_image) }] : [];
     push(`/blog/${post.slug}`, {
       lastModified: modifiedDate(post),
+      localizedModified: Object.fromEntries(routing.locales.map(locale => [locale, translatedPost(post.slug, locale)?.modified])),
       priority: 0.6,
       changeFrequency: 'monthly',
       images: imgs,
