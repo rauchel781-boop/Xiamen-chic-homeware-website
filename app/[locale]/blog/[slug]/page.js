@@ -378,7 +378,9 @@ export default function BlogPost({ params }) {
               )}
 
               <div
-                className="wp-content blog-prose"
+                className={p.responsive_tables && params.locale === routing.defaultLocale
+                  ? "wp-content blog-prose [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
+                  : "wp-content blog-prose"}
                 dangerouslySetInnerHTML={{ __html: enhancedHtml }}
               />
 

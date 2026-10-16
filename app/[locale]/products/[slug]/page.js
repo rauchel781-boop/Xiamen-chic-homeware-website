@@ -566,7 +566,12 @@ function ProductView({ p, locale }) {
             return (
               <section className="mt-12 border-t border-brand-line pt-10">
                 <h2 className="text-2xl font-bold text-brand-ink mb-6">{t('moreAboutProduct')}</h2>
-                <div className="wp-content max-w-4xl" dangerouslySetInnerHTML={{__html: cleaned}} />
+                <div
+                  className={useCuratedContent
+                    ? "wp-content max-w-4xl [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
+                    : "wp-content max-w-4xl"}
+                  dangerouslySetInnerHTML={{__html: cleaned}}
+                />
               </section>
             );
           }
