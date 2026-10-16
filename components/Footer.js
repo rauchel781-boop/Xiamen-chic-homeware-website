@@ -60,13 +60,11 @@ export default function Footer() {
 
   function subscribe(e) {
     e.preventDefault();
-    if (!email) return;
-    setState('sending');
-    // TODO: wire to your newsletter endpoint or mailto fallback
-    setTimeout(() => {
-      setState('done');
-      setEmail('');
-    }, 700);
+    if (!email.trim()) return;
+    const subject = encodeURIComponent('CHIC newsletter subscription request');
+    const body = encodeURIComponent(`Please send me the CHIC catalog and product updates.\n\nEmail: ${email.trim()}`);
+    window.location.href = `mailto:sales@xmchichomeware.com?subject=${subject}&body=${body}`;
+    setState('draft');
   }
 
   return (
@@ -82,32 +80,29 @@ export default function Footer() {
               {t('footer.newsletterTitle')}
             </h3>
           </div>
-          <form onSubmit={subscribe} className="flex gap-2">
+          <form onSubmit={subscribe} className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder={t('footer.newsletterPlaceholder')}
-              className="flex-1 rounded-full bg-white/10 border border-white/20 px-5 py-3 text-white placeholder-white/50 focus:outline-none focus:border-brand-yellowSoft"
+              aria-label={t('footer.newsletterPlaceholder')}
+              className="min-w-0 w-full sm:flex-1 rounded-full bg-white/10 border border-white/20 px-5 py-3 text-white placeholder-white/50 focus:outline-none focus:border-brand-yellowSoft"
             />
             <button
               type="submit"
-              disabled={state === 'sending'}
-              className="rounded-full bg-white text-brand-green px-6 py-3 text-sm font-bold hover:bg-brand-cream disabled:opacity-60 transition shrink-0"
+              className="w-full sm:w-auto rounded-full bg-white text-brand-green px-6 py-3 text-sm font-bold hover:bg-brand-cream transition shrink-0"
             >
-              {state === 'sending'
-                ? t('cta.sending')
-                : state === 'done'
-                ? t('footer.subscribedConfirm')
-                : t('footer.subscribeArrow')}
+              {t('footer.subscribeArrow')}
             </button>
+            {state === 'draft' && <p role="status" className="w-full text-sm leading-relaxed">{t('footer.newsletterEmailDraft')}</p>}
           </form>
         </div>
       </div>
 
       {/* Main grid */}
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-14 grid grid-cols-2 md:grid-cols-4 gap-10 [overflow-wrap:anywhere]">
         {/* Brand */}
         <div className="col-span-2 md:col-span-1">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">

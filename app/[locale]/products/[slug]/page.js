@@ -175,7 +175,7 @@ export async function generateMetadata({ params }) {
   if (rawP) {
     const p = localizeProduct(rawP, params.locale);
     const title = productSeoTitle(p.meta_title, p.title);
-    const desc  = clampDesc(p._localizedOverview || p.meta_desc || p.excerpt || p.content);
+    const desc  = clampDesc(p._localizedMetaDescription || p._localizedOverview || p.meta_desc || p.excerpt || p.content);
     const img   = p.featured_image || `${SITE.siteUrl}/logo.png`;
     return {
       // absolute → skip the root layout's brand-suffix title template.
@@ -394,7 +394,7 @@ function ProductView({ p, locale }) {
   // Same translator declaration pattern as the blog page — only emit on
   // non-default-locale variants where the description was machine-translated.
   const isTranslated = locale !== routing.defaultLocale;
-  const useCuratedContent = !isTranslated && p.content_complete === true;
+  const useCuratedContent = p.content_complete === true && (!isTranslated || p._localizedContentComplete === true);
 
   // Resolve B2B FOB price range for this product, driven by its leaf
   // category. See lib/product-pricing.js for the full per-category table.
@@ -419,7 +419,7 @@ function ProductView({ p, locale }) {
     ...(isTranslated && {
       translator: {
         '@type': 'Organization',
-        name: 'CHIC Localization (Aliyun Machine Translation, human-reviewed)',
+        name: p._localizedModified ? 'CHIC Localization' : 'CHIC Localization (Aliyun Machine Translation, human-reviewed)',
       },
     }),
     // ── AggregateOffer ─────────────────────────────────────────────────
@@ -568,7 +568,7 @@ function ProductView({ p, locale }) {
                 <h2 className="text-2xl font-bold text-brand-ink mb-6">{t('moreAboutProduct')}</h2>
                 <div
                   className={useCuratedContent
-                    ? "wp-content max-w-4xl [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
+                    ? "wp-content max-w-4xl [overflow-wrap:anywhere] [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
                     : "wp-content max-w-4xl"}
                   dangerouslySetInnerHTML={{__html: cleaned}}
                 />
@@ -579,7 +579,9 @@ function ProductView({ p, locale }) {
         })()}
 
         {useCuratedContent && Array.isArray(p.faq) && p.faq.length > 0 && (
-          <PageFAQ title={t('faqTitle')} items={p.faq} />
+          <div className="min-w-0 [overflow-wrap:anywhere]">
+            <PageFAQ title={t('faqTitle')} items={p.faq} />
+          </div>
         )}
 
         {guides.length > 0 && (

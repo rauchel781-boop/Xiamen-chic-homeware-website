@@ -17,7 +17,7 @@ import {
   wpPages,
 } from '@/lib/wp-data';
 import { routing } from '@/i18n/routing';
-import { translatedPost } from '@/lib/translated-content';
+import { translatedPost, translatedProduct } from '@/lib/translated-content';
 
 function modifiedDate(record) {
   const value = record.modified || record.date;
@@ -141,6 +141,7 @@ export default function sitemap() {
     for (const g of p.gallery || []) if (g) imgs.push({ url: abs(g) });
     push(`/products/${p.slug}`, {
       lastModified: modifiedDate(p),
+      localizedModified: Object.fromEntries(routing.locales.map(locale => [locale, translatedProduct(p.slug, locale)?.modified])),
       priority: 0.7,
       changeFrequency: 'monthly',
       images: imgs.slice(0, 6),

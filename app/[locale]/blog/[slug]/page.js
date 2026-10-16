@@ -187,7 +187,7 @@ export default function BlogPost({ params }) {
   // target="_blank" rel="noopener nofollow" on every external link,
   // and count externals (build-time warning if >10). The TOC array
   // is fed to the <TableOfContents> component below.
-  const { html: enhancedHtml, toc } = enhanceArticle(p.content);
+  const { html: enhancedHtml, toc } = enhanceArticle(p.content, p.responsive_tables ? { cta: false } : {});
 
   // Optional FAQ data attached to a post — used to emit FAQPage schema
   // and visible FAQ block in the article. Authors include this in
@@ -378,8 +378,8 @@ export default function BlogPost({ params }) {
               )}
 
               <div
-                className={p.responsive_tables && params.locale === routing.defaultLocale
-                  ? "wp-content blog-prose [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
+                className={p.responsive_tables
+                  ? "wp-content blog-prose [overflow-wrap:anywhere] [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
                   : "wp-content blog-prose"}
                 dangerouslySetInnerHTML={{ __html: enhancedHtml }}
               />
