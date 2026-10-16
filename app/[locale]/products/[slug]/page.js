@@ -394,12 +394,13 @@ function ProductView({ p, locale }) {
   // Same translator declaration pattern as the blog page — only emit on
   // non-default-locale variants where the description was machine-translated.
   const isTranslated = locale !== routing.defaultLocale;
+  const useCuratedContent = !isTranslated && p.content_complete === true;
 
   // Resolve B2B FOB price range for this product, driven by its leaf
   // category. See lib/product-pricing.js for the full per-category table.
   // Using AggregateOffer (not Offer) is the honest way to surface a
   // wholesale MOQ-tiered band without committing to a single number.
-  const pricing = getPriceRangeForProduct(p);
+  const pricing = p.quote_only ? null : getPriceRangeForProduct(p);
 
   const productLd = {
     '@context': 'https://schema.org',
@@ -429,7 +430,7 @@ function ProductView({ p, locale }) {
     //   - seller = the factory Organization @id we register globally
     // This unlocks Product rich results in Google search without
     // misrepresenting the price as a fixed retail figure.
-    offers: {
+    offers: pricing ? {
       '@type': 'AggregateOffer',
       priceCurrency: 'USD',
       lowPrice: pricing.lowPrice.toFixed(2),
@@ -449,7 +450,7 @@ function ProductView({ p, locale }) {
         minValue: pricing.moq,
         unitCode: 'C62',
       },
-    },
+    } : undefined,
   };
 
   return (
@@ -534,7 +535,7 @@ function ProductView({ p, locale }) {
                 {t('getQuote')}
               </Link>
               <a
-                href={`mailto:?subject=${encodeURIComponent(t('inquirySubjectPrefix') + ' ' + p.title)}`}
+                href={`mailto:sales@xmchichomeware.com?subject=${encodeURIComponent(t('inquirySubjectPrefix') + ' ' + p.title)}`}
                 className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition"
               >
                 {t('emailInquiry')}
@@ -549,7 +550,7 @@ function ProductView({ p, locale }) {
             words of unique, keyword-rich content built from its title and
             category metadata. All strings come from productContent.* i18n
             keys, so each locale gets fully translated content. */}
-        <ProductSEOSections product={p} overview={overview} />
+        {!useCuratedContent && <ProductSEOSections product={p} overview={overview} />}
 
         {/* Original WP content — cleaned of Elementor cruft, only renders if
             substantial content exists beyond what's auto-generated above. */}
@@ -571,6 +572,10 @@ function ProductView({ p, locale }) {
           }
           return null;
         })()}
+
+        {useCuratedContent && Array.isArray(p.faq) && p.faq.length > 0 && (
+          <PageFAQ title={t('faqTitle')} items={p.faq} />
+        )}
 
         {guides.length > 0 && (
           <section className="mt-16 border-t border-brand-line pt-12">
