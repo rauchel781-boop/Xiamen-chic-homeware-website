@@ -1,5 +1,5 @@
 // /custom-wooden-gift-box-manufacturer — hand-coded SEO landing page.
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -29,7 +29,8 @@ const GALLERY_IMAGES = [
   '/wp-images/2026/04/Custom-Unfinished-Wooden-Boxes-Wholesale-Linen-Lined-Wooden-Gift-Storage-Box-with-Decorative-Cut-Lid-2.jpg',
 ];
 
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.giftBox' });
   const description = t('metaDesc');
   const ogTitle = t('ogTitle');
@@ -48,8 +49,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function Page({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function PageRoute(props) {
+  return <Page {...props} params={await props.params} />;
+}
+
+function Page({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.giftBox');
   const tCta = useTranslations('cta');
 

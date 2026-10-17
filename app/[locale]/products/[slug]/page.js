@@ -3,7 +3,7 @@
 //   2. PRODUCT detail (rich content) when slug matches a wp product
 // Both use the original WP slugs so old links keep working.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -141,6 +141,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
+  params = await params;
   const path = `/products/${params.slug}`;
   const t = await getTranslations({ locale: params.locale, namespace: 'productDetail' });
   // Localize BEFORE reading name / description / meta_title: without this the
@@ -196,8 +197,12 @@ export async function generateMetadata({ params }) {
   return {};
 }
 
-export default function ProductOrCategoryPage({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function ProductOrCategoryPageRoute(props) {
+  return <ProductOrCategoryPage {...props} params={await props.params} />;
+}
+
+function ProductOrCategoryPage({ params }) {
+  setRequestLocale(params.locale);
   const cat  = localizeCategory(wpCategoryBySlug(params.slug), params.locale);
   if (cat)  return <CategoryView cat={cat} locale={params.locale} />;
   const rawP = wpProductBySlug(params.slug);

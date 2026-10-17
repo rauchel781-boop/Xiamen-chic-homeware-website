@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { unstable_setRequestLocale, getMessages, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google';
 import Header from '@/components/Header';
@@ -175,7 +175,8 @@ export function buildHreflangAlternates(pathInLocale = '') {
 }
 
 // Per-locale metadata (title/description translated, hreflang on every page).
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   if (!routing.locales.includes(locale)) return {};
   const t = await getTranslations({ locale, namespace: 'meta' });
   const SITE_NAME = `${SITE.company.brand} — ${SITE.company.tagline}`;
@@ -229,12 +230,13 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default async function LocaleLayout({ children, params: { locale } }) {
+export default async function LocaleLayout({ children, params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   if (!routing.locales.includes(locale)) {
     notFound();
   }
   // Required for static rendering
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   const messages = await getMessages();
 
@@ -260,4 +262,3 @@ export default async function LocaleLayout({ children, params: { locale } }) {
     </html>
   );
 }
-                                                                                                                                                                    

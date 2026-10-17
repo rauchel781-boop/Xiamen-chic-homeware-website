@@ -8,7 +8,7 @@
 // blog, contact, material-guide). Next.js prefers static over dynamic, so this
 // only matches slugs that don't conflict with those.
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
 import WpRichLanding from '@/components/WpRichLanding';
 import { wpPageBySlug, wpPages, stripHtml } from '@/lib/wp-data';
@@ -73,6 +73,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
+  params = await params;
   const p = wpPageBySlug(params.slug);
   if (!p) return {};
   const robots = p.noindex ? { index: false, follow: p.nofollow !== true } : undefined;
@@ -84,8 +85,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function WpPageRoute({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function WpPageRouteRoute(props) {
+  return <WpPageRoute {...props} params={await props.params} />;
+}
+
+function WpPageRoute({ params }) {
+  setRequestLocale(params.locale);
 
   // Aliases — 301 to the canonical short URL
   if (ALIAS_REDIRECTS[params.slug]) {

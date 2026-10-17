@@ -14,7 +14,7 @@
 //
 // Site-wide policy caps external links at 10; this page uses 7, all primary
 // standards bodies, all target="_blank" rel="noopener noreferrer".
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -95,7 +95,8 @@ const Ext = ({ href, children }) => (
   </a>
 );
 
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.treasureChest' });
   const description = t('metaDesc');
   const title = t('metaTitle');
@@ -118,8 +119,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function Page({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function PageRoute(props) {
+  return <Page {...props} params={await props.params} />;
+}
+
+function Page({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.treasureChest');
 
   const money = (n) => `$${n.toFixed(2)}`;

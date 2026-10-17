@@ -2,7 +2,7 @@
 // Designed to feel formal: clear acknowledgement, "what happens next" timeline,
 // helpful while-you-wait links, and direct fall-back contact channels.
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 
 export const metadata = {
@@ -39,8 +39,12 @@ const WHILE_YOU_WAIT = [
   },
 ];
 
-export default function ThankYouPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function ThankYouPageRoute(props) {
+  return <ThankYouPage {...props} params={await props.params} />;
+}
+
+function ThankYouPage({ params: { locale } }) {
+  setRequestLocale(locale);
 
   return (
     <article className="bg-white">

@@ -1,7 +1,7 @@
 // /products — full product catalog with editorial hero, visual category
 // showcase, material chips, sticky sidebar and rich product cards.
 
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -12,7 +12,8 @@ import { localizeProduct, localizeCategory } from '@/lib/translated-content';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import PageFAQ from '@/components/PageFAQ';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   return {
     title: 'All Products — Custom Wooden & Bamboo Manufacturer',
     description: 'Browse 178+ wooden and bamboo home storage products — kitchen, organizers, gift packaging, hospitality. OEM & ODM ready. 45 categories.',
@@ -47,8 +48,12 @@ const MATERIAL_CHIPS = [
   { name: 'Teak',      href: '/material-guide#teak' },
 ];
 
-export default function ProductsIndex({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function ProductsIndexRoute(props) {
+  return <ProductsIndex {...props} params={await props.params} />;
+}
+
+function ProductsIndex({ params: { locale } }) {
+  setRequestLocale(locale);
 
   // Localize product titles for the active locale (English passes through).
   const products = wpProducts().map((p) => localizeProduct(p, locale));

@@ -5,7 +5,7 @@
 // entity inside the page's JSON-LD so search engines can recognize the
 // site as having real, named authors — a core E-E-A-T signal.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -15,7 +15,8 @@ import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'team' });
   const title = t('metaTitle');
   const description = t('metaDesc');
@@ -33,8 +34,12 @@ export async function generateMetadata({ params: { locale } = {} }) {
   };
 }
 
-export default function TeamPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function TeamPageRoute(props) {
+  return <TeamPage {...props} params={await props.params} />;
+}
+
+function TeamPage({ params: { locale } }) {
+  setRequestLocale(locale);
   const t   = useTranslations('team');
   const tNav = useTranslations('nav');
 

@@ -3,7 +3,7 @@
 // with brand-consistent sections that mirror the home-page design language.
 // Static route takes precedence over the [slug] catch-all.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -35,7 +35,8 @@ const APP_IMAGES = [
   '/wp-images/2026/01/444444.png',
 ];
 
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.woodenSofaTray' });
   const description = t('metaDesc');
   const ogTitle = t('ogTitle');
@@ -58,8 +59,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function WoodenSofaTrayPage({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function WoodenSofaTrayPageRoute(props) {
+  return <WoodenSofaTrayPage {...props} params={await props.params} />;
+}
+
+function WoodenSofaTrayPage({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.woodenSofaTray');
   const tCta = useTranslations('cta');
 

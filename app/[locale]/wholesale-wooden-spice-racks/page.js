@@ -1,5 +1,5 @@
 // /wholesale-wooden-spice-racks — hand-coded SEO landing page (small, ~800 chars original).
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -20,7 +20,8 @@ const STYLE_IMAGES = [
 // Per-locale metadata. Title / description / OG strings are pulled from
 // messages/{locale}.json via getTranslations so non-EN versions show in
 // localized SERPs with the right meta tags (not English).
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.wholesaleSpiceRacks' });
   const description = t('metaDesc');
   const ogTitle = t('ogTitle');
@@ -43,8 +44,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function Page({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function PageRoute(props) {
+  return <Page {...props} params={await props.params} />;
+}
+
+function Page({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.wholesaleSpiceRacks');
   const tCta = useTranslations('cta');
 

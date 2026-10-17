@@ -3,12 +3,13 @@
 // i18n namespace. No interactive elements; no JSON-LD beyond what the
 // root layout already emits (Organization + WebSite).
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor, routing } from '@/i18n/routing';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'privacy' });
   const title = t('metaTitle');
   const description = t('metaDesc');
@@ -30,8 +31,12 @@ export async function generateMetadata({ params: { locale } = {} }) {
   };
 }
 
-export default function PrivacyPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function PrivacyPageRoute(props) {
+  return <PrivacyPage {...props} params={await props.params} />;
+}
+
+function PrivacyPage({ params: { locale } }) {
+  setRequestLocale(locale);
   const t = useTranslations('privacy');
   const isTranslated = locale !== routing.defaultLocale;
 

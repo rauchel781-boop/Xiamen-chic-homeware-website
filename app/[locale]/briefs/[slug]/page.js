@@ -13,7 +13,7 @@
 // fields (tldr[], bigNumber{}, outsideSignal{}, fromTheFloor{}, actionItems[],
 // nextWeek). They are filtered OUT of /blog routes so they only render here.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -60,6 +60,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
+  params = await params;
   const raw = getBriefBySlug(params.slug);
   if (!raw) return {};
   const p = localizePost(raw, params.locale);
@@ -87,8 +88,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function BriefDetailPage({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function BriefDetailPageRoute(props) {
+  return <BriefDetailPage {...props} params={await props.params} />;
+}
+
+function BriefDetailPage({ params }) {
+  setRequestLocale(params.locale);
   return <BriefDetail params={params} />;
 }
 

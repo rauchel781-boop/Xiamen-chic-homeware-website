@@ -2,7 +2,7 @@
 // Structure: Hero · Stats · Video · Story · Process · Capabilities · QC · Gallery · FAQ · CTA
 // Content sourced from the WP "wooden-products-factory-in-china" page.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -14,7 +14,8 @@ import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'about' });
   const title = t('metaTitle');
   const description = t('metaDesc');
@@ -37,8 +38,12 @@ const VIDEO_UPLOAD_DATE = '2026-03-15';
 // ─────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────
-export default function AboutPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function AboutPageRoute(props) {
+  return <AboutPage {...props} params={await props.params} />;
+}
+
+function AboutPage({ params: { locale } }) {
+  setRequestLocale(locale);
   const t = useTranslations('about');
   const tCta = useTranslations('cta');
   const tNav = useTranslations('nav');

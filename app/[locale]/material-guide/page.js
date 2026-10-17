@@ -3,7 +3,7 @@
 // Each wood has its own card with photo, description, ratings, best-for use cases,
 // and links to relevant product categories on this site.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -14,7 +14,8 @@ import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import ProcessVideos from '@/components/ProcessVideos';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'materialGuide' });
   const title = t('metaTitle');
   const description = t('metaDesc');
@@ -49,8 +50,12 @@ const WOOD_DATA = [
 // ───────────────────────────────────────────────────────────────────
 // PAGE
 // ───────────────────────────────────────────────────────────────────
-export default function MaterialsGuide({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function MaterialsGuideRoute(props) {
+  return <MaterialsGuide {...props} params={await props.params} />;
+}
+
+function MaterialsGuide({ params: { locale } }) {
+  setRequestLocale(locale);
   const t = useTranslations('materialGuide');
   const tNav = useTranslations('nav');
 

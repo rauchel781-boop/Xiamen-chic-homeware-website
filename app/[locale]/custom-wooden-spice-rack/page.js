@@ -1,5 +1,5 @@
 // /custom-wooden-spice-rack — hand-coded SEO landing page (~10k chars original).
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -23,7 +23,8 @@ const SET_IMAGES = [
   '/wp-images/2026/04/ScreenShot_2026-04-09_191044_303.png',
 ];
 
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.customSpiceRack' });
   const description = t('metaDesc');
   const ogTitle = t('ogTitle');
@@ -46,8 +47,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function Page({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function PageRoute(props) {
+  return <Page {...props} params={await props.params} />;
+}
+
+function Page({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.customSpiceRack');
   const tCta = useTranslations('cta');
 

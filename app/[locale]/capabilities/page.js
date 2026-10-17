@@ -1,12 +1,13 @@
 // /capabilities — high-level overview of factory capabilities.
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor } from '@/i18n/routing';
 import PageFAQ from '@/components/PageFAQ';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'capabilities' });
   return {
     // `absolute` opts out of the root layout's `%s | CHIC — Wooden Expert`
@@ -18,8 +19,12 @@ export async function generateMetadata({ params: { locale } = {} }) {
   };
 }
 
-export default function CapabilitiesPage({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function CapabilitiesPageRoute(props) {
+  return <CapabilitiesPage {...props} params={await props.params} />;
+}
+
+function CapabilitiesPage({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('capabilities');
   const tCta = useTranslations('cta');
   const tNav = useTranslations('nav');

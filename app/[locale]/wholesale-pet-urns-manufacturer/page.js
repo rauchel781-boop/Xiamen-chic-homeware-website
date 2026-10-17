@@ -14,7 +14,7 @@
 // Capability accuracy: every technique named here is verified against the 16
 // pet SKUs already in wp-data/products.json. We do NOT claim hot foil or
 // emboss/deboss, and we explicitly rule out press-fit plug closures on wood.
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -67,7 +67,8 @@ const OTHER_IMAGES = [
   '/pet/wooden-bat-house/wooden-bat-house-1.jpg',
 ];
 
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.petUrns' });
   const description = t('metaDesc');
   const ogTitle = t('ogTitle');
@@ -84,8 +85,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function Page({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function PageRoute(props) {
+  return <Page {...props} params={await props.params} />;
+}
+
+function Page({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.petUrns');
 
   const STATS   = [1, 2, 3, 4].map(i => ({ value: t(`stat${i}Value`), label: t(`stat${i}Label`) }));

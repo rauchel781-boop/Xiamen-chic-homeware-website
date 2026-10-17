@@ -12,7 +12,7 @@
 //   10. FAQ (5 questions — content from WP)
 //   11. Final CTA strip
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import fs from 'fs';
 import path from 'path';
@@ -41,7 +41,8 @@ import ProcessVideos from '@/components/ProcessVideos';
 const HERO_LCP = '/wp-images/2026/02/CHIC-Factory.jpg';
 
 // Home page metadata override (locale layout already handles canonical/hreflang)
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'meta' });
   const title = locale === routing.defaultLocale
     ? 'Wooden Products Manufacturer & OEM Supplier in China'
@@ -69,8 +70,12 @@ export async function generateMetadata({ params: { locale } }) {
 // Note: WebSite + SearchAction JSON-LD is now in the global layout (locale/layout.js)
 // so it's emitted on every page and uses the correct URL (no /en/ prefix).
 
-export default function HomePage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function HomePageRoute(props) {
+  return <HomePage {...props} params={await props.params} />;
+}
+
+function HomePage({ params: { locale } }) {
+  setRequestLocale(locale);
 
   // Curated showcase products — the exact 8 image + title pairs from the
   // xmchichomeware.com home page "Our Real Products" section.

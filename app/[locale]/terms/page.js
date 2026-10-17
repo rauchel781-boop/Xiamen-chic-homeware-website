@@ -2,12 +2,13 @@
 // Plain prose page rendering 13 numbered sections from the `terms`
 // i18n namespace. Same structure as /privacy.
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { SITE } from '@/data/site-config';
 import { hreflangFor, canonicalFor, routing } from '@/i18n/routing';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'terms' });
   const title = t('metaTitle');
   const description = t('metaDesc');
@@ -29,8 +30,12 @@ export async function generateMetadata({ params: { locale } = {} }) {
   };
 }
 
-export default function TermsPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function TermsPageRoute(props) {
+  return <TermsPage {...props} params={await props.params} />;
+}
+
+function TermsPage({ params: { locale } }) {
+  setRequestLocale(locale);
   const t = useTranslations('terms');
   const isTranslated = locale !== routing.defaultLocale;
 

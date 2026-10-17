@@ -2,27 +2,30 @@
   "name": "wajawood-nextjs",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint app components i18n lib middleware.js next.config.js",
     "seo:audit": "node scripts/audit-seo-metadata.mjs",
     "seo:fix-metadata": "node scripts/generate-category-metadata-proposals.mjs && node scripts/apply-seo-metadata-fixes.mjs",
     "seo:verify-build": "node scripts/verify-seo-deployment.mjs --build",
     "seo:verify-live": "node scripts/verify-seo-deployment.mjs"
   },
   "dependencies": {
-    "next": "14.2.5",
-    "next-intl": "^3.26.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "sharp": "^0.33.5"
+    "next": "16.4.2",
+    "next-intl": "4.14.9",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.4.2",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6"
   }

@@ -1,5 +1,5 @@
 // /custom-wooden-boxes — hand-coded SEO landing page (~13k chars original).
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -42,7 +42,8 @@ const MATERIAL_IMAGES = [
   '/different%20wood/bamboo.png',
 ];
 
-export async function generateMetadata({ params: { locale } }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'landing.customWoodenBoxes' });
   const description = t('metaDesc');
   const ogTitle = t('ogTitle');
@@ -65,8 +66,12 @@ export async function generateMetadata({ params: { locale } }) {
   };
 }
 
-export default function Page({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function PageRoute(props) {
+  return <Page {...props} params={await props.params} />;
+}
+
+function Page({ params }) {
+  setRequestLocale(params.locale);
   const t = useTranslations('landing.customWoodenBoxes');
   const tCta = useTranslations('cta');
 

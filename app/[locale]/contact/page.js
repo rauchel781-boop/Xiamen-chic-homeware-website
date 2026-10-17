@@ -2,7 +2,7 @@
 // Sections: Hero · Quick channels · Form + side panel · What happens next ·
 //           Office locations · FAQ · Final reassurance
 
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -12,7 +12,8 @@ import { hreflangFor, canonicalFor, routing } from '@/i18n/routing';
 import { schemaLang } from '@/i18n/seo';
 import ContactClient from './ContactClient';
 
-export async function generateMetadata({ params: { locale } = {} }) {
+export async function generateMetadata({ params: requestParams }) {
+  const { locale } = (await requestParams) ?? {};
   const t = await getTranslations({ locale, namespace: 'contact' });
   const title = t('metaTitle');
   const description = t('metaDesc');
@@ -27,8 +28,12 @@ export async function generateMetadata({ params: { locale } = {} }) {
   };
 }
 
-export default function ContactPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
+export default async function ContactPageRoute(props) {
+  return <ContactPage {...props} params={await props.params} />;
+}
+
+function ContactPage({ params: { locale } }) {
+  setRequestLocale(locale);
   const t = useTranslations('contact');
   const tCta = useTranslations('cta');
   const tNav = useTranslations('nav');

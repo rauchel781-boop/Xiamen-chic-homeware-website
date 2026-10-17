@@ -2,7 +2,7 @@
 // Sections: Hero (category + title + meta) · Featured image ·
 // 2-column layout (article + sticky sidebar) · Mid-article CTA ·
 // Author/brand card · Newsletter band · Related articles · Final CTA
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -108,6 +108,7 @@ function clampDesc(s, max = 160) {
 }
 
 export async function generateMetadata({ params }) {
+  params = await params;
   const rawP = wpBlogPostBySlug(params.slug);
   if (!rawP) return {};
   const p = localizePost(rawP, params.locale);
@@ -152,8 +153,12 @@ function readingTime(html) {
   return Math.max(1, Math.round(words / 200));
 }
 
-export default function BlogPost({ params }) {
-  unstable_setRequestLocale(params.locale);
+export default async function BlogPostRoute(props) {
+  return <BlogPost {...props} params={await props.params} />;
+}
+
+function BlogPost({ params }) {
+  setRequestLocale(params.locale);
   const tTeam = useTranslations('team');
   const tBlog = useTranslations('blogPost');
   const rawP = wpBlogPostBySlug(params.slug);
