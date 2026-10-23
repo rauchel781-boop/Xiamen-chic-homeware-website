@@ -65,7 +65,7 @@ function Page({ params }) {
   const USES = [1, 2, 3, 4].map(i => ({ title: t(`ind${i}Title`), body: t(`ind${i}Body`) }));
   const RELATED = [
     { label: t('relProd1'), href: '/products/carved-wooden-boxes-wholesale' },
-    { label: t('relProd2'), href: '/products/wholesale-leaf-shaped-wood-tray-hand-carved-acacia-serving-platter' },
+    { label: t('relProd2'), href: '/products/wooden-gift-box' },
     { label: t('relBlog1'), href: '/blog/carved-wooden-boxes-wholesale' },
     { label: t('relBlog2'), href: '/blog/best-wood-for-custom-wooden-boxes' },
   ];
@@ -118,11 +118,11 @@ function Page({ params }) {
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/contact#form" className="inline-flex items-center rounded-full bg-brand-green px-7 py-3 text-[15px] font-semibold text-white hover:bg-brand-greenDark transition">{t('ctaPrice')}</Link>
-                <Link href="/products" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">{t('ctaBrowse')}</Link>
+                <Link href="/products/carved-wooden-boxes-wholesale" className="inline-flex items-center rounded-full border-2 border-brand-green bg-white px-7 py-3 text-[15px] font-semibold text-brand-green hover:bg-brand-green hover:text-white transition">{t('ctaBrowse')}</Link>
               </div>
             </div>
             <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden border border-brand-line shadow-sm">
-              <Image src={HERO_IMAGE} alt={t('ogTitle')} fill sizes="(max-width: 1024px) 100vw, 600px" priority fetchPriority="high" className="object-cover" />
+              <Image src={HERO_IMAGE} alt={t('heroAlt')} fill sizes="(max-width: 1024px) 100vw, 600px" priority fetchPriority="high" className="object-cover" />
             </div>
           </div>
         </div>
@@ -335,6 +335,18 @@ function Page({ params }) {
         </div>
       </section>
 
+      <section id="carved-box-rfq" className="py-12 lg:py-16 border-t border-brand-line bg-white">
+        <div className="max-w-[980px] mx-auto px-6 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-brand-ink leading-tight">{t('rfqTitle')}</h2>
+          <p className="mt-4 text-brand-mute leading-relaxed">{t('rfqIntro')}</p>
+          <ol className="mt-6 list-decimal pl-5 space-y-3 text-brand-ink/85 leading-relaxed">
+            {[1, 2, 3, 4, 5].map(i => <li key={i}>{t(`rfqItem${i}`)}</li>)}
+          </ol>
+          <p className="mt-5 text-sm text-brand-mute leading-relaxed">{t('rfqNote')}</p>
+          <Link href="/contact#form" className="mt-6 inline-flex text-brand-green font-semibold underline underline-offset-4">{t('ctaPrice')}</Link>
+        </div>
+      </section>
+
       {/* RELATED */}
       <section className="py-16 lg:py-20 bg-white border-t border-brand-line">
         <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
@@ -384,7 +396,7 @@ function Page({ params }) {
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
               <Link href="/contact#form" className="inline-flex items-center rounded-full bg-brand-wood px-7 py-3 text-[15px] font-semibold text-brand-ink hover:bg-brand-woodSoft transition">{tCta('getFreeQuote')}</Link>
-              <Link href="/products" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">{t('ctaBrowse')}</Link>
+              <Link href="/products/carved-wooden-boxes-wholesale" className="inline-flex items-center rounded-full border-2 border-white px-7 py-3 text-[15px] font-semibold text-white hover:bg-white hover:text-brand-green transition">{t('ctaBrowse')}</Link>
             </div>
           </div>
         </div>

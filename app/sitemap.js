@@ -17,7 +17,7 @@ import {
   wpPages,
 } from '@/lib/wp-data';
 import { routing } from '@/i18n/routing';
-import { translatedPost, translatedProduct } from '@/lib/translated-content';
+import { translatedPost, translatedProduct, translatedCategory, translatedLanding } from '@/lib/translated-content';
 
 function modifiedDate(record) {
   const value = record.modified || record.date;
@@ -107,7 +107,11 @@ export default function sitemap() {
     'wholesale-treasure-chest-manufacturer',
   ];
   for (const slug of LANDING_PAGES) {
-    push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly' });
+    const updates = slug === 'carved-wooden-boxes-manufacturer' ? {
+      lastModified: modifiedDate(translatedLanding('carvedBox', routing.defaultLocale) || {}),
+      localizedModified: Object.fromEntries(routing.locales.map(locale => [locale, translatedLanding('carvedBox', locale)?.modified])),
+    } : {};
+    push(`/${slug}`, { priority: 0.9, changeFrequency: 'monthly', ...updates });
   }
 
   // ── Product category pages (45 categories) ─────────────────────────
@@ -125,9 +129,11 @@ export default function sitemap() {
     const catImages = products
       .filter((p) => p.featured_image && p.categories?.some((c) => catSlugs.has(c.slug)))
       .slice(0, 4)
-      .map((p) => ({ url: abs(p.featured_image) }))
-      .filter((i) => i.url);
+      .map((p) => abs(p.featured_image))
+      .filter(Boolean);
     push(`/products/${cat.slug}`, {
+      lastModified: modifiedDate(cat),
+      localizedModified: Object.fromEntries(routing.locales.map(locale => [locale, translatedCategory(cat.slug, locale)?.modified])),
       priority: 0.8,
       changeFrequency: 'weekly',
       images: catImages,
@@ -137,8 +143,8 @@ export default function sitemap() {
   // ── Individual product pages (178) ─────────────────────────────────
   for (const p of products) {
     const imgs = [];
-    if (p.featured_image) imgs.push({ url: abs(p.featured_image) });
-    for (const g of p.gallery || []) if (g) imgs.push({ url: abs(g) });
+    if (p.featured_image) imgs.push(abs(p.featured_image));
+    for (const g of p.gallery || []) if (g) imgs.push(abs(g));
     push(`/products/${p.slug}`, {
       lastModified: modifiedDate(p),
       localizedModified: Object.fromEntries(routing.locales.map(locale => [locale, translatedProduct(p.slug, locale)?.modified])),
@@ -188,7 +194,7 @@ export default function sitemap() {
 
   // ── Blog posts (excludes briefs) ───────────────────────────────────
   for (const post of wpBlogPosts()) {
-    const imgs = post.featured_image ? [{ url: abs(post.featured_image) }] : [];
+    const imgs = post.featured_image ? [abs(post.featured_image)] : [];
     push(`/blog/${post.slug}`, {
       lastModified: modifiedDate(post),
       localizedModified: Object.fromEntries(routing.locales.map(locale => [locale, translatedPost(post.slug, locale)?.modified])),
@@ -202,7 +208,7 @@ export default function sitemap() {
   // Newsletter-style weekly posts under /briefs/[slug]. Higher
   // changeFrequency than blog posts because the series is recurring.
   for (const brief of wpBriefs()) {
-    const imgs = brief.featured_image ? [{ url: abs(brief.featured_image) }] : [];
+    const imgs = brief.featured_image ? [abs(brief.featured_image)] : [];
     push(`/briefs/${brief.slug}`, {
       lastModified: modifiedDate(brief),
       priority: 0.7,

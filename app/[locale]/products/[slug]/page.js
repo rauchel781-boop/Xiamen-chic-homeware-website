@@ -235,14 +235,15 @@ function breadcrumbLd(crumbs) {
 function CategoryFaq({ cat }) {
   const t = useTranslations('pageFaqs');
   const key = detectCategoryFaqKey(cat.slug);
-  const ITEMS = [1, 2, 3, 4, 5].map((i) => ({
+  const curated = Array.isArray(cat.faq) && cat.faq.length > 0;
+  const ITEMS = curated ? cat.faq : [1, 2, 3, 4, 5].map((i) => ({
     q: t(`category.${key}Q${i}`),
     a: t(`category.${key}A${i}`),
   }));
   return (
     <PageFAQ
-      title={`${cat.name} — Sourcing FAQ`}
-      intro={t(`category.${key}Intro`)}
+      title={cat.faq_title || `${cat.name} — Sourcing FAQ`}
+      intro={curated ? cat.faq_intro : t(`category.${key}Intro`)}
       items={ITEMS}
       background="bg-white"
     />
@@ -275,7 +276,7 @@ function CategoryView({ cat, locale }) {
       '@type': 'ListItem',
       position: i + 1,
       url: `${SITE.siteUrl}/products/${p.slug}`,
-      name: p.title,
+      name: decodeEntities(stripHtml(p.title)),
     })),
   };
 
@@ -337,13 +338,23 @@ function CategoryView({ cat, locale }) {
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="text-sm font-semibold text-brand-green line-clamp-2">{p.title}</h3>
+                  <h3 className="text-sm font-semibold text-brand-green line-clamp-2">{decodeEntities(stripHtml(p.title))}</h3>
                 </div>
               </Link>
             ))}
           </div>
         )}
       </div>
+
+      {cat.buying_guide && (
+        <section className="bg-white border-y border-brand-line py-12 lg:py-16">
+          <div
+            id="category-buying-guide"
+            className="wp-content max-w-[980px] mx-auto px-6 lg:px-8 [overflow-wrap:anywhere] [&_table]:table-fixed [&_th]:break-words [&_td]:break-words [&_th]:px-2 [&_td]:px-2 sm:[&_th]:px-4 sm:[&_td]:px-4"
+            dangerouslySetInnerHTML={{__html: optimizeContentImages(cat.buying_guide)}}
+          />
+        </section>
+      )}
 
       {/* ── Category-specific FAQ ──
           Auto-selected based on category slug. Adds FAQPage schema +
