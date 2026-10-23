@@ -88,7 +88,7 @@ export default function CaseStudies() {
               </dl>
 
               {/* Quote — pushed to bottom of card */}
-              <blockquote className="mt-auto pt-5 border-t border-brand-line">
+              {c.quote && <blockquote className="mt-auto pt-5 border-t border-brand-line">
                 <svg
                   viewBox="0 0 24 24"
                   fill="currentColor"
@@ -100,7 +100,7 @@ export default function CaseStudies() {
                 <p className="text-[15px] text-brand-ink italic leading-relaxed">
                   &ldquo;{c.quote}&rdquo;
                 </p>
-              </blockquote>
+              </blockquote>}
             </article>
           ))}
         </div>

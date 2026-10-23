@@ -93,7 +93,7 @@ function fixCase(t) {
   // as a whole already contains uppercase.
   return t
     .split(/( \| | \u2014 | \u2013 | - )/)
-    .map((seg) => (/[A-Z]/.test(seg) ? seg : seg.replace(/\b[a-z]/g, (c) => c.toUpperCase())))
+    .map((seg) => (/\p{Lu}/u.test(seg) ? seg : seg.replace(/\b[a-z]/g, (c) => c.toUpperCase())))
     .join('');
 }
 
@@ -446,7 +446,6 @@ function ProductView({ p, locale }) {
       // "Product snippet" appearance in Search Console fell off a cliff.
       // One aggregated wholesale band per product, so the honest value is 1.
       offerCount: 1,
-      availability: 'https://schema.org/InStock',
       businessFunction: 'https://schema.org/Sell',
       seller: { '@id': `${SITE.siteUrl}/#organization` },
       url: `${SITE.siteUrl}/products/${p.slug}`,

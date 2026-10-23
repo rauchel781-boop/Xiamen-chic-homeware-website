@@ -24,7 +24,7 @@ export default function ProofStrip({ cases = [1, 2] }) {
     industry: t(`case${i}Industry`),
     years: t(`case${i}Years`),
     quote: t(`case${i}Quote`),
-  }));
+  })).filter(c => c.quote);
 
   return (
     <section className="bg-brand-cream border-y border-brand-line">
